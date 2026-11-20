@@ -43,10 +43,10 @@ export const COVID_OMICRON = {
         groups: [
             { id: Group.All, covers: "all ages", ifr: cited(0.001, "liu-ijid-2022"), vaccineCoverage: cited(0.69, "fast-2022") },
 
-            { id: Group.Infants, covers: "1", ifr: cited(0.000011, "liu-ijid-2022", { also: ["covid-forecasting-2022"] }) },
-            { id: Group.Adults, covers: "25", ifr: cited(0.000021, "liu-ijid-2022", { also: ["levin-2020"] }) },
-            { id: Group.MiddleAged, covers: "55", ifr: cited(0.00084, "liu-ijid-2022", { also: ["levin-2020"] }) },
-            { id: Group.Elderly, covers: "75", ifr: cited(0.0097, "liu-ijid-2022", { also: ["levin-2020"] }) },
+            { id: Group.Infants, covers: "1", ages: { from: 1, to: 1 }, ifr: cited(0.000011, "liu-ijid-2022", { also: ["covid-forecasting-2022"] }) },
+            { id: Group.Adults, covers: "25", ages: { from: 25, to: 25 }, ifr: cited(0.000021, "liu-ijid-2022", { also: ["levin-2020"] }) },
+            { id: Group.MiddleAged, covers: "55", ages: { from: 55, to: 55 }, ifr: cited(0.00084, "liu-ijid-2022", { also: ["levin-2020"] }) },
+            { id: Group.Elderly, covers: "75", ages: { from: 75, to: 75 }, ifr: cited(0.0097, "liu-ijid-2022", { also: ["levin-2020"] }) },
         ],
     },
     vaccination: {

@@ -36,9 +36,9 @@ export const PERTUSSIS = {
         groups: [
             { id: Group.All, covers: "all ages", ifr: cited(0.0012, "skoff-2019") },
 
-            { id: Group.Infants, covers: "under 1", ifr: cited(261 / 50_950, "skoff-2019") },
+            { id: Group.Infants, covers: "under 1", ages: { from: 0, to: 0 }, ifr: cited(261 / 50_950, "skoff-2019") },
             { id: Group.Children, covers: "4 DTaP doses by age 2", vaccineCoverage: cited(0.807, "hill-2026") },
-            { id: Group.Elderly, covers: "65+", ifr: cited(14 / 8_177, "skoff-2019") },
+            { id: Group.Elderly, covers: "65+", ages: { from: 65, to: Infinity }, ifr: cited(14 / 8_177, "skoff-2019") },
         ],
     },
     vaccination: {

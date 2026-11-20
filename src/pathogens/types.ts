@@ -192,10 +192,21 @@ export interface PathogenValues {
 }
 
 /** One population group's data, as its sources report it: fatality, vaccine coverage, both, or neither. */
+/** Ages from `from` to `to` years, inclusive. */
+export interface AgeRange {
+    from: number;
+    to: number;
+}
+
 export interface PopulationGroup<Id extends Group = PopulationGroupId> {
     id: Id;
     /** Who exactly the numbers cover, as the source reports it: ages ("75", "0–4") or a short description. */
     covers: string;
+    /**
+     * The ages the numbers cover, in whole years (`to: Infinity`: and older). A single age (`from` = `to`) is an
+     * estimate at that age, as age-specific fatality is usually published (e.g. Levin et al. 2020).
+     */
+    ages?: AgeRange;
     /** Fatality in this group, with its citation (without it, everyone's rate applies, or none if everyone has none either). */
     ifr?: Cited;
     /** Share of this group vaccinated, with its citation (without it, everyone's coverage applies). */

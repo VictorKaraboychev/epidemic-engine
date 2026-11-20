@@ -33,10 +33,10 @@ export const MERS = {
         groups: [
             { id: Group.All, covers: "reported cases", ifr: cited(0.37, "who-mers-2025", { caveat: Caveat.UnderReported }) },
 
-            { id: Group.Children, covers: "under 15", ifr: cited(7 / 28, "al-raddadi-2020", { caveat: Caveat.UnderReported }) },
-            { id: Group.Adults, covers: "25–54", ifr: cited(116 / 434, "al-raddadi-2020") },
-            { id: Group.MiddleAged, covers: "55–64", ifr: cited(76 / 142, "al-raddadi-2020") },
-            { id: Group.Elderly, covers: "65+", ifr: cited(154 / 195, "al-raddadi-2020") },
+            { id: Group.Children, covers: "under 15", ages: { from: 0, to: 14 }, ifr: cited(7 / 28, "al-raddadi-2020", { caveat: Caveat.UnderReported }) },
+            { id: Group.Adults, covers: "25–54", ages: { from: 25, to: 54 }, ifr: cited(116 / 434, "al-raddadi-2020") },
+            { id: Group.MiddleAged, covers: "55–64", ages: { from: 55, to: 64 }, ifr: cited(76 / 142, "al-raddadi-2020") },
+            { id: Group.Elderly, covers: "65+", ages: { from: 65, to: Infinity }, ifr: cited(154 / 195, "al-raddadi-2020") },
         ],
     },
     vaccination: { none: "who-mers-factsheet" },

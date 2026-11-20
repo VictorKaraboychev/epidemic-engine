@@ -40,8 +40,8 @@ export const RSV = {
         kind: PopulationKind.Age,
         measure: FatalityMeasure.Illness,
         groups: [
-            { id: Group.Under5, covers: "under 5", ifr: cited(0.0031, "li-2022", { caveat: Caveat.OtherSetting }) },
-            { id: Group.Elderly, covers: "75+", vaccineCoverage: cited(0.397, "kriss-2024") },
+            { id: Group.Under5, covers: "under 5", ages: { from: 0, to: 4 }, ifr: cited(0.0031, "li-2022", { caveat: Caveat.OtherSetting }) },
+            { id: Group.Elderly, covers: "75+", ages: { from: 75, to: Infinity }, vaccineCoverage: cited(0.397, "kriss-2024") },
         ],
     },
 } satisfies PathogenProfile<PathogenId>;

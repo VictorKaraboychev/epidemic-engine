@@ -11,6 +11,7 @@
  * - Measures: `estimateR0`, `infectionTimeline`, `outbreakSummary`, the daily `History`.
  */
 export * from "./deterministic.js";
+export * from "./ensemble.js";
 export * from "./pathogens/index.js";
 export { Pathogen } from "./pathogens/pathogen.js";
 export * from "./growth.js";
@@ -24,6 +25,7 @@ export * from "./profile.js";
 export * from "./r0.js";
 export * from "./random.js";
 export * from "./reproduction.js";
+export * from "./seeding.js";
 export * from "./seird.js";
 export * from "./spatial-grid.js";
 export * from "./stochastic.js";

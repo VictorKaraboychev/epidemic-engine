@@ -109,3 +109,50 @@ const vaccinationCitations = (pathogen: PathogenProfile): CitationId[] => {
 /** The sources behind the model's superspreading: individual variation in infectiousness, and in contacts. */
 export const SUPERSPREADING_CITATION: CitationId = "lloyd-smith-2005";
 export const CONTACTS_CITATION: CitationId = "mossong-2008";
+
+/** How far past the oldest published age fatality keeps rising (COVID-19: from 75 to 85, ≈ 16%, as Levin et al.'s 15%). */
+export const MAX_EXTRAPOLATION_YEARS = 10;
+
+/** Whether a group's ages include `age`. */
+const covers = (group: PopulationGroup<Group>, age: number) => Boolean(group.ages && age >= group.ages.from && age <= group.ages.to);
+
+/**
+ * Fatality at one age, from the pathogen's age-specific data:
+ * - In an age band the data covers ("18–49", "65+"): that band's rate.
+ * - Where the data gives rates at single ages (COVID-19: 1, 25, 55, 75), interpolated log-linearly between them, as
+ *   fatality rises roughly exponentially with age (Levin et al. 2020); beyond the oldest, extended along the last
+ *   segment for `MAX_EXTRAPOLATION_YEARS` and then held (estimates thin out in the very old), below the youngest,
+ *   the youngest's rate.
+ * - Otherwise (no age data, or an age between the bands given): the pathogen's overall rate.
+ */
+export const fatalityAtAge = (pathogen: PathogenProfile, age: number): number => {
+    const groups = pathogen.populations.groups.filter((group) => group.ages && group.ifr);
+    const band = groups.find((group) => group.ages!.from !== group.ages!.to && covers(group, age));
+    if (band) return band.ifr!.value;
+    const points = groups
+        .filter((group) => group.ages!.from === group.ages!.to)
+        .map((group) => ({ age: group.ages!.from, rate: group.ifr!.value }))
+        .sort((a, b) => a.age - b.age);
+    const exact = points.find((point) => point.age === age);
+    if (exact) return exact.rate;
+    if (points.length >= 2) {
+        if (age < points[0].age) return points[0].rate;
+        const upper = points.findIndex((point) => point.age > age);
+        const [a, b] = upper === -1 ? [points[points.length - 2], points[points.length - 1]] : [points[upper - 1], points[upper]];
+        const slope = Math.log(b.rate / a.rate) / (b.age - a.age);
+        return Math.min(1, a.rate * Math.exp(slope * (Math.min(age, b.age + MAX_EXTRAPOLATION_YEARS) - a.age)));
+    }
+    return baseGroupOf(pathogen).ifr?.value ?? NO_FATALITY;
+};
+
+/**
+ * The share vaccinated at one age: an age group's own coverage where the data gives it by age (RSV: 75 and over),
+ * everyone else the base group's (or none); without coverage by age, the pathogen's overall coverage for everyone.
+ * Null without a vaccine.
+ */
+export const coverageAtAge = (pathogen: PathogenProfile, age: number): number | null => {
+    if (!pathogen.vaccination || "none" in pathogen.vaccination) return null;
+    const byAge = pathogen.populations.groups.filter((group) => group.ages && group.vaccineCoverage);
+    if (!byAge.length) return simulatedCoverage(pathogen, Group.All)?.value ?? 0;
+    return byAge.find((group) => covers(group, age))?.vaccineCoverage!.value ?? baseGroupOf(pathogen).vaccineCoverage?.value ?? 0;
+};

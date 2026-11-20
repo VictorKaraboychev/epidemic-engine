@@ -36,10 +36,10 @@ export const INFLUENZA_B = {
                 vaccineCoverage: cited(0.472, "cdc-fluvaxview-2024"),
             },
 
-            { id: Group.Infants, covers: "0–4", ifr: cited(268 / 2_903_633, "cdc-flu-burden-2024") },
-            { id: Group.Adults, covers: "18–49", ifr: cited(2_705 / 16_351_383, "cdc-flu-burden-2024") },
-            { id: Group.MiddleAged, covers: "50–64", ifr: cited(5_701 / 9_042_884, "cdc-flu-burden-2024") },
-            { id: Group.Elderly, covers: "65+", ifr: cited(19_038 / 2_610_181, "cdc-flu-burden-2024") },
+            { id: Group.Infants, covers: "0–4", ages: { from: 0, to: 4 }, ifr: cited(268 / 2_903_633, "cdc-flu-burden-2024") },
+            { id: Group.Adults, covers: "18–49", ages: { from: 18, to: 49 }, ifr: cited(2_705 / 16_351_383, "cdc-flu-burden-2024") },
+            { id: Group.MiddleAged, covers: "50–64", ages: { from: 50, to: 64 }, ifr: cited(5_701 / 9_042_884, "cdc-flu-burden-2024") },
+            { id: Group.Elderly, covers: "65+", ages: { from: 65, to: Infinity }, ifr: cited(19_038 / 2_610_181, "cdc-flu-burden-2024") },
         ],
     },
     vaccination: {

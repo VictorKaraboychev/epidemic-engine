@@ -34,10 +34,10 @@ export const SARS = {
         groups: [
             { id: Group.All, covers: "probable cases", ifr: cited(0.096, "who-sars-summary") },
 
-            { id: Group.Young, covers: "24 and under", ifr: cited(0.01, "who-sars-update-49", { bound: Bound.Below }) },
-            { id: Group.Adults, covers: "25–44", ifr: cited(0.06, "who-sars-update-49") },
-            { id: Group.MiddleAged, covers: "45–64", ifr: cited(0.15, "who-sars-update-49") },
-            { id: Group.Elderly, covers: "65+", ifr: cited(0.5, "who-sars-update-49", { bound: Bound.Above }) },
+            { id: Group.Young, covers: "24 and under", ages: { from: 0, to: 24 }, ifr: cited(0.01, "who-sars-update-49", { bound: Bound.Below }) },
+            { id: Group.Adults, covers: "25–44", ages: { from: 25, to: 44 }, ifr: cited(0.06, "who-sars-update-49") },
+            { id: Group.MiddleAged, covers: "45–64", ages: { from: 45, to: 64 }, ifr: cited(0.15, "who-sars-update-49") },
+            { id: Group.Elderly, covers: "65+", ages: { from: 65, to: Infinity }, ifr: cited(0.5, "who-sars-update-49", { bound: Bound.Above }) },
         ],
     },
     vaccination: { none: "li-2020-vaccines" },

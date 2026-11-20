@@ -6,12 +6,14 @@ import { type PathogenParams, availableFeatures, pathogenParams } from "../prese
 import type { ModelFeatures } from "../seird.js";
 import type { CitationId } from "./citations.js";
 import { type PathogenSpec, profileFromSpec } from "./custom.js";
+import { sampleProfile } from "./sample.js";
+import type { Random } from "../random.js";
 import { COVID_ANCESTRAL } from "./covid-ancestral.js";
 import { COVID_OMICRON } from "./covid-omicron.js";
 import { EBOLA } from "./ebola.js";
 import { INFLUENZA_A } from "./influenza-a.js";
 import { INFLUENZA_B } from "./influenza-b.js";
-import { citationsOf, fatalityRate, simulatedCoverage } from "./index.js";
+import { citationsOf, coverageAtAge, fatalityAtAge, fatalityRate, simulatedCoverage } from "./index.js";
 import { MEASLES } from "./measles.js";
 import { MERS } from "./mers.js";
 import { MPOX } from "./mpox.js";
@@ -94,6 +96,14 @@ export class Pathogen implements PathogenProfile {
         };
     }
 
+    /**
+     * A copy with every value that has a published interval drawn from it (see `sample.ts`), e.g. for runs that reflect
+     * what isn't known: `Pathogen.Measles.sample(seededRandom(1))`.
+     */
+    sample(random: Random = Math.random): Pathogen {
+        return new Pathogen(sampleProfile(this.profile(), random));
+    }
+
     /** The basic reproduction number. */
     get r0(): number {
         return this.values.r0.value;
@@ -117,6 +127,16 @@ export class Pathogen implements PathogenProfile {
     /** The share of infections (or illnesses, or cases: see `populations.measure`) that are fatal, for a group. */
     fatalityRate(population: Group = Group.All): number {
         return fatalityRate(this, population);
+    }
+
+    /** Fatality at one age (see `fatalityAtAge`: age bands, or log-linear between published ages). */
+    fatalityAt(age: number): number {
+        return fatalityAtAge(this, age);
+    }
+
+    /** The share vaccinated at one age (see `coverageAtAge`); null without a vaccine. */
+    vaccineCoverageAt(age: number): number | null {
+        return coverageAtAge(this, age);
     }
 
     /** The share vaccinated before an outbreak, for a group; null without a vaccine. */

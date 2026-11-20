@@ -239,6 +239,12 @@ export interface Rates {
      * a factor on infectiousness and the cumulative exit shares with deaths reduced; null where there is none.
      */
     protection: ({ infectiousness: number; cumulativeShares: Float64Array[] } | null)[];
+    /**
+     * Each person's risk of dying from an infection relative to the model's (`ifr`): exits to a death compartment take
+     * that multiple of their share, the others the rest. Null: everyone's is the model's. Set it after `ratesFor`,
+     * e.g. from people's ages (`Outbreak` does).
+     */
+    fatalityScale?: Float32Array | null;
 }
 
 /** Cumulative exit shares, in exit order (the last is 1). */

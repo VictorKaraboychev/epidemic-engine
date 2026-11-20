@@ -195,6 +195,28 @@ export const createEpidemic = <P extends ModelParams>(
 /** A protection threshold in (0, 1]: protected while susceptibility is below it. */
 const drawThreshold = (random: Random) => 1 - random();
 
+/** Scratch space for one person's exit shares (an infection at a time). */
+let scaledShares = new Float64Array(8);
+
+/**
+ * Cumulative exit shares with the exits to death scaled by `scale` (capped so they total at most 1) and the others
+ * sharing the rest in proportion.
+ */
+const scaledDeaths = (cumulative: Float64Array, dead: boolean[], scale: number) => {
+    if (scaledShares.length < cumulative.length) scaledShares = new Float64Array(cumulative.length);
+    let deaths = 0;
+    for (let exit = 0; exit < cumulative.length; exit++) if (dead[exit]) deaths += cumulative[exit] - (exit ? cumulative[exit - 1] : 0);
+    const scaled = Math.min(1, deaths * scale);
+    const survivals = 1 - deaths;
+    let total = 0;
+    for (let exit = 0; exit < cumulative.length; exit++) {
+        const share = cumulative[exit] - (exit ? cumulative[exit - 1] : 0);
+        total += dead[exit] ? (deaths > 0 ? (share * scaled) / deaths : 0) : survivals > 0 ? (share * (1 - scaled)) / survivals : 0;
+        scaledShares[exit] = exit === cumulative.length - 1 ? 1 : total;
+    }
+    return scaledShares.subarray(0, cumulative.length);
+};
+
 /** Picks an exit from cumulative shares (`UNDECIDED` for a compartment without exits). */
 const drawExit = (cumulative: Float64Array, random: Random) => {
     if (cumulative.length === 0) return UNDECIDED;
@@ -416,10 +438,16 @@ export const advanceEpidemic = <P extends ModelParams>(
             if (infectable[states[contact]]) scheduleContact(node, contact, from, days);
         }
     };
+    // Per compartment with an exit to death: which of its exits lead there (null: none), for per-person fatality.
+    const deathExits = compiled.targets.map((targets) =>
+        targets.some((target) => compiled.dead[target]) ? targets.map((target) => Boolean(compiled.dead[target])) : null,
+    );
     /** On entering `compartment` on `entry`: the exit they'll take (fewer deaths if protected), when, and what follows. */
     const enter = (person: number, compartment: number, entry: number) => {
         const protection = infectedFrom[person] >= 0 ? rates.protection[infectedFrom[person]] : null;
-        const exit = drawExit((protection ?? rates).cumulativeShares[compartment], random);
+        const shares = (protection ?? rates).cumulativeShares[compartment];
+        const scale = rates.fatalityScale ? rates.fatalityScale[person] : 1;
+        const exit = drawExit(scale === 1 || !deathExits[compartment] ? shares : scaledDeaths(shares, deathExits[compartment]!, scale), random);
         exits[person] = exit;
         if (exit !== UNDECIDED) {
             leaveOn[person] = entry + drawStayDays(rates.meanDays[compartment][exit], random, rates.shapes[compartment][exit]);

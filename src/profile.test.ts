@@ -2,7 +2,10 @@ import { Group } from "./pathogens/types.js";
 import { Pathogen } from "./pathogens/pathogen.js";
 import { describe, expect, it } from "vitest";
 import { EdgeKind, buildNetwork, degreeOf, neighboursOf } from "./network.js";
-import { HOUSEHOLD_SIZES, HOUSEHOLD_WEIGHT } from "./population.js";
+import { US_2024 } from "./population.js";
+
+const HOUSEHOLD_SIZES = US_2024.households!.shares;
+const HOUSEHOLD_WEIGHT = US_2024.households!.transmission.value;
 import { pathogenParams } from "./presets.js";
 import { infectionTimeline, infectiousnessAfterInfection } from "./profile.js";
 import { seededRandom } from "./random.js";

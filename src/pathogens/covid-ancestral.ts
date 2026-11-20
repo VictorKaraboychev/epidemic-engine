@@ -45,11 +45,12 @@ export const COVID_ANCESTRAL = {
             {
                 id: Group.Infants,
                 covers: "1",
+                ages: { from: 1, to: 1 },
                 ifr: cited(0.000054, "covid-forecasting-2022", { interval: between(0.000021, 0.000114, IntervalKind.UI95) }),
             },
-            { id: Group.Adults, covers: "25", ifr: cited(0.0001, "levin-2020") },
-            { id: Group.MiddleAged, covers: "55", ifr: cited(0.004, "levin-2020") },
-            { id: Group.Elderly, covers: "75", ifr: cited(0.046, "levin-2020") },
+            { id: Group.Adults, covers: "25", ages: { from: 25, to: 25 }, ifr: cited(0.0001, "levin-2020") },
+            { id: Group.MiddleAged, covers: "55", ages: { from: 55, to: 55 }, ifr: cited(0.004, "levin-2020") },
+            { id: Group.Elderly, covers: "75", ages: { from: 75, to: 75 }, ifr: cited(0.046, "levin-2020") },
         ],
     },
     vaccination: {

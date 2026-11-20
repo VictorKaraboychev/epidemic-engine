@@ -8,7 +8,8 @@ import { Group } from "../pathogens/types.js";
  */
 import { type PathogenId } from "../pathogens/index.js";
 import { compileModel, ratesFor } from "../model.js";
-import { buildPopulationNetwork, indexCaseOrder, luckSeed, seededIndexCases } from "../population.js";
+import { buildPopulationNetwork } from "../population.js";
+import { indexCaseOrder, luckSeed, seededIndexCases } from "../seeding.js";
 import { availableFeatures, pathogenParams, solveTransmission } from "../presets.js";
 import { seededRandom } from "../random.js";
 import { reproductionCurve } from "../reproduction.js";

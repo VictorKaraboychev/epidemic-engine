@@ -13,6 +13,34 @@ export interface Citation {
  * them in the order they are first cited (see `CITATION_ORDER` in `diseases/index.ts`).
  */
 export const CITATIONS = {
+    "census-ages-2024": {
+        authors: "US Census Bureau",
+        title: "Annual Estimates of the Resident Population by Single Year of Age and Sex for the United States: April 1, 2020 to July 1, 2024 (NC-EST2024-AGESEX-RES)",
+        venue: "Vintage 2024 Population Estimates",
+        details: "June 2025",
+        url: "https://www.census.gov/data/tables/time-series/demo/popest/2020s-national-detail.html",
+    },
+    "census-households-2024": {
+        authors: "US Census Bureau",
+        title: "Historical Households Tables, Table HH-4: Households by Size, 1960 to Present",
+        venue: "Current Population Survey, Annual Social and Economic Supplement",
+        details: "2024",
+        url: "https://www.census.gov/data/tables/time-series/demo/families/households.html",
+    },
+    "madewell-2020": {
+        authors: "Madewell ZJ, Yang Y, Longini IM Jr, Halloran ME, Dean NE",
+        title: "Household transmission of SARS-CoV-2: a systematic review and meta-analysis",
+        venue: "JAMA Network Open",
+        details: "2020;3(12):e2031756",
+        url: "https://doi.org/10.1001/jamanetworkopen.2020.31756",
+    },
+    "fu-2012": {
+        authors: "Fu YC, Wang DW, Chuang JH",
+        title: "Representative contact diaries for modeling the spread of infectious diseases in Taiwan",
+        venue: "PLoS ONE",
+        details: "2012;7(10):e45113",
+        url: "https://doi.org/10.1371/journal.pone.0045113",
+    },
     "lloyd-smith-2005": {
         authors: "Lloyd-Smith JO, Schreiber SJ, Kopp PE, Getz WM",
         title: "Superspreading and the effect of individual variation on disease emergence",
