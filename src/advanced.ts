@@ -24,3 +24,4 @@ export * from "./seird.js";
 export * from "./spatial-grid.js";
 export * from "./stochastic.js";
 export * from "./superspreading.js";
+export * from "./version.js";

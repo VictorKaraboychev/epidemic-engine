@@ -53,3 +53,4 @@ export { type History, countsOn, peakInfections, seriesOf } from "./history.js";
 export type { Theory } from "./deterministic.js";
 export { infectionTimeline } from "./profile.js";
 export { type Random, randomSeed, seededRandom } from "./random.js";
+export { VERSION } from "./version.js";

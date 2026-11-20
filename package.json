@@ -1,6 +1,6 @@
 {
     "name": "epidemic-engine",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "private": true,
     "description": "Stochastic epidemics on contact networks of up to a million people, with a deterministic reference and pathogens set from published estimates (every value cited).",
     "keywords": [
@@ -48,7 +48,8 @@
         "!src/validation",
         "!src/test-support.ts",
         "README.md",
-        "LICENSE"
+        "LICENSE",
+        "CHANGELOG.md"
     ],
     "engines": {
         "node": ">=20"
@@ -60,7 +61,8 @@
         "validate": "VALIDATE=1 vitest run src/validation",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
-        "prepare": "npm run build"
+        "prepare": "npm run build",
+        "version": "node scripts/sync-version.mjs && git add src/version.ts"
     },
     "devDependencies": {
         "@types/node": "^26.6.3",
