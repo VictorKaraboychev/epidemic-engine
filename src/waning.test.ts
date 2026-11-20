@@ -7,7 +7,7 @@ import { compileModel, ratesFor, waningSusceptibility } from "./model.js";
 import { buildNetwork } from "./network.js";
 import { pathogenParams } from "./presets.js";
 import { estimateR0 } from "./r0.js";
-import { mulberry32 } from "./random.js";
+import { seededRandom } from "./random.js";
 import { treeCurve } from "./reproduction.js";
 import { type SeirdModelParams, seirdModel } from "./seird.js";
 import { createEpidemic, infectedCount, stepEpidemic } from "./stochastic.js";
@@ -34,8 +34,8 @@ describe("waning immunity", () => {
     });
 
     it("lets recovered people be infected again only once they've lost protection, at the curve's pace", () => {
-        const network = buildNetwork(mulberry32(41), DESKTOP);
-        const random = mulberry32(7);
+        const network = buildNetwork(seededRandom(41), DESKTOP);
+        const random = seededRandom(7);
         const rates = ratesFor(WANING, PARAMS);
         let state = createEpidemic(WANING, network, [0, 1, 2]);
         const recoveredOn = new Map<number, number>();
@@ -57,8 +57,8 @@ describe("waning immunity", () => {
     });
 
     it("never reinfects anyone without waning", () => {
-        const network = buildNetwork(mulberry32(41), DESKTOP);
-        const random = mulberry32(7);
+        const network = buildNetwork(seededRandom(41), DESKTOP);
+        const random = seededRandom(7);
         const rates = ratesFor(PLAIN, PARAMS);
         let state = createEpidemic(PLAIN, network, [0, 1, 2]);
         for (let day = 0; day < 400; day++) {

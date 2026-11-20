@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { compileModel, ratesFor } from "./model.js";
 import { buildNetwork } from "./network.js";
 import { estimateR0 } from "./r0.js";
-import { gammaMeanOne, mulberry32 } from "./random.js";
+import { gammaMeanOne, seededRandom } from "./random.js";
 import { treeCurve } from "./reproduction.js";
 import { type SeirdModelParams, seirdModel } from "./seird.js";
 import { createEpidemic, infectedCount, stepEpidemic } from "./stochastic.js";
@@ -24,7 +24,7 @@ const PARAMS: SeirdModelParams = {
 describe("gamma infectiousness", () => {
     it("has mean 1 and variance 1/k", () => {
         for (const k of [0.1, 0.5, 2]) {
-            const random = mulberry32(11);
+            const random = seededRandom(11);
             const draws = Array.from({ length: 40000 }, () => gammaMeanOne(random, k));
             const mean = draws.reduce((a, b) => a + b, 0) / draws.length;
             const variance = draws.reduce((sum, x) => sum + (x - mean) ** 2, 0) / draws.length;
@@ -54,9 +54,9 @@ describe("superspreading in the simulation", () => {
         let shares = 0;
         let runs = 0;
         for (let seed = 1; seed <= 30 && runs < 8; seed++) {
-            const network = buildNetwork(mulberry32(seed), { ...DESKTOP, contactVariation });
+            const network = buildNetwork(seededRandom(seed), { ...DESKTOP, contactVariation });
             const rates = ratesFor(MODEL, { ...PARAMS, dispersion });
-            const random = mulberry32(seed * 7);
+            const random = seededRandom(seed * 7);
             let state = createEpidemic(MODEL, network, [0, 1, 2]);
             while (infectedCount(compileModel(MODEL), state.counts) > 0) state = stepEpidemic(MODEL, network, state, rates, random);
             const share = topCasesShare(state.states, state.infectedBy);

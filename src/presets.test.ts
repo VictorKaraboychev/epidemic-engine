@@ -5,13 +5,13 @@ import { getPathogen } from "./pathogens/index.js";
 import { buildPopulationNetwork } from "./population.js";
 import { availableFeatures, pathogenParams, solveTransmission } from "./presets.js";
 import { estimateR0 } from "./r0.js";
-import { mulberry32 } from "./random.js";
+import { seededRandom } from "./random.js";
 import { reproductionCurve } from "./reproduction.js";
 import { seirdModel } from "./seird.js";
 import { seirdParams } from "./test-support.js";
 
 const network = buildPopulationNetwork({ seed: 3, people: 5000, contacts: 6 });
-const reproduction = reproductionCurve(network, mulberry32(3));
+const reproduction = reproductionCurve(network, seededRandom(3));
 const SEIRD = seirdModel({ exposed: true, waning: false });
 
 describe("pathogen parameters", () => {

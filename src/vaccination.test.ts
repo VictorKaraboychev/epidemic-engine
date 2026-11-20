@@ -5,7 +5,7 @@ import { compileModel, vaccineSusceptibility } from "./model.js";
 import { buildNetwork } from "./network.js";
 import { seededVaccinated, vaccinatedCount, vaccinationOrder } from "./population.js";
 import { availableFeatures } from "./presets.js";
-import { mulberry32 } from "./random.js";
+import { seededRandom } from "./random.js";
 import { seirdModel } from "./seird.js";
 import { createEpidemic } from "./stochastic.js";
 
@@ -28,7 +28,7 @@ describe("vaccination", () => {
     });
 
     it("vaccinates the first people in the seed's own order, never an index case", () => {
-        const network = buildNetwork(mulberry32(1), { count: 100, width: 1200, height: 180 });
+        const network = buildNetwork(seededRandom(1), { count: 100, width: 1200, height: 180 });
         const order = vaccinationOrder(7, 100);
         expect(vaccinationOrder(7, 100)).toEqual(order);
         const vaccinated = seededVaccinated(order, [order[0]], 30);

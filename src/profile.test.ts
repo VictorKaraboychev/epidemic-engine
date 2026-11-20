@@ -6,7 +6,7 @@ import { EdgeKind, buildNetwork, degreeOf, neighboursOf } from "./network.js";
 import { HOUSEHOLD_SIZES, HOUSEHOLD_WEIGHT } from "./population.js";
 import { pathogenParams } from "./presets.js";
 import { infectionTimeline, infectiousnessAfterInfection } from "./profile.js";
-import { mulberry32 } from "./random.js";
+import { seededRandom } from "./random.js";
 import { type SeirdModelParams, seirdModel } from "./seird.js";
 import { seirdParams } from "./test-support.js";
 
@@ -47,7 +47,7 @@ describe("infectiousness profile", () => {
 });
 
 describe("population network", () => {
-    const network = buildNetwork(mulberry32(2), {
+    const network = buildNetwork(seededRandom(2), {
         width: 1400,
         height: 800,
         count: 6000,

@@ -17,7 +17,7 @@ import type { Pathogen } from "./pathogens/types.js";
 import { buildPopulationNetwork, indexCaseOrder, luckSeed, seededIndexCases, seededVaccinated, vaccinatedCount, vaccinationOrder } from "./population.js";
 import { availableFeatures, pathogenParams, solveTransmission } from "./presets.js";
 import { estimateR0 } from "./r0.js";
-import { type Random, mulberry32, randomSeed } from "./random.js";
+import { type Random, seededRandom, randomSeed } from "./random.js";
 import { reproductionCurve } from "./reproduction.js";
 import { type ModelFeatures, type SeirdModel, type SeirdModelParams, seirdModel, seirdParams } from "./seird.js";
 import { type EpidemicState, createEpidemic, infectedCount, advanceEpidemic } from "./stochastic.js";
@@ -119,7 +119,7 @@ export class Outbreak {
         const network = buildPopulationNetwork({ seed, people, contacts, world: options.world, superspreading: features.superspreading });
         const model = seirdModel(features);
         const base = seirdParams({ ...pathogenModelParams, ...options.params });
-        const reproduction = reproductionCurve(network, mulberry32(seed ^ REPRODUCTION_SALT));
+        const reproduction = reproductionCurve(network, seededRandom(seed ^ REPRODUCTION_SALT));
         const r0 = options.r0 ?? pathogen?.values.r0.value ?? null;
         const solved = solveTransmission({
             model,
@@ -144,7 +144,7 @@ export class Outbreak {
         this.r0 = r0 ?? estimateR0(model, params, reproduction);
         this.compiled = compileModel(model) as CompiledModel;
         this.rates = ratesFor(model, params);
-        this.random = mulberry32(luckSeed(seed, 0));
+        this.random = seededRandom(luckSeed(seed, 0));
         this.epidemic = createEpidemic(model, network, indexCases, vaccinated, this.random);
         this.indexCases = this.epidemic.indexCases;
         this.vaccinated = vaccinated;

@@ -4,21 +4,28 @@
  * the shape of the generation interval's distribution before contacts run out (the "intrinsic" one), and its mean is
  * the mean generation interval.
  */
-import { type CompartmentModel, type ModelParams, atLeastOneDay, compileModel, drawStayDays, exitShares, infectiousnessTable, stayShape } from "./model.js";
-import { mulberry32 } from "./random.js";
+import {
+    type CompartmentModel,
+    type ModelParams,
+    atLeastOneDay,
+    compileModel,
+    exitShares,
+    infectiousnessTable,
+    stayDistribution as wholeDayStays,
+    stayShape,
+} from "./model.js";
 
 /** Days after infection covered. */
 export const PROFILE_DAYS = 90;
 /** Below this share of infected people infectious on a day, their average infectiousness isn't shown (too few to say). */
 export const STRENGTH_MIN_SHARE = 0.01;
-/** Stays sampled per exit (a fixed seed, so the curve is the same each time). */
-const SAMPLES = 2000;
-
-/** The distribution of whole-day stays, as `drawStayDays` draws them: probability by number of days. */
+/**
+ * The distribution of whole-day stays (the same one the deterministic reference uses), by number of days, with any
+ * longer than `PROFILE_DAYS` counted on the last day.
+ */
 const stayDistribution = (mean: number, shape: number) => {
-    const random = mulberry32(0x9a1e);
     const probability = new Float64Array(PROFILE_DAYS + 1);
-    for (let sample = 0; sample < SAMPLES; sample++) probability[Math.min(PROFILE_DAYS, drawStayDays(mean, random, shape))] += 1 / SAMPLES;
+    wholeDayStays(mean, shape).forEach((chance, days) => (probability[Math.min(PROFILE_DAYS, days)] += chance));
     return probability;
 };
 

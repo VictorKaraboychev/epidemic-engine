@@ -4,7 +4,7 @@
  * seeded orders that pick index cases and the vaccinated, so a seed and a run number replay an outbreak exactly.
  */
 import { NODE_RADIUS, type Network, buildNetwork } from "./network.js";
-import { mulberry32, seededOrder } from "./random.js";
+import { seededRandom, seededOrder } from "./random.js";
 
 /** Share of the canvas the node spacing discs may cover; spacing shrinks on small canvases to fit everyone. */
 const PACKING = 0.38;
@@ -86,7 +86,7 @@ const nodeSpacing = (width: number, height: number, population: number) =>
  */
 export const buildPopulationNetwork = ({ seed, world = DEFAULT_WORLD, people, contacts, superspreading = false }: PopulationNetworkOptions): Network => {
     const spacing = nodeSpacing(world.width, world.height, people);
-    return buildNetwork(mulberry32(seed), {
+    return buildNetwork(seededRandom(seed), {
         width: world.width,
         height: world.height,
         count: people,
@@ -108,10 +108,10 @@ export const buildPopulationNetwork = ({ seed, world = DEFAULT_WORLD, people, co
  * Seeded order in which people become index cases: k initial cases are always the first k connected people in this
  * order, so changing k adds and removes the same people instead of re-drawing them.
  */
-export const indexCaseOrder = (seed: number, population: number) => seededOrder(population, mulberry32(seed ^ INDEX_CASE_SALT));
+export const indexCaseOrder = (seed: number, population: number) => seededOrder(population, seededRandom(seed ^ INDEX_CASE_SALT));
 
 /** Who gets vaccinated first, from the seed (its own order, so the vaccinated aren't the first index cases). */
-export const vaccinationOrder = (seed: number, population: number) => seededOrder(population, mulberry32(seed ^ VACCINATION_SALT));
+export const vaccinationOrder = (seed: number, population: number) => seededOrder(population, seededRandom(seed ^ VACCINATION_SALT));
 
 /** How many people a coverage vaccinates. */
 export const vaccinatedCount = (coverage: number, population: number) => Math.round(Math.min(1, Math.max(0, coverage)) * population);

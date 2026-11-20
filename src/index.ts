@@ -1,6 +1,6 @@
 /**
  * epidemic-engine: stochastic epidemics on contact networks of up to a million people, with a deterministic
- * reference, and pathogens set from published estimates (every value cited). No UI and no dependencies.
+ * reference, and pathogens set from published estimates (every value cited). No UI; one small dependency (pure-rand).
  *
  * - Start here: `Outbreak` (`new Outbreak({ pathogen: Pathogen.Measles }).run()`).
  * - Pathogens: `Pathogen`, `Population`, `getPathogen`, `pathogenParams`, `PATHOGENS`, `CITATIONS`.

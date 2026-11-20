@@ -9,7 +9,7 @@ import { type Pathogen, getPathogen } from "../pathogens/index.js";
 import { compileModel, ratesFor } from "../model.js";
 import { buildPopulationNetwork, indexCaseOrder, luckSeed, seededIndexCases } from "../population.js";
 import { availableFeatures, pathogenParams, solveTransmission } from "../presets.js";
-import { mulberry32 } from "../random.js";
+import { seededRandom } from "../random.js";
 import { reproductionCurve } from "../reproduction.js";
 import { seirdModel } from "../seird.js";
 import { createEpidemic, infectedCount, stepEpidemic } from "../stochastic.js";
@@ -65,7 +65,7 @@ export const measurePreset = (
         const solved = solveTransmission({
             model,
             params: base,
-            reproduction: reproductionCurve(network, mulberry32(seed)),
+            reproduction: reproductionCurve(network, seededRandom(seed)),
             r0: pathogen.values.r0.value,
             dispersion: superspreading ? (k ?? DEFAULT_DISPERSION) : null,
         });
@@ -74,7 +74,7 @@ export const measurePreset = (
         const params = { ...base, beta, dispersion };
         const compiled = compileModel(model);
         const rates = ratesFor(model, params);
-        const random = mulberry32(luckSeed(seed, 0));
+        const random = seededRandom(luckSeed(seed, 0));
         let state = createEpidemic(model, network, seededIndexCases(indexCaseOrder(seed, people), network, 5));
         const infectedOn = new Int32Array(people).fill(-1);
         for (const person of state.indexCases) infectedOn[person] = 0;

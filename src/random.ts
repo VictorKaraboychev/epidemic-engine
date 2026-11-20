@@ -1,17 +1,16 @@
 /** Seeded randomness: a run can be replayed exactly from its seeds. */
+import { xoroshiro128plus } from "pure-rand/generator/xoroshiro128plus";
 
 export type Random = () => number;
 
-/** Small, fast, seeded PRNG so a run can be replayed from its seed. */
-export const mulberry32 = (seed: number): Random => {
-    let state = seed;
-    return () => {
-        state |= 0;
-        state = (state + 0x6d2b79f5) | 0;
-        let t = Math.imul(state ^ (state >>> 15), 1 | state);
-        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
+/**
+ * A seeded generator of uniform numbers in [0, 1): the same seed gives the same sequence, so a run can be replayed
+ * from its seed. xoroshiro128+ (via pure-rand): 128 bits of state, so even a million-person outbreak's billions of
+ * draws come nowhere near repeating it (period 2¹²⁸ − 1), at about the speed of a 32-bit generator.
+ */
+export const seededRandom = (seed: number): Random => {
+    const generator = xoroshiro128plus(seed);
+    return () => (generator.next() >>> 0) / 4294967296;
 };
 
 export const MIN_SEED = 10000;

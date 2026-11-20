@@ -1,7 +1,7 @@
 # epidemic-engine
 
 Stochastic epidemics on contact networks of up to a million people, with a deterministic reference curve, and
-pathogens set from published estimates, every value cited. Pure TypeScript, no dependencies, runs in Node and
+pathogens set from published estimates, every value cited. Pure TypeScript, one small dependency (pure-rand), runs in Node and
 browsers (put it in a Web Worker for large networks).
 
 ## Use
