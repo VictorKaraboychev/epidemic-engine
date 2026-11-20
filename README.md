@@ -16,7 +16,7 @@ pathogens set from published estimates, every value cited.
 - **Fast and reproducible**: event-driven; a million people take about 2 s to set up and an outbreak among them under
   a second. The same seed replays the same outbreak.
 - **Validated**: simulated outbreaks are checked against the published R₀, generation intervals and dispersion.
-- Pure TypeScript with type declarations, ES modules, one small dependency (pure-rand). Node 20+ and browsers (put
+- Pure TypeScript with type declarations, ES modules, one small dependency (pure-rand). Node 22+ and browsers (put
   it in a Web Worker for large populations).
 
 ## Install
@@ -246,8 +246,8 @@ The engine follows standard practice for stochastic network models, and checks i
 
 The package follows [semantic versioning](https://semver.org/); while it's 0.x, a minor version can break the API
 (the main entry least, `/advanced` more often). Changes are in [CHANGELOG.md](./CHANGELOG.md), and each release is a
-tag with a [GitHub release](https://github.com/VictorKaraboychev/epidemic-engine/releases). To release one: add its
-section to the changelog, then
+tag with a [GitHub release](https://github.com/VictorKaraboychev/epidemic-engine/releases). Pull requests add their
+changes under Unreleased in the changelog; to release, rename that section to the new version (with the date), then
 
 ```bash
 npm version minor        # or patch / major: bumps package.json and VERSION, commits and tags
@@ -257,15 +257,29 @@ git push --follow-tags   # the Release workflow checks it and publishes the GitH
 ## Develop
 
 ```bash
-npm install          # also builds dist/
-npm test             # unit tests (Vitest)
+npm install             # also builds dist/
+npm test                # unit tests (Vitest)
 npm run typecheck
-npm run format       # Prettier (CI checks it with format:check)
-npm run build        # dist/: ES modules with type declarations and source maps
-npm run validate     # every pathogen on 20,000 people, against the literature (under a minute)
+npm run format          # Prettier (CI checks it with format:check)
+npm run build           # dist/: ES modules with type declarations and source maps
+npm run validate        # every pathogen on 20,000 people, against the literature (under a minute)
+npm run api             # update the public API reports in etc/ after changing the API
+npm run check:package   # exports, types and module format resolve (publint, Are the Types Wrong)
+npm run check:browser   # bundles for the browser and runs without Node's globals
+npm run check:consumer  # installs the packed package and runs every README example
+npm run benchmark       # times the work that has to stay fast, against budgets
 ```
 
-CI runs the checks on Node 20, 22 and 24, and the validation, on every pull request.
+On every pull request, CI runs:
+
+- the checks above on Node 22, 24 and 26;
+- the package checks, plus `npm audit` of runtime dependencies;
+- the benchmark;
+- the literature validation;
+- a changelog check: a change to `src/` needs a line in `CHANGELOG.md` under Unreleased, or the "no changelog" label.
+
+Dependabot proposes dependency and GitHub Actions updates weekly. A change to the public API shows as a diff of
+`etc/*.api.md` in the pull request.
 
 Pathogens live in `src/pathogens/`, one file of data each (checked with `satisfies PathogenProfile`), with an id in
 `PathogenId` and a static member on `Pathogen`. Every published value is `cited(value, citationId, details?)`, citing

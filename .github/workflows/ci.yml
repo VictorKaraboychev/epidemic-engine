@@ -19,7 +19,8 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                node: [20, 22, 24]
+                # The maintained Node versions (20 reached end of life in April 2026).
+                node: [22, 24, 26]
         steps:
             - uses: actions/checkout@v4
             - uses: actions/setup-node@v4
@@ -31,8 +32,39 @@ jobs:
             - run: npm run typecheck
             - run: npm test
             - run: npm run build
-            - name: Package contents
-              run: npm pack --dry-run
+
+    package:
+        name: Package (as users get it)
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+                  cache: npm
+            - run: npm ci
+            - name: Public API matches etc/*.api.md (run `npm run api` and commit the reports if you meant to change it)
+              run: npm run check:api
+            - name: Exports, types and module format resolve (publint, Are the Types Wrong)
+              run: npm run check:package
+            - name: Bundles and runs in a browser, without Node
+              run: npm run check:browser
+            - name: Installs, and every README example type-checks and runs
+              run: npm run check:consumer
+            - name: No known vulnerabilities in runtime dependencies
+              run: npm audit --omit=dev --audit-level=moderate
+
+    benchmark:
+        name: Performance
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+                  cache: npm
+            - run: npm ci
+            - run: npm run benchmark
 
     validate:
         name: Validate against the literature

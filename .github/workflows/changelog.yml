@@ -1,0 +1,29 @@
+name: Changelog
+
+# A pull request that changes the package (src/) should say so in CHANGELOG.md, under "Unreleased". Label it
+# "no changelog" when there's nothing for users to know (a refactor, tests, comments).
+on:
+    pull_request:
+        types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+    contents: read
+
+jobs:
+    changelog:
+        runs-on: ubuntu-latest
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'no changelog') }}
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+            - name: CHANGELOG.md is updated when src/ changes
+              env:
+                  BASE: ${{ github.event.pull_request.base.sha }}
+                  HEAD: ${{ github.event.pull_request.head.sha }}
+              run: |
+                  changed="$(git diff --name-only "$BASE...$HEAD")"
+                  if echo "$changed" | grep -qE '^src/' && ! echo "$changed" | grep -qx 'CHANGELOG.md'; then
+                      echo "::error::src/ changed but CHANGELOG.md didn't. Add a line under Unreleased, or label the PR 'no changelog'."
+                      exit 1
+                  fi

@@ -52,7 +52,7 @@
         "CHANGELOG.md"
     ],
     "engines": {
-        "node": ">=20"
+        "node": ">=22"
     },
     "scripts": {
         "build": "rm -rf dist && tsc -p tsconfig.build.json",
@@ -62,11 +62,21 @@
         "format": "prettier --write .",
         "format:check": "prettier --check .",
         "prepare": "npm run build",
-        "version": "node scripts/sync-version.mjs && git add src/version.ts"
+        "version": "node scripts/sync-version.mjs && git add src/version.ts",
+        "api": "api-extractor run --local -c api-extractor.json && api-extractor run --local -c api-extractor.advanced.json",
+        "check:api": "api-extractor run -c api-extractor.json && api-extractor run -c api-extractor.advanced.json",
+        "check:package": "publint && attw --pack . --profile esm-only",
+        "check:browser": "node scripts/check-browser.mjs",
+        "check:consumer": "node scripts/check-consumer.mjs",
+        "benchmark": "node scripts/benchmark.mjs"
     },
     "devDependencies": {
+        "@arethetypeswrong/cli": "^0.18.5",
+        "@microsoft/api-extractor": "^7.60.1",
         "@types/node": "^26.6.3",
+        "esbuild": "^0.28.2",
         "prettier": "^3.10.1",
+        "publint": "^0.3.25",
         "typescript": "^6.0.3",
         "vitest": "^5.1.0"
     },

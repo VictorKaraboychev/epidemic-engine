@@ -4,6 +4,8 @@ All notable changes to this package. The format follows [Keep a Changelog](https
 the package follows [semantic versioning](https://semver.org/): while it is 0.x, a minor version (0.2 → 0.3) can
 break the API, and a patch version (0.2.0 → 0.2.1) doesn't.
 
+## [Unreleased]
+
 ## [0.2.0] - 2026-11-20
 
 ### Added
@@ -43,6 +45,7 @@ break the API, and a patch version (0.2.0 → 0.2.1) doesn't.
   and `vaccine: { efficacy, … }` instead of `immunityHalfLife`, `vaccineEfficacy` and the like.
 - **Breaking.** Seeded randomness uses pure-rand's xoroshiro128+ (period 2¹²⁸ − 1) instead of mulberry32 (2³²), so
   every seed gives a different outbreak than in 0.1.0; networks no longer draw a radius per person.
+- **Breaking.** Requires Node 22 or later (Node 20 reached end of life in April 2026).
 - `randomSeed()` returns any 32-bit integer; `superspreaders`, `outbreakSummary` and `infectionTimeline` take their
   display limits as options.
 
