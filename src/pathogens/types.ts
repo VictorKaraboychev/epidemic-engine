@@ -1,32 +1,55 @@
 import type { CitationId } from "./citations.js";
 
-/** Every disease's id, in display order (each has a file in this folder, listed in `index.ts`). A UI names each one. */
-export const DISEASE_IDS = [
-    "covid-ancestral",
-    "covid-omicron",
-    "influenza-a",
-    "influenza-b",
-    "rsv",
-    "measles",
-    "pertussis",
-    "mpox",
-    "sars",
-    "mers",
-    "ebola",
-] as const;
-export type DiseaseId = (typeof DISEASE_IDS)[number];
+/** The pathogens with cited data, by id (each has a file in this folder, listed in `index.ts`). A UI names each one. */
+export enum Pathogen {
+    CovidAncestral = "covid-ancestral",
+    CovidOmicron = "covid-omicron",
+    InfluenzaA = "influenza-a",
+    InfluenzaB = "influenza-b",
+    Rsv = "rsv",
+    Measles = "measles",
+    Pertussis = "pertussis",
+    Mpox = "mpox",
+    Sars = "sars",
+    Mers = "mers",
+    Ebola = "ebola",
+}
 
 /**
- * Population groups a disease can have data for ("all" is everyone); add one here to use it (it needn't be an age
- * group), and a UI names it. "all" also selects a disease's base group, whatever it is (see
+ * Population groups a pathogen can have data for (`All` is everyone); add one here to use it (it needn't be an age
+ * group), and a UI names it. `All` also selects a pathogen's base group, whatever it covers (see
  * `Populations.groups`).
  */
-export const POPULATION_IDS = ["all", "infants", "under-5", "children", "young", "adults", "middle-aged", "elderly", "contacts", "gbmsm"] as const;
-export type PopulationId = (typeof POPULATION_IDS)[number];
-export type PopulationGroupId = Exclude<PopulationId, "all">;
+export enum Population {
+    All = "all",
+    Infants = "infants",
+    Under5 = "under-5",
+    Children = "children",
+    Young = "young",
+    Adults = "adults",
+    MiddleAged = "middle-aged",
+    Elderly = "elderly",
+    Contacts = "contacts",
+    Gbmsm = "gbmsm",
+}
+/** A group narrower than everyone. */
+export type PopulationGroupId = Exclude<Population, Population.All>;
 
 /** How a source states a value's uncertainty. */
-export type IntervalKind = "ci95" | "ci90" | "cri95" | "ui95" | "iqr" | "range";
+export enum IntervalKind {
+    /** 95% confidence interval. */
+    CI95 = "ci95",
+    /** 90% confidence interval. */
+    CI90 = "ci90",
+    /** 95% credible interval (Bayesian). */
+    CrI95 = "cri95",
+    /** 95% uncertainty interval (e.g. Global Burden of Disease). */
+    UI95 = "ui95",
+    /** Interquartile range. */
+    IQR = "iqr",
+    /** The range of the estimates or observations. */
+    Range = "range",
+}
 
 /** The uncertainty around a published value: a confidence or credible interval, interquartile range, or plain range. */
 export interface Interval {
@@ -35,12 +58,32 @@ export interface Interval {
     kind: IntervalKind;
 }
 
-/** Interval constructor, for reading order: `between(5.1, 5.9, "ci95")`. */
+/** Interval constructor, for reading order: `between(5.1, 5.9, IntervalKind.CI95)`. */
 export const between = (low: number, high: number, kind: IntervalKind): Interval => ({ low, high, kind });
 
 /** Why a value should be read with care; a UI explains each one beside the value. */
-export const CAVEAT_IDS = ["otherSetting", "clinicalDuration", "proxy", "confounded", "underReported", "poorFit", "fitted"] as const;
-export type CaveatId = (typeof CAVEAT_IDS)[number];
+export enum Caveat {
+    /** Measured in a different population or setting from the one it stands for: an approximation. */
+    OtherSetting = "otherSetting",
+    /** A clinical duration (symptom onset to death or discharge): overstates how long people are infectious. */
+    ClinicalDuration = "clinicalDuration",
+    /** A related quantity: illness rather than infection, severe disease rather than death, early R rather than R₀. */
+    Proxy = "proxy",
+    /** Mixes in other effects (e.g. new variants escaping immunity), so the effect on its own may differ. */
+    Confounded = "confounded",
+    /** Per reported case: mild cases are missed, so the rate per infection is likely lower. */
+    UnderReported = "underReported",
+    /** A rough fit: the published figures don't follow the model's curve (e.g. a simple halving). */
+    PoorFit = "poorFit",
+    /** Fitted, not measured: e.g. the infectiousness profile that reproduces a published generation interval. */
+    Fitted = "fitted",
+}
+
+/** A one-sided published value: the source gives only a bound ("< 1%", "> 21 years"). */
+export enum Bound {
+    Below = "below",
+    Above = "above",
+}
 
 /** A published number, the source it comes from, and what else the source says about it. */
 export interface Cited {
@@ -51,9 +94,9 @@ export interface Cited {
     /** The source's uncertainty around the value (the value lies within it). */
     interval?: Interval;
     /** The source gives a bound, not a point estimate ("< 1%", "> 21 years"): the bound is used and shown with its sign. */
-    bound?: "below" | "above";
+    bound?: Bound;
     /** Why the value should be read with care, if it should. */
-    caveat?: CaveatId;
+    caveat?: Caveat;
 }
 
 /** Everything about a value beyond the number and its main source. */
@@ -112,7 +155,7 @@ export const protectionCitations = (protection: Protection): CitationId[] => [
  * can run with superspreading. What each value's source says is written out under `presets.details` in the catalog,
  * which takes the numbers from here.
  */
-export interface DiseaseValues {
+export interface PathogenValues {
     /** R₀ the simulator targets (it solves for the daily transmission rate that gives it on the network). */
     r0: Cited;
     /** Mean infectious period (days) of infections that end in recovery. */
@@ -146,7 +189,7 @@ export interface DiseaseValues {
 }
 
 /** One population group's data, as its sources report it: fatality, vaccine coverage, both, or neither. */
-export interface PopulationGroup<Id extends PopulationId = PopulationGroupId> {
+export interface PopulationGroup<Id extends Population = PopulationGroupId> {
     id: Id;
     /** Who exactly the numbers cover, as the source reports it: ages ("75", "0–4") or a short description. */
     covers: string;
@@ -156,25 +199,41 @@ export interface PopulationGroup<Id extends PopulationId = PopulationGroupId> {
     vaccineCoverage?: Cited;
 }
 
+/** What a pathogen's population groups split people by. */
+export enum PopulationKind {
+    Age = "age",
+    Group = "group",
+}
+
+/** What a fatality rate is per. */
+export enum FatalityMeasure {
+    /** Per infection (IFR). */
+    Infection = "infection",
+    /** Per symptomatic illness. */
+    Illness = "illness",
+    /** Per reported case (CFR). */
+    Case = "case",
+}
+
 /**
  * Who dies, and who is vaccinated: data for everyone, and for groups within the population where it's published. Only
  * the groups the data covers are listed (incomplete data is fine), and groups needn't be ages.
  */
 export interface Populations {
     /** What the groups split people by; names the section's explanation. */
-    kind: "age" | "group";
+    kind: PopulationKind;
     /**
      * What every fatality rate here is per: an infection (IFR), a symptomatic illness (CDC influenza burden), or a
      * reported case. One measure for everyone and every group, so the rates compare.
      */
-    measure: "infection" | "illness" | "case";
+    measure: FatalityMeasure;
     /**
      * The base group first: the disease's overall data (its fatality is the default rate, and without one nobody
      * dies), for whoever the sources measured it in. That's everyone ("all") for most diseases, but any group fits
      * (children under 5 for RSV, GBMSM for mpox), so a UI can name who the numbers are about. Then the narrower groups
      * with data, in display order. At most `MAX_POPULATION_GROUPS` besides the base with fatality data.
      */
-    groups: [PopulationGroup<PopulationId>, ...PopulationGroup[]];
+    groups: [PopulationGroup<Population>, ...PopulationGroup[]];
 }
 
 /**
@@ -192,9 +251,9 @@ export type Vaccination =
           none: CitationId;
       };
 
-export interface Disease {
-    id: DiseaseId;
-    values: DiseaseValues;
+export interface PathogenProfile {
+    id: Pathogen;
+    values: PathogenValues;
     /**
      * Nearest contacts per person: a modelling choice, not a published value. Each person can infect at most their
      * contacts, so the network's R₀ ceiling is roughly its mean excess degree; highly transmissible diseases need
@@ -214,5 +273,5 @@ export interface Disease {
     hidden?: boolean;
 }
 
-/** Typed identity: lets each disease file be checked against `Disease` where it is written. */
-export const defineDisease = (disease: Disease) => disease;
+/** Typed identity: lets each disease file be checked against `PathogenProfile` where it is written. */
+export const definePathogen = (pathogen: PathogenProfile) => pathogen;

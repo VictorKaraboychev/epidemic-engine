@@ -1,13 +1,14 @@
+import { Population } from "../pathogens/types.js";
 /**
  * Measures what a preset's simulated outbreaks actually do, for validation against the literature: the mean
  * generation interval (days from an infector's infection to their infectee's), the reproduction number in the early
  * epidemic (secondary infections per case among the first cases), the dispersion of those offspring counts
  * (negative binomial k, by moments) and the share caused by the most infectious 20%, and the doubling time.
  */
-import { type DiseaseId, getDisease } from "../diseases/index.js";
+import { type Pathogen, getPathogen } from "../pathogens/index.js";
 import { compileModel, ratesFor } from "../model.js";
 import { buildSimulationNetwork, indexCaseOrder, luckSeed, seededIndexCases } from "../population.js";
-import { availableFeatures, diseaseParams, solveTransmission } from "../presets.js";
+import { availableFeatures, pathogenParams, solveTransmission } from "../presets.js";
 import { mulberry32 } from "../random.js";
 import { reproductionCurve } from "../reproduction.js";
 import { simulationModel } from "../seird.js";
@@ -31,7 +32,7 @@ export interface Measured {
 const mean = (values: number[]) => values.reduce((sum, value) => sum + value, 0) / Math.max(1, values.length);
 
 export const measurePreset = (
-    presetId: DiseaseId,
+    presetId: Pathogen,
     options: {
         superspreading?: boolean;
         contactsOnly?: boolean;
@@ -49,9 +50,9 @@ export const measurePreset = (
     let beta = 0;
     for (let run = 0; run < (options.runs ?? 6); run++) {
         const seed = (options.seed ?? 1000) + run;
-        const disease = getDisease(presetId);
-        const { contacts, vaccineCoverage: _coverage, dispersion: k, ...preset } = diseaseParams(disease, "all");
-        const superspreading = (options.superspreading ?? false) && availableFeatures(disease).superspreading;
+        const pathogen = getPathogen(presetId);
+        const { contacts, vaccineCoverage: _coverage, dispersion: k, ...preset } = pathogenParams(pathogen, Population.All);
+        const superspreading = (options.superspreading ?? false) && availableFeatures(pathogen).superspreading;
         // Calibration: scale both infectious periods (the preset's R₀ is still solved for).
         const scale = options.infectiousScale ?? 1;
         const base = seirdParams({
@@ -62,12 +63,12 @@ export const measurePreset = (
             ...(options.infectiousnessHalfLife !== undefined ? { infectiousnessHalfLife: options.infectiousnessHalfLife } : {}),
         });
         const network = buildSimulationNetwork({ seed, layout: LAYOUT, population: people, contacts: contacts!, contactVariation: superspreading });
-        const model = simulationModel({ exposed: availableFeatures(disease).exposed, waning: false });
+        const model = simulationModel({ exposed: availableFeatures(pathogen).exposed, waning: false });
         const solved = solveTransmission({
             model,
             params: base,
             reproduction: reproductionCurve(network, mulberry32(seed)),
-            r0: disease.values.r0.value,
+            r0: pathogen.values.r0.value,
             dispersion: superspreading ? (k ?? DEFAULT_DISPERSION) : null,
         });
         beta = solved.beta;

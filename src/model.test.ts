@@ -123,7 +123,7 @@ describe("outcome-specific infectious periods", () => {
     const network = buildNetwork(mulberry32(3), DESKTOP);
     const k = treeCurve(excessDegree(network));
 
-    it("a disease that kills quickly has a lower R₀ than one that kills slowly", () => {
+    it("a pathogen that kills quickly has a lower R₀ than one that kills slowly", () => {
         expect(estimateR0(SIRD_MODEL, sird({ beta: 0.2, recoveryDays: 16, deathDays: 4, ifr: 0.5 }), k)).toBeLessThan(
             estimateR0(SIRD_MODEL, sird({ beta: 0.2, recoveryDays: 16, deathDays: 16, ifr: 0.5 }), k),
         );

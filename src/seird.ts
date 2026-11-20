@@ -3,7 +3,7 @@
  * own infectious period, with an optional exposed (latent) compartment, gradually waning immunity and vaccination.
  * Lifelong protection and flat infectiousness are infinite half-lives.
  */
-import { type CompartmentModel, type SeirdParams, vaccineSusceptibility, waningSusceptibility } from "./model.js";
+import { type CompartmentModel, SeirdCompartment, type SeirdParams, vaccineSusceptibility, waningSusceptibility } from "./model.js";
 
 /** Every parameter any of the simulator's models reads (each model ignores the ones it doesn't use). */
 export interface SimulationModelParams extends SeirdParams {
@@ -64,12 +64,12 @@ export const simulationModel = ({
         id,
         name: `${exposed ? "SEIRD" : "SIRD"}${additions ? ` with ${additions}` : ""}`,
         compartments: [
-            { key: "s", name: "susceptible", susceptibility: () => 1 },
+            { key: SeirdCompartment.Susceptible, name: "susceptible", susceptibility: () => 1 },
             // Vaccinated before the outbreak: partly protected, less so as the vaccine wanes; infection moves them on.
             ...(vaccination
                 ? [
                       {
-                          key: "v",
+                          key: SeirdCompartment.Vaccinated,
                           name: "vaccinated",
                           susceptibilityAfter: (p: SimulationModelParams) => vaccineSusceptibility(p.vaccineEfficacy ?? 0, p.vaccineHalfLife ?? Infinity),
                           // Breakthrough infections: less likely to be fatal, and less infectious.
@@ -80,18 +80,22 @@ export const simulationModel = ({
             ...(exposed
                 ? [
                       {
-                          key: "e",
+                          key: SeirdCompartment.Exposed,
                           name: "exposed",
                           infected: true,
                           // How variable latent periods are: shape 1 / CV², from the incubation period's spread.
                           exits: [
-                              { to: "i", days: (p: SimulationModelParams) => p.latentDays, shape: (p: SimulationModelParams) => 1 / p.latentVariation ** 2 },
+                              {
+                                  to: SeirdCompartment.Infected,
+                                  days: (p: SimulationModelParams) => p.latentDays,
+                                  shape: (p: SimulationModelParams) => 1 / p.latentVariation ** 2,
+                              },
                           ],
                       },
                   ]
                 : []),
             {
-                key: "i",
+                key: SeirdCompartment.Infected,
                 name: "infected",
                 infected: true,
                 infectious: true,
@@ -101,24 +105,24 @@ export const simulationModel = ({
                     return (day) => 2 ** (-day / halfLife);
                 },
                 exits: [
-                    { to: "r", share: (p) => 1 - p.ifr, days: (p) => p.recoveryDays },
-                    { to: "d", share: (p) => p.ifr, days: (p) => p.deathDays },
+                    { to: SeirdCompartment.Recovered, share: (p) => 1 - p.ifr, days: (p) => p.recoveryDays },
+                    { to: SeirdCompartment.Died, share: (p) => p.ifr, days: (p) => p.deathDays },
                 ],
             },
             waning
                 ? {
-                      key: "r",
+                      key: SeirdCompartment.Recovered,
                       name: "recovered",
                       susceptibilityAfter: (p) => waningSusceptibility(p.immunityHalfLife, p.immunityDelay ?? 0),
                       // Reinfections: less likely to be fatal, and less infectious.
                       protects: (p) => ({ death: p.immunityDeathProtection ?? 0, spread: p.immunitySpreadProtection ?? 0 }),
                   }
-                : { key: "r", name: "recovered" },
-            { key: "d", name: "died", dead: true },
+                : { key: SeirdCompartment.Recovered, name: "recovered" },
+            { key: SeirdCompartment.Died, name: "died", dead: true },
         ],
-        infectionEntry: exposed ? "e" : "i",
-        indexEntry: "i",
-        ...(vaccination ? { vaccinatedEntry: "v" } : {}),
+        infectionEntry: exposed ? SeirdCompartment.Exposed : SeirdCompartment.Infected,
+        indexEntry: SeirdCompartment.Infected,
+        ...(vaccination ? { vaccinatedEntry: SeirdCompartment.Vaccinated } : {}),
     };
     models.set(id, model);
     return model;
@@ -141,7 +145,7 @@ export const withStagesScaled = <P extends SimulationModelParams>(params: P, sca
           };
 
 /**
- * A complete set of SEIRD parameters: `overrides` (e.g. a disease's `diseaseParams`) over defaults for a mild disease
+ * A complete set of SEIRD parameters: `overrides` (e.g. a disease's `pathogenParams`) over defaults for a mild disease
  * with flat infectiousness, 1% fatality and no protection after infection or vaccination. The default `beta` is a
  * placeholder: solve it for an R₀ with `solveTransmission`.
  */

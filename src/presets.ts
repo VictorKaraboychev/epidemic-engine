@@ -3,7 +3,7 @@
  * features it has data for, and the transmission rate that gives its published R₀ on a particular network.
  * Lifelong protection and flat infectiousness are infinite half-lives.
  */
-import { type Cited, type Disease, type PopulationId, diseaseIfr, parameterValues, simulatedCoverage } from "./diseases/index.js";
+import { type Cited, type PathogenProfile, Population, fatalityRate, parameterValues, simulatedCoverage } from "./pathogens/index.js";
 import type { CompartmentModel } from "./model.js";
 import { betaForR0, transmissibility } from "./r0.js";
 import { type ReproductionCurve, contactDispersionAt, individualDispersion } from "./reproduction.js";
@@ -14,7 +14,7 @@ import type { ModelFeatures, SimulationModelParams } from "./seird.js";
  * see `solveTransmission`), plus contacts per person, vaccine coverage, and `dispersion`, the published k of offspring
  * counts (a target: the network's own unevenness supplies part of it).
  */
-export type DiseaseParams = Omit<SimulationModelParams, "beta" | "dispersion"> & { contacts: number; vaccineCoverage: number; dispersion: number };
+export type PathogenParams = Omit<SimulationModelParams, "beta" | "dispersion"> & { contacts: number; vaccineCoverage: number; dispersion: number };
 
 /** Model parameters a disease's cited values set directly, where it has them. */
 const CITED_PARAMS = [
@@ -26,19 +26,19 @@ const CITED_PARAMS = [
     "infectiousnessHalfLife",
     "immunityHalfLife",
     "immunityDelay",
-] as const satisfies (keyof DiseaseParams)[];
+] as const satisfies (keyof PathogenParams)[];
 
 /**
  * A disease's vaccine as parameters: its efficacy, its half-life (`Infinity` when protection lasts or wasn't measured
  * to wane), and the coverage for this population. Nothing for a disease without a licensed vaccine.
  */
-export const vaccineParams = (disease: Disease, populationId: PopulationId): Partial<DiseaseParams> => {
-    const vaccination = disease.vaccination;
+export const vaccineParams = (pathogen: PathogenProfile, populationId: Population): Partial<PathogenParams> => {
+    const vaccination = pathogen.vaccination;
     if (!vaccination || "none" in vaccination) return {};
     return {
         vaccineEfficacy: vaccination.efficacy.value,
         vaccineHalfLife: vaccination.halfLife?.value ?? Infinity,
-        vaccineCoverage: simulatedCoverage(disease, populationId)?.value ?? 0,
+        vaccineCoverage: simulatedCoverage(pathogen, populationId)?.value ?? 0,
         vaccineDeathProtection: vaccination.deathProtection?.value ?? 0,
         vaccineSpreadProtection: vaccination.spreadProtection?.value ?? 0,
     };
@@ -48,22 +48,22 @@ export const vaccineParams = (disease: Disease, populationId: PopulationId): Par
  * The parameters a disease sets: each of its cited values that is a parameter (so a disease file only has to add a
  * value for a new parameter to start setting it), its fatality for this population, its contacts and its vaccine.
  */
-export const diseaseParams = (disease: Disease, populationId: PopulationId): Partial<DiseaseParams> => {
-    const params: Partial<DiseaseParams> = {
-        contacts: disease.contacts,
-        ifr: diseaseIfr(disease, populationId),
+export const pathogenParams = (pathogen: PathogenProfile, populationId: Population): Partial<PathogenParams> => {
+    const params: Partial<PathogenParams> = {
+        contacts: pathogen.contacts,
+        ifr: fatalityRate(pathogen, populationId),
         // No published delay means protection wanes from the start.
         immunityDelay: 0,
         // Flat infectiousness unless the disease has a fitted profile (set from its values below).
         infectiousnessHalfLife: Infinity,
         // Reinfections' protection, where published (else none).
-        immunityDeathProtection: disease.immunity?.deathProtection?.value ?? 0,
-        immunitySpreadProtection: disease.immunity?.spreadProtection?.value ?? 0,
+        immunityDeathProtection: pathogen.immunity?.deathProtection?.value ?? 0,
+        immunitySpreadProtection: pathogen.immunity?.spreadProtection?.value ?? 0,
         // Lifelong immunity: full protection that never ends.
-        ...(disease.immunity?.lifelong ? { immunityDelay: Infinity, immunityHalfLife: Infinity } : {}),
-        ...vaccineParams(disease, populationId),
+        ...(pathogen.immunity?.lifelong ? { immunityDelay: Infinity, immunityHalfLife: Infinity } : {}),
+        ...vaccineParams(pathogen, populationId),
     };
-    const values = parameterValues(disease) as Partial<Record<keyof DiseaseParams, Cited>>;
+    const values = parameterValues(pathogen) as Partial<Record<keyof PathogenParams, Cited>>;
     for (const key of CITED_PARAMS) {
         const value = values[key];
         if (value) params[key] = value.value;
@@ -76,11 +76,11 @@ export const diseaseParams = (disease: Disease, populationId: PopulationId): Par
  * or lifelong immunity for waning, a k for superspreading, a licensed vaccine with coverage data for vaccination).
  * `null` (no disease: parameters set by hand) can run with everything.
  */
-export const availableFeatures = (disease: Disease | null): ModelFeatures => ({
-    superspreading: !disease || Boolean(disease.values.dispersion),
-    exposed: !disease || Boolean(disease.values.latentDays),
-    waning: !disease || Boolean(disease.immunity?.halfLife || disease.immunity?.lifelong),
-    vaccination: !disease || (Boolean(disease.vaccination && !("none" in disease.vaccination)) && simulatedCoverage(disease, "all") !== null),
+export const availableFeatures = (pathogen: PathogenProfile | null): ModelFeatures => ({
+    superspreading: !pathogen || Boolean(pathogen.values.dispersion),
+    exposed: !pathogen || Boolean(pathogen.values.latentDays),
+    waning: !pathogen || Boolean(pathogen.immunity?.halfLife || pathogen.immunity?.lifelong),
+    vaccination: !pathogen || (Boolean(pathogen.vaccination && !("none" in pathogen.vaccination)) && simulatedCoverage(pathogen, Population.All) !== null),
 });
 
 /** The transmission rates `solveTransmission` searches between (daily chance per contact). */

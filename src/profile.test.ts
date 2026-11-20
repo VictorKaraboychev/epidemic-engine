@@ -1,8 +1,10 @@
+import { Pathogen } from "./pathogens/types.js";
+import { Population } from "./pathogens/types.js";
 import { describe, expect, it } from "vitest";
-import { getDisease } from "./diseases/index.js";
-import { EDGE_KIND, buildNetwork, degreeOf, neighboursOf } from "./network.js";
+import { getPathogen } from "./pathogens/index.js";
+import { EdgeKind, buildNetwork, degreeOf, neighboursOf } from "./network.js";
 import { HOUSEHOLD_SIZES, HOUSEHOLD_WEIGHT } from "./population.js";
-import { diseaseParams } from "./presets.js";
+import { pathogenParams } from "./presets.js";
 import { infectionTimeline, infectiousnessAfterInfection } from "./profile.js";
 import { mulberry32 } from "./random.js";
 import { type SimulationModelParams, simulationModel } from "./seird.js";
@@ -39,8 +41,8 @@ describe("infectiousness profile", () => {
     });
 
     it("comes from the presets: fitted where published intervals call for it, flat (an infinite half-life) otherwise", () => {
-        expect(diseaseParams(getDisease("covid-ancestral"), "all")).toMatchObject({ recoveryDays: 8, infectiousnessHalfLife: 1.3 });
-        expect(diseaseParams(getDisease("measles"), "all").infectiousnessHalfLife).toBe(Infinity);
+        expect(pathogenParams(getPathogen(Pathogen.CovidAncestral), Population.All)).toMatchObject({ recoveryDays: 8, infectiousnessHalfLife: 1.3 });
+        expect(pathogenParams(getPathogen(Pathogen.Measles), Population.All).infectiousnessHalfLife).toBe(Infinity);
     });
 });
 
@@ -74,7 +76,7 @@ describe("population network", () => {
         const sd = Math.sqrt(degrees.reduce((sum, d) => sum + (d - mean) ** 2, 0) / degrees.length);
         expect(sd / mean).toBeGreaterThan(0.6);
         expect(sd / mean).toBeLessThan(0.9);
-        const distant = network.edgeKind.filter((kind) => kind === EDGE_KIND.distant).length / network.edgeKind.length;
+        const distant = network.edgeKind.filter((kind) => kind === EdgeKind.Distant).length / network.edgeKind.length;
         expect(distant).toBeGreaterThan(0.1);
         expect(distant).toBeLessThan(0.3);
     });

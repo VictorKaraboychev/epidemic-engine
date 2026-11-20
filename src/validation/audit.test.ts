@@ -1,7 +1,8 @@
 import { it } from "vitest";
+import { Pathogen } from "../pathogens/index.js";
 import { measurePreset } from "./measure.js";
 
-// Slow (many large runs): `AUDIT=1 npx vitest run packages/epidemic-engine/src/validation`.
+// Slow (many large runs): `AUDIT=1 npx vitest run src/validation`.
 const run = (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env.AUDIT ? it : it.skip;
 
 run(
@@ -10,17 +11,17 @@ run(
         for (const [id, superspreading] of (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env.ONLY
             ? (JSON.parse((globalThis as { process?: { env: Record<string, string | undefined> } }).process!.env.ONLY!) as [string, boolean][] as never)
             : ([
-                  ["covid-ancestral", false],
-                  ["covid-ancestral", true],
-                  ["covid-omicron", false],
-                  ["influenza-a", false],
-                  ["measles", false],
-                  ["measles", true],
-                  ["pertussis", false],
-                  ["mpox", false],
-                  ["sars", true],
-                  ["mers", false],
-                  ["ebola", false],
+                  [Pathogen.CovidAncestral, false],
+                  [Pathogen.CovidAncestral, true],
+                  [Pathogen.CovidOmicron, false],
+                  [Pathogen.InfluenzaA, false],
+                  [Pathogen.Measles, false],
+                  [Pathogen.Measles, true],
+                  [Pathogen.Pertussis, false],
+                  [Pathogen.Mpox, false],
+                  [Pathogen.Sars, true],
+                  [Pathogen.Mers, false],
+                  [Pathogen.Ebola, false],
               ] as const)) {
             const m = measurePreset(id, {
                 superspreading,

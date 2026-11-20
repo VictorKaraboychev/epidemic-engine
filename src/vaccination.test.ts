@@ -1,5 +1,6 @@
+import { Pathogen } from "./pathogens/types.js";
 import { describe, expect, it } from "vitest";
-import { CITATION_ORDER, getDisease } from "./diseases/index.js";
+import { CITATION_ORDER, getPathogen } from "./pathogens/index.js";
 import { compileModel, vaccineSusceptibility } from "./model.js";
 import { buildNetwork } from "./network.js";
 import { seededVaccinated, vaccinatedCount, vaccinationOrder } from "./population.js";
@@ -40,9 +41,9 @@ describe("vaccination", () => {
     });
 
     it("is unavailable without a licensed vaccine, and cites its sources", () => {
-        expect(availableFeatures(getDisease("sars")).vaccination).toBe(false);
-        expect(availableFeatures(getDisease("mers")).vaccination).toBe(false);
-        expect(availableFeatures(getDisease("ebola")).vaccination).toBe(true);
+        expect(availableFeatures(getPathogen(Pathogen.Sars)).vaccination).toBe(false);
+        expect(availableFeatures(getPathogen(Pathogen.Mers)).vaccination).toBe(false);
+        expect(availableFeatures(getPathogen(Pathogen.Ebola)).vaccination).toBe(true);
         for (const citation of ["tartof-2021", "fast-2022", "li-2020-vaccines", "who-immunization-2026"] as const) expect(CITATION_ORDER).toContain(citation);
     });
 });

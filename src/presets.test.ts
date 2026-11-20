@@ -1,7 +1,9 @@
+import { Population } from "./pathogens/types.js";
+import { Pathogen } from "./pathogens/types.js";
 import { describe, expect, it } from "vitest";
-import { getDisease } from "./diseases/index.js";
+import { getPathogen } from "./pathogens/index.js";
 import { buildSimulationNetwork } from "./population.js";
-import { availableFeatures, diseaseParams, solveTransmission } from "./presets.js";
+import { availableFeatures, pathogenParams, solveTransmission } from "./presets.js";
 import { estimateR0 } from "./r0.js";
 import { mulberry32 } from "./random.js";
 import { reproductionCurve } from "./reproduction.js";
@@ -12,17 +14,17 @@ const network = buildSimulationNetwork({ seed: 3, layout: { width: 1600, height:
 const reproduction = reproductionCurve(network, mulberry32(3));
 const SEIRD = simulationModel({ exposed: true, waning: false });
 
-describe("disease parameters", () => {
-    it("are the disease's cited values, with infinite half-lives for lifelong protection and flat infectiousness", () => {
-        const measles = diseaseParams(getDisease("measles"), "all");
+describe("pathogen parameters", () => {
+    it("are the pathogen's cited values, with infinite half-lives for lifelong protection and flat infectiousness", () => {
+        const measles = pathogenParams(getPathogen(Pathogen.Measles), Population.All);
         expect(measles).toMatchObject({ immunityDelay: Infinity, immunityHalfLife: Infinity, infectiousnessHalfLife: Infinity, vaccineHalfLife: Infinity });
-        expect(diseaseParams(getDisease("covid-omicron"), "all")).toMatchObject({ immunityDelay: 100 });
-        expect(diseaseParams(getDisease("sars"), "all").vaccineEfficacy).toBeUndefined();
+        expect(pathogenParams(getPathogen(Pathogen.CovidOmicron), Population.All)).toMatchObject({ immunityDelay: 100 });
+        expect(pathogenParams(getPathogen(Pathogen.Sars), Population.All).vaccineEfficacy).toBeUndefined();
     });
 
-    it("switch on only the features a disease has data for", () => {
+    it("switch on only the features a pathogen has data for", () => {
         expect(availableFeatures(null)).toEqual({ exposed: true, waning: true, superspreading: true, vaccination: true });
-        expect(availableFeatures(getDisease("sars")).vaccination).toBe(false);
+        expect(availableFeatures(getPathogen(Pathogen.Sars)).vaccination).toBe(false);
     });
 });
 

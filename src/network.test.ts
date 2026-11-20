@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EDGE_KIND, buildNetwork, degreeOf, nearestNode, neighboursOf } from "./network.js";
+import { EdgeKind, buildNetwork, degreeOf, nearestNode, neighboursOf } from "./network.js";
 import { mulberry32 } from "./random.js";
 import { DESKTOP } from "./test-support.js";
 
@@ -33,7 +33,7 @@ describe("buildNetwork", () => {
             expect([...neighboursOf(network, b)]).toContain(a);
         });
         expect(network.neighbours.length).toBe(2 * network.edgeA.length);
-        expect(new Set(network.edgeKind)).toEqual(new Set([EDGE_KIND.local, EDGE_KIND.distant, EDGE_KIND.household]));
+        expect(new Set(network.edgeKind)).toEqual(new Set([EdgeKind.Local, EdgeKind.Distant, EdgeKind.Household]));
     });
 
     it("gives every node a contact and more contacts when asked", () => {
