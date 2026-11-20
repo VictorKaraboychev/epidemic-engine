@@ -32,7 +32,7 @@ import { Outbreak, Pathogen, SeirdCompartment } from "epidemic-engine";
 
 const outbreak = new Outbreak({ pathogen: Pathogen.Measles, people: 20_000, seed: 1 });
 const summary = outbreak.run();
-// { days: 83, over: true, everInfected: 20000, attackRate: 1, deaths: 30, peak: { day: 42, infected: 17368 } }
+// { days: 88, over: true, everInfected: 20000, attackRate: 1, deaths: 42, peak: { day: 47, infected: 17421 } }
 
 outbreak.count(SeirdCompartment.Recovered); // people recovered at the end
 outbreak.series(SeirdCompartment.Infected); // infected people, day by day
@@ -118,19 +118,19 @@ number of people infected (`offspring`); `outbreak.network` has their positions 
 
 ## Pathogens
 
-| `Pathogen.`           | R₀   | Latent | Infectious             | Fatality (base group)    | Waning | Vaccine | Superspreading |
-| --------------------- | ---- | ------ | ---------------------- | ------------------------ | ------ | ------- | -------------- |
-| `CovidAncestral`      | 2.79 | 5.5 d  | 8 d                    | 0.47% per infection      | ✓      | ✓       | ✓              |
-| `CovidOmicron`        | 9.5  | 2.7 d  | 8 d                    | 0.1% per infection       | ✓      | ✓       | ✓              |
-| `InfluenzaA`          | 1.28 | 1.6 d  | 5 d                    | 0.07% per illness        | ✓      | ✓       |                |
-| `InfluenzaB` (hidden) | 1.23 | 0.6 d  | 5 d                    | 0.07% per illness        | ✓      | ✓       |                |
-| `Rsv`                 | 3    | 3 d    | 6.4 d                  | 0.31% per illness, < 5s  | ✓      | ✓       |                |
-| `Measles`             | 15   | 10 d   | 8 d                    | 0.15% per case, children | ✓      | ✓       | ✓              |
-| `Pertussis`           | 5.5  | 8 d    | 15 d                   | 0.12% per case           | ✓      | ✓       | ✓              |
-| `Mpox`                | 1.94 | 7.6 d  | 21 d                   | 0.08% per case, GBMSM    |        | ✓       | ✓              |
-| `Sars`                | 2.7  | 4.6 d  | 26.5 d (fatal: 23.7 d) | 9.6% per case            |        |         | ✓              |
-| `Mers`                | 0.47 | 5 d    | 14 d (fatal: 11.5 d)   | 37% per case             |        |         | ✓              |
-| `Ebola`               | 1.83 | 11.4 d | 16.4 d (fatal: 7.5 d)  | 50% per case             |        | ✓       | ✓              |
+| `Pathogen.`      | R₀   | Latent | Infectious             | Fatality (base group)    | Waning | Vaccine | Superspreading |
+| ---------------- | ---- | ------ | ---------------------- | ------------------------ | ------ | ------- | -------------- |
+| `CovidAncestral` | 2.79 | 5.5 d  | 8 d                    | 0.47% per infection      | ✓      | ✓       | ✓              |
+| `CovidOmicron`   | 9.5  | 2.7 d  | 8 d                    | 0.1% per infection       | ✓      | ✓       | ✓              |
+| `InfluenzaA`     | 1.28 | 1.6 d  | 5 d                    | 0.07% per illness        | ✓      | ✓       |                |
+| `InfluenzaB`     | 1.23 | 0.6 d  | 5 d                    | 0.07% per illness        | ✓      | ✓       |                |
+| `Rsv`            | 3    | 3 d    | 6.4 d                  | 0.31% per illness, < 5s  | ✓      | ✓       |                |
+| `Measles`        | 15   | 10 d   | 8 d                    | 0.15% per case, children | ✓      | ✓       | ✓              |
+| `Pertussis`      | 5.5  | 8 d    | 15 d                   | 0.12% per case           | ✓      | ✓       | ✓              |
+| `Mpox`           | 1.94 | 7.6 d  | 21 d                   | 0.08% per case, GBMSM    |        | ✓       | ✓              |
+| `Sars`           | 2.7  | 4.6 d  | 26.5 d (fatal: 23.7 d) | 9.6% per case            |        |         | ✓              |
+| `Mers`           | 0.47 | 5 d    | 14 d (fatal: 11.5 d)   | 37% per case             |        |         | ✓              |
+| `Ebola`          | 1.83 | 11.4 d | 16.4 d (fatal: 7.5 d)  | 50% per case             |        | ✓       | ✓              |
 
 Every value is cited (`Pathogen.Measles.values` has them with their sources, intervals and caveats;
 `Pathogen.Measles.citations` lists the sources). Your own pathogens don't need sources. Fatality rates are
@@ -183,7 +183,7 @@ npm run validate     # every pathogen on 20,000 people, against the literature (
 
 CI runs the checks on Node 20, 22 and 24, and the validation, on every pull request.
 
-Pathogens live in `src/pathogens/`, one file each (`definePathogen`), listed in `pathogens/data.ts`, with an id in
+Pathogens live in `src/pathogens/`, one file of data each (checked with `satisfies PathogenProfile`), with an id in
 `PathogenId` and a static member on `Pathogen`. Every published value is `cited(value, citationId, details?)`, citing an entry in
 `src/pathogens/citations.ts`; `pathogens.test.ts` checks every value is cited and inside its published interval.
 

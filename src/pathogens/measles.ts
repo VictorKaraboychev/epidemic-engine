@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
 
 /**
  * Measles.
@@ -14,7 +14,7 @@ import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, Populati
  * - Known gap: early cases on the network infect ≈ 1.26–1.32 × R₀ on average (validation, 30 runs), as its first
  *   generations fill the dense local clusters; within 40% rather than the usual 25%.
  */
-export const MEASLES = definePathogen({
+export const MEASLES = {
     id: PathogenId.Measles,
     values: {
         r0: cited(15, "guerra-2017", { interval: between(12, 18, IntervalKind.Range) }),
@@ -48,4 +48,4 @@ export const MEASLES = definePathogen({
             },
         ],
     },
-});
+} satisfies PathogenProfile<PathogenId>;

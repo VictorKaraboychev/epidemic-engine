@@ -64,7 +64,6 @@ describe("the Pathogen class", () => {
         expect(Pathogen.get(PathogenId.Measles)).toBe(Pathogen.Measles);
         expect(Pathogen.get("measles")).toBe(Pathogen.Measles);
         expect(() => Pathogen.get("smallpox")).toThrow(/Unknown pathogen/);
-        expect(Pathogen.visible).not.toContain(Pathogen.InfluenzaB);
     });
 
     it("reads its data through methods", () => {

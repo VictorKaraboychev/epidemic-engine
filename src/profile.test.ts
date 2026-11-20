@@ -32,6 +32,12 @@ describe("infectiousness profile", () => {
         for (let day = 1; day < fading.length; day++) expect(fading[day]).toBeLessThanOrEqual(fading[day - 1] + 1e-9);
     });
 
+    it("leaves days with too few infectious people blank only when asked", () => {
+        const blank = (minInfectiousShare?: number) =>
+            Array.from(infectionTimeline(SEIRD, params({ infectiousnessHalfLife: 1.5 }), { minInfectiousShare }).strength).filter(Number.isNaN).length;
+        expect(blank(0.01)).toBeGreaterThan(blank());
+    });
+
     it("moves infectiousness earlier as it fades faster, keeping the periods", () => {
         const flat = infectiousnessAfterInfection(SEIRD, params({ infectiousnessHalfLife: Infinity })).mean;
         const fading = infectiousnessAfterInfection(SEIRD, params({ infectiousnessHalfLife: 1.5 })).mean;

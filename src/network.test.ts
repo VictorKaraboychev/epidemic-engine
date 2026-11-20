@@ -60,7 +60,7 @@ describe("buildNetwork", () => {
         expect(spread(degrees(varied))).toBeGreaterThan(spread(degrees(even)) * 1.5);
         expect(Math.max(...degrees(varied))).toBeGreaterThan(Math.max(...degrees(even)) * 1.5);
         // The same people either way: only the links change.
-        expect([varied.x, varied.y, varied.r]).toEqual([even.x, even.y, even.r]);
+        expect([varied.x, varied.y]).toEqual([even.x, even.y]);
     });
 
     it("finds the nearest person to a point", () => {

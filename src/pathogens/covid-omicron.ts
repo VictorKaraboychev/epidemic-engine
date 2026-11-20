@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
 
 /**
  * COVID-19, Omicron variant.
@@ -15,7 +15,7 @@ import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, Populati
  * - Vaccine (primary series) against Omicron infection: 44% at 1 month, fitted half-life 143 days [Menegale 2023];
  *   ≈ 69% had completed it by mid-2022 [Fast 2022].
  */
-export const COVID_OMICRON = definePathogen({
+export const COVID_OMICRON = {
     id: PathogenId.CovidOmicron,
     values: {
         r0: cited(9.5, "liu-rocklov-2022", { interval: between(5.5, 24, IntervalKind.Range) }),
@@ -57,4 +57,4 @@ export const COVID_OMICRON = definePathogen({
         deathProtection: cited(0.82, "tseng-2022", { caveat: Caveat.Proxy }),
         spreadProtection: cited(0.22, "tan-2023", { interval: between(0.06, 0.36, IntervalKind.CI95) }),
     },
-});
+} satisfies PathogenProfile<PathogenId>;

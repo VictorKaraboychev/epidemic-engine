@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
 
 /**
  * Respiratory syncytial virus. Reinfection is common throughout life, so it's the disease where waning immunity matters
@@ -16,7 +16,7 @@ import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, Populati
  * - Vaccine (RSVPreF3 OA, age 60+), against RSV illness, not infection: 71.7% in the first season [Papi 2023], 40.6% in
  *   the second [Ison 2024]; half-life ≈ 445 days. ≈ 40% of Americans 75+ vaccinated by late 2024 [Kriss 2024].
  */
-export const RSV = definePathogen({
+export const RSV = {
     id: PathogenId.Rsv,
     values: {
         r0: cited(3.0, "reis-2016", { interval: between(1.5, 4, IntervalKind.Range) }),
@@ -44,4 +44,4 @@ export const RSV = definePathogen({
             { id: Population.Elderly, covers: "75+", vaccineCoverage: cited(0.397, "kriss-2024") },
         ],
     },
-});
+} satisfies PathogenProfile<PathogenId>;

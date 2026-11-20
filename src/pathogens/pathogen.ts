@@ -33,7 +33,7 @@ export class Pathogen implements PathogenProfile {
     static readonly Mers = new Pathogen(MERS);
     static readonly Ebola = new Pathogen(EBOLA);
 
-    /** Every built-in pathogen, in display order. */
+    /** Every built-in pathogen. */
     static readonly all: readonly Pathogen[] = [
         Pathogen.CovidAncestral,
         Pathogen.CovidOmicron,
@@ -47,9 +47,6 @@ export class Pathogen implements PathogenProfile {
         Pathogen.Mers,
         Pathogen.Ebola,
     ];
-
-    /** The built-in pathogens to offer (not `hidden`). */
-    static readonly visible: readonly Pathogen[] = Pathogen.all.filter((pathogen) => !pathogen.hidden);
 
     /** A built-in pathogen by id (e.g. from a URL). Throws for an unknown one. */
     static get(id: PathogenId | string): Pathogen {
@@ -65,7 +62,6 @@ export class Pathogen implements PathogenProfile {
     readonly immunity?: Protection;
     readonly populations: Populations;
     readonly vaccination?: Vaccination;
-    readonly hidden?: boolean;
 
     /**
      * Your own pathogen from plain numbers (`{ id, r0, recoveryDays, latentDays?, ifr?, immunity?, vaccine?, … }`; see
@@ -79,7 +75,6 @@ export class Pathogen implements PathogenProfile {
         this.populations = profile.populations;
         if (profile.immunity) this.immunity = profile.immunity;
         if (profile.vaccination) this.vaccination = profile.vaccination;
-        if (profile.hidden) this.hidden = profile.hidden;
     }
 
     /** A copy with some data changed: `Pathogen.Measles.with({ contacts: 12 })`. */
@@ -96,7 +91,6 @@ export class Pathogen implements PathogenProfile {
             populations: this.populations,
             ...(this.immunity ? { immunity: this.immunity } : {}),
             ...(this.vaccination ? { vaccination: this.vaccination } : {}),
-            ...(this.hidden ? { hidden: this.hidden } : {}),
         };
     }
 

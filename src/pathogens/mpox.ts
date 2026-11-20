@@ -1,4 +1,4 @@
-import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
 
 /**
  * Mpox, 2022 clade IIb outbreak, which spread almost entirely among gay, bisexual and other men who have sex with men
@@ -14,7 +14,7 @@ import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, P
  *   ≈ 23% of Americans at risk (GBMSM and transgender people eligible for vaccination) were fully vaccinated by early
  *   2023 [Owens 2023].
  */
-export const MPOX = definePathogen({
+export const MPOX = {
     id: PathogenId.Mpox,
     values: {
         r0: cited(1.94, "zhang-2024", { interval: between(1.81, 2.19, IntervalKind.CrI95) }),
@@ -46,4 +46,4 @@ export const MPOX = definePathogen({
             },
         ],
     },
-});
+} satisfies PathogenProfile<PathogenId>;

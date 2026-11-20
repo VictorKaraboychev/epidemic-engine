@@ -1,4 +1,4 @@
-import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
 
 /**
  * SARS (2003). Similar R₀ to COVID-19, but almost no spread before symptoms and far deadlier; famous for superspreading
@@ -15,7 +15,7 @@ import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, P
  * - Superspreading: dispersion k ≈ 0.16 (90% CI 0.11–0.64), Singapore 2003 [Lloyd-Smith 2005].
  * - No licensed SARS vaccine has ever existed [Li 2020].
  */
-export const SARS = definePathogen({
+export const SARS = {
     id: PathogenId.Sars,
     values: {
         r0: cited(2.7, "riley-2003", { interval: between(2.2, 3.7, IntervalKind.CI95) }),
@@ -41,4 +41,4 @@ export const SARS = definePathogen({
         ],
     },
     vaccination: { none: "li-2020-vaccines" },
-});
+} satisfies PathogenProfile<PathogenId>;

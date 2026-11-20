@@ -96,7 +96,7 @@ export interface Cited {
     also?: CitationId[];
     /** The source's uncertainty around the value (the value lies within it). */
     interval?: Interval;
-    /** The source gives a bound, not a point estimate ("< 1%", "> 21 years"): the bound is used and shown with its sign. */
+    /** The source gives a bound, not a point estimate ("< 1%", "> 21 years"): the bound is used as the value. */
     bound?: Bound;
     /** Why the value should be read with care, if it should. */
     caveat?: Caveat;
@@ -234,7 +234,7 @@ export interface Populations {
      * The base group first: the disease's overall data (its fatality is the default rate, and without one nobody
      * dies), for whoever the sources measured it in. That's everyone ("all") for most diseases, but any group fits
      * (children under 5 for RSV, GBMSM for mpox), so a UI can name who the numbers are about. Then the narrower groups
-     * with data, in display order. At most `MAX_POPULATION_GROUPS` besides the base with fatality data.
+     * with data.
      */
     groups: [PopulationGroup<Population>, ...PopulationGroup[]];
 }
@@ -277,9 +277,4 @@ export interface PathogenProfile<Id extends string = string> {
     populations: Populations;
     /** Vaccination data (not used by the simulator yet). */
     vaccination?: Vaccination;
-    /** Kept in the data (and type-checked) but not offered in the UI. */
-    hidden?: boolean;
 }
-
-/** Typed identity: lets each built-in pathogen's file be checked against `PathogenProfile` where it is written. */
-export const definePathogen = (pathogen: PathogenProfile<PathogenId>) => pathogen;

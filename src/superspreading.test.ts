@@ -6,7 +6,7 @@ import { gammaMeanOne, seededRandom } from "./random.js";
 import { treeCurve } from "./reproduction.js";
 import { type SeirdModelParams, seirdModel } from "./seird.js";
 import { createEpidemic, infectedCount, stepEpidemic } from "./stochastic.js";
-import { offspringCounts, topCasesShare } from "./superspreading.js";
+import { offspringCounts, superspreaders, topCasesShare } from "./superspreading.js";
 import { DESKTOP } from "./test-support.js";
 
 const MODEL = seirdModel({ exposed: false, waning: false });
@@ -80,5 +80,15 @@ describe("superspreading in the simulation", () => {
         const varied = estimateR0(MODEL, { ...PARAMS, dispersion: 0.1 }, treeCurve(4));
         expect(varied).toBeLessThan(even * 0.6);
         expect(varied).toBeGreaterThan(even * 0.2);
+    });
+});
+
+describe("superspreader options", () => {
+    it("list everyone over the bar by default, or only the most prolific up to a limit", () => {
+        const offspring = Int32Array.from([0, 5, 9, 2, 7, 12, 5]);
+        const people = (pairs: Int32Array) => Array.from(pairs).filter((_, i) => i % 2 === 0);
+        expect(people(superspreaders(offspring))).toEqual([1, 2, 4, 5, 6]);
+        expect(people(superspreaders(offspring, { limit: 2 }))).toEqual([2, 5]);
+        expect(people(superspreaders(offspring, { minInfected: 8 }))).toEqual([2, 5]);
     });
 });

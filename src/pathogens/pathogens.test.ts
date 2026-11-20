@@ -2,18 +2,14 @@ import { Pathogen } from "./pathogen.js";
 import { describe, expect, it } from "vitest";
 import {
     CITATIONS,
-    CITATION_ORDER,
     type Cited,
-    MAX_POPULATION_GROUPS,
     NO_FATALITY,
     SUPERSPREADING_CITATION,
     baseGroupOf,
-    citationNumber,
     citationsFor,
     citationsOf,
     citedValuesOf,
     fatalityRate,
-    effectivePopulation,
     fatalityGroups,
     hasOutcomeSpecificPeriods,
     parameterValues,
@@ -71,11 +67,6 @@ describe("pathogens", () => {
         }
     });
 
-    it("hide influenza B but keep its data", () => {
-        expect(Pathogen.InfluenzaB.hidden).toBe(true);
-        expect(Pathogen.visible.map((pathogen) => pathogen.id)).not.toContain(PathogenId.InfluenzaB);
-    });
-
     it("give fatal cases their own infectious period only where a source estimates it", () => {
         const ebola = Pathogen.Ebola.values;
         expect([ebola.deathDays.value, ebola.recoveryDays.value]).toEqual([7.5, 16.4]);
@@ -87,7 +78,7 @@ describe("pathogens", () => {
 
     it("make Ebola, MERS and SARS the deadliest, far above the rest", () => {
         const deadly = [Pathogen.Ebola, Pathogen.Mers, Pathogen.Sars];
-        const others = Pathogen.visible.filter((pathogen) => !deadly.includes(pathogen)).map((pathogen) => pathogen.fatalityRate());
+        const others = Pathogen.all.filter((pathogen) => !deadly.includes(pathogen)).map((pathogen) => pathogen.fatalityRate());
         for (const pathogen of deadly) expect(pathogen.fatalityRate()).toBeGreaterThan(Math.max(...others) * 10);
     });
 });
@@ -143,11 +134,10 @@ describe("vaccination data", () => {
 });
 
 describe("population groups", () => {
-    it("can be incomplete, bounded, or not ages at all, and fit the reserved space", () => {
+    it("can be incomplete, bounded, or not ages at all", () => {
         expect(fatalityGroups(Pathogen.Pertussis).map((group) => group.id)).toEqual([Population.Infants, Population.Elderly]);
         expect(Pathogen.Sars.populations.groups.map((group) => group.ifr?.bound)).toEqual([undefined, "below", undefined, undefined, "above"]);
         expect(Pathogen.Mpox.populations.kind).toBe("group");
-        for (const pathogen of Pathogen.all) expect(fatalityGroups(pathogen).length).toBeLessThanOrEqual(MAX_POPULATION_GROUPS);
     });
 
     it('start with a base group like any other, selected by "all", whose fatality may be missing (then nobody dies)', () => {
@@ -184,27 +174,22 @@ describe("population groups", () => {
     });
 
     it("fall back to the base group (and its rate) for a group a pathogen has no data for", () => {
-        expect(effectivePopulation(Pathogen.Pertussis, Population.Adults)).toBe(Population.All);
         expect(fatalityRate(Pathogen.Pertussis, Population.Adults)).toBe(baseGroupOf(Pathogen.Pertussis).ifr!.value);
-        expect(effectivePopulation(Pathogen.Rsv, Population.Elderly)).toBe(Population.All);
         expect(fatalityRate(Pathogen.Measles, Population.All)).toBe(baseGroupOf(Pathogen.Measles).ifr!.value);
         expect(fatalityRate(Pathogen.Sars, Population.Elderly)).toBe(0.5);
     });
 });
 
-describe("reference list", () => {
-    it("numbers every visible pathogen's citations from 1, without gaps or duplicates", () => {
-        expect(new Set(CITATION_ORDER).size).toBe(CITATION_ORDER.length);
-        CITATION_ORDER.forEach((id, index) => expect(citationNumber(id)).toBe(index + 1));
-        for (const pathogen of Pathogen.visible) for (const citation of citationsOf(pathogen)) expect(CITATION_ORDER).toContain(citation);
-        expect(CITATION_ORDER).toContain(SUPERSPREADING_CITATION);
+describe("citations", () => {
+    it("list each pathogen's sources once, all in the library", () => {
+        for (const pathogen of Pathogen.all) {
+            expect(new Set(pathogen.citations).size, pathogen.id).toBe(pathogen.citations.length);
+            for (const citation of pathogen.citations) expect(CITATIONS[citation]).toBeDefined();
+        }
+        expect(CITATIONS[SUPERSPREADING_CITATION]).toBeDefined();
     });
 
-    it("leaves out citations only a hidden pathogen uses", () => {
-        expect(CITATION_ORDER).not.toContain("thompson-2022");
-    });
-
-    it("lists every citation with a URL", () => {
+    it("all have a URL", () => {
         for (const citation of Object.values(CITATIONS)) expect(citation.url).toMatch(/^https:\/\//);
     });
 });

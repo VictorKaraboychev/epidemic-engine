@@ -1,6 +1,5 @@
 import { Pathogen } from "./pathogens/pathogen.js";
 import { describe, expect, it } from "vitest";
-import { CITATION_ORDER } from "./pathogens/index.js";
 import { compileModel, vaccineSusceptibility } from "./model.js";
 import { buildNetwork } from "./network.js";
 import { seededVaccinated, vaccinatedCount, vaccinationOrder } from "./population.js";
@@ -44,6 +43,7 @@ describe("vaccination", () => {
         expect(availableFeatures(Pathogen.Sars).vaccination).toBe(false);
         expect(availableFeatures(Pathogen.Mers).vaccination).toBe(false);
         expect(availableFeatures(Pathogen.Ebola).vaccination).toBe(true);
-        for (const citation of ["tartof-2021", "fast-2022", "li-2020-vaccines", "who-immunization-2026"] as const) expect(CITATION_ORDER).toContain(citation);
+        const cited = Pathogen.all.flatMap((pathogen) => pathogen.citations);
+        for (const citation of ["tartof-2021", "fast-2022", "li-2020-vaccines", "who-immunization-2026"] as const) expect(cited).toContain(citation);
     });
 });

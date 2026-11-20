@@ -13,7 +13,6 @@ export const star = (): Network => ({
     count: 6,
     x: Float64Array.from({ length: 6 }, (_, i) => i * 10),
     y: new Float64Array(6),
-    r: new Float64Array(6).fill(3),
     edgeA: Int32Array.of(0, 0, 0, 0),
     edgeB: Int32Array.of(1, 2, 3, 4),
     edgeKind: new Uint8Array(4),

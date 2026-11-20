@@ -3,7 +3,7 @@
  * uneven contact numbers as in contact diaries and a share of distant contacts (each value cited below), and the
  * seeded orders that pick index cases and the vaccinated, so a seed and a run number replay an outbreak exactly.
  */
-import { NODE_RADIUS, type Network, buildNetwork } from "./network.js";
+import { type Network, buildNetwork } from "./network.js";
 import { seededRandom, seededOrder } from "./random.js";
 
 /** Share of the canvas the node spacing discs may cover; spacing shrinks on small canvases to fit everyone. */
@@ -13,10 +13,6 @@ const MAX_NODE_SPACING = 30;
 /** Longest contact link at full spacing and `BASE_CONTACTS` contacts each (more contacts reach further). */
 const BASE_EDGE_LENGTH = 88;
 const BASE_CONTACTS = 3;
-/** Dots shrink with spacing on crowded canvases, but never below this share of their roomy size… */
-const MIN_RADIUS_SCALE = 0.6;
-/** …unless the crowd is so dense that even that would overlap: a dot's diameter never exceeds this share of the spacing. */
-const MAX_DOT_SHARE = 0.8;
 /**
  * How much contact numbers vary with superspreading: each person's share of the usual number is gamma-distributed with
  * this shape (mean 1, coefficient of variation √2), so a few people have several times the usual contacts. A modelling
@@ -94,8 +90,6 @@ export const buildPopulationNetwork = ({ seed, world = DEFAULT_WORLD, people, co
         neighbours: contacts,
         // Denser networks need a longer reach so every node can find its nearest contacts.
         maxEdgeLength: BASE_EDGE_LENGTH * (spacing / MAX_NODE_SPACING) * Math.sqrt(Math.max(1, contacts / BASE_CONTACTS)),
-        // Smaller dots when people are packed closer.
-        radiusScale: Math.min(Math.max(MIN_RADIUS_SCALE, spacing / MAX_NODE_SPACING), (MAX_DOT_SHARE * spacing) / (2 * NODE_RADIUS.max)),
         // Everyone's contact numbers vary as in contact diaries; superspreading adds people with very many contacts
         // (gatherings), so the most infectious can infect many more than an everyday contact list.
         contactVariation: superspreading ? CONTACT_VARIATION : EVERYDAY_CONTACT_VARIATION,

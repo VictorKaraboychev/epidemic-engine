@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
 
 /**
  * MERS. R₀ below 1, so most chains die out on their own, yet hospital superspreading caused large clusters (Korea
@@ -14,7 +14,7 @@ import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, Populati
  * - No waning estimate: neutralizing antibodies persist for years in some survivors and vanish within one in others.
  * - No licensed MERS vaccine [WHO fact sheet].
  */
-export const MERS = definePathogen({
+export const MERS = {
     id: PathogenId.Mers,
     values: {
         r0: cited(0.47, "kucharski-althaus-2015", { interval: between(0.29, 0.8, IntervalKind.CI95) }),
@@ -40,4 +40,4 @@ export const MERS = definePathogen({
         ],
     },
     vaccination: { none: "who-mers-factsheet" },
-});
+} satisfies PathogenProfile<PathogenId>;

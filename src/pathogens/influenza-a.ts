@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
 
 /**
  * Seasonal influenza A.
@@ -13,7 +13,7 @@ import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, Populati
  * - Vaccine against A(H3N2), medically attended: 45% at 15–90 days, 13% at 91–180 days; half-life ≈ 46 days
  *   [Young 2018]. 47% of Americans vaccinated in 2023–24 [CDC FluVaxView].
  */
-export const INFLUENZA_A = definePathogen({
+export const INFLUENZA_A = {
     id: PathogenId.InfluenzaA,
     values: {
         r0: cited(1.28, "biggerstaff-2014", { interval: between(1.19, 1.37, IntervalKind.IQR) }),
@@ -50,4 +50,4 @@ export const INFLUENZA_A = definePathogen({
         // In-hospital death among adults 65+ hospitalised with influenza: aOR 0.39 vaccinated vs not [Arriola 2017].
         deathProtection: cited(0.61, "arriola-2017", { interval: between(0.34, 0.83, IntervalKind.CI95), caveat: Caveat.OtherSetting }),
     },
-});
+} satisfies PathogenProfile<PathogenId>;
