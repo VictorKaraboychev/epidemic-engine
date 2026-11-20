@@ -54,8 +54,9 @@
         "typecheck": "tsc -p tsconfig.json",
         "test": "vitest run",
         "validate": "VALIDATE=1 vitest run src/validation",
-        "prepack": "npm run build",
-        "format": "prettier --write ."
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "prepare": "npm run build"
     },
     "devDependencies": {
         "@types/node": "^26.6.3",
