@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
 
 /**
  * COVID-19, Omicron variant.
@@ -16,7 +16,7 @@ import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, Population
  *   ≈ 69% had completed it by mid-2022 [Fast 2022].
  */
 export const COVID_OMICRON = definePathogen({
-    id: Pathogen.CovidOmicron,
+    id: PathogenId.CovidOmicron,
     values: {
         r0: cited(9.5, "liu-rocklov-2022", { interval: between(5.5, 24, IntervalKind.Range) }),
         recoveryDays: cited(8, "boucau-2022"),

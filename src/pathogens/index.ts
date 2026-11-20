@@ -1,29 +1,11 @@
 /**
- * The diseases: one file each, every published value cited (`Cited`), citations from the shared library
- * (`citations.ts`). Add a disease by writing its file and listing it here and its id in `Pathogen`.
+ * What can be read from a pathogen's data: fatality and vaccine coverage by population group, its values by
+ * parameter, and its citations (the `Pathogen` class wraps these as methods). The built-in pathogens' data is in
+ * `data.ts`, one file each.
  */
 import type { CitationId } from "./citations.js";
-import { COVID_ANCESTRAL } from "./covid-ancestral.js";
-import { COVID_OMICRON } from "./covid-omicron.js";
-import { EBOLA } from "./ebola.js";
-import { INFLUENZA_A } from "./influenza-a.js";
-import { INFLUENZA_B } from "./influenza-b.js";
-import { MEASLES } from "./measles.js";
-import { MERS } from "./mers.js";
-import { MPOX } from "./mpox.js";
-import { PERTUSSIS } from "./pertussis.js";
-import { RSV } from "./rsv.js";
-import { SARS } from "./sars.js";
-import {
-    type Cited,
-    type PathogenProfile,
-    type Pathogen,
-    type PathogenValues,
-    type PopulationGroup,
-    Population,
-    citationsFor,
-    protectionCitations,
-} from "./types.js";
+import { PATHOGEN_DATA } from "./data.js";
+import { type Cited, type PathogenProfile, type PathogenValues, type PopulationGroup, Population, citationsFor, protectionCitations } from "./types.js";
 
 export { CITATIONS, type Citation, type CitationId } from "./citations.js";
 export * from "./types.js";
@@ -34,30 +16,6 @@ export const MAX_POPULATION_GROUPS = 4;
 
 /** The figure opens on the elderly, where age-dependent fatality is easiest to see. */
 export const DEFAULT_POPULATION: Population = Population.Elderly;
-
-/** Every disease, in display order. */
-export const PATHOGENS: PathogenProfile<Pathogen>[] = [
-    COVID_ANCESTRAL,
-    COVID_OMICRON,
-    INFLUENZA_A,
-    INFLUENZA_B,
-    RSV,
-    MEASLES,
-    PERTUSSIS,
-    MPOX,
-    SARS,
-    MERS,
-    EBOLA,
-];
-
-export const getPathogen = (id: Pathogen): PathogenProfile<Pathogen> => {
-    const pathogen = PATHOGENS.find((candidate) => candidate.id === id);
-    if (!pathogen) throw new Error(`Unknown pathogen "${id}"`);
-    return pathogen;
-};
-
-/** The diseases to offer (not `hidden`). */
-export const VISIBLE_PATHOGENS = PATHOGENS.filter((pathogen) => !pathogen.hidden);
 
 /** True when the disease gives fatal infections their own infectious period. */
 export const hasOutcomeSpecificPeriods = (pathogen: PathogenProfile) => pathogen.values.deathDays.value !== pathogen.values.recoveryDays.value;
@@ -170,6 +128,8 @@ export const CONTACTS_CITATION: CitationId = "mossong-2008";
  * Citations in order of first use, so reference numbers read 1, 2, 3… down the disease list. Only visible diseases
  * (not `hidden`) contribute, so the list never cites a hidden one.
  */
-export const CITATION_ORDER: CitationId[] = [...new Set([...VISIBLE_PATHOGENS.flatMap(citationsOf), SUPERSPREADING_CITATION, CONTACTS_CITATION])];
+export const CITATION_ORDER: CitationId[] = [
+    ...new Set([...PATHOGEN_DATA.filter((pathogen) => !pathogen.hidden).flatMap(citationsOf), SUPERSPREADING_CITATION, CONTACTS_CITATION]),
+];
 
 export const citationNumber = (id: CitationId) => CITATION_ORDER.indexOf(id) + 1;

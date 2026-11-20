@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
 
 /**
  * MERS. R₀ below 1, so most chains die out on their own, yet hospital superspreading caused large clusters (Korea
@@ -15,7 +15,7 @@ import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, Population
  * - No licensed MERS vaccine [WHO fact sheet].
  */
 export const MERS = definePathogen({
-    id: Pathogen.Mers,
+    id: PathogenId.Mers,
     values: {
         r0: cited(0.47, "kucharski-althaus-2015", { interval: between(0.29, 0.8, IntervalKind.CI95) }),
         recoveryDays: cited(14, "sha-2017", { caveat: Caveat.ClinicalDuration }),

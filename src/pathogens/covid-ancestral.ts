@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
 
 /**
  * COVID-19, ancestral strain, before vaccines.
@@ -15,7 +15,7 @@ import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, Population
  *   completed the primary series by mid-2022 [Fast 2022].
  */
 export const COVID_ANCESTRAL = definePathogen({
-    id: Pathogen.CovidAncestral,
+    id: PathogenId.CovidAncestral,
     values: {
         r0: cited(2.79, "liu-2020"),
         recoveryDays: cited(8, "he-2020"),

@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
 
 /**
  * Measles.
@@ -15,7 +15,7 @@ import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, Population
  *   generations fill the dense local clusters; within 40% rather than the usual 25%.
  */
 export const MEASLES = definePathogen({
-    id: Pathogen.Measles,
+    id: PathogenId.Measles,
     values: {
         r0: cited(15, "guerra-2017", { interval: between(12, 18, IntervalKind.Range) }),
         recoveryDays: cited(8, "cdc-measles"),

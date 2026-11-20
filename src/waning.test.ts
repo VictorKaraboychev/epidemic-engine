@@ -1,8 +1,7 @@
-import { Pathogen } from "./pathogens/types.js";
 import { Population } from "./pathogens/types.js";
+import { Pathogen } from "./pathogens/pathogen.js";
 import { describe, expect, it } from "vitest";
 import { deterministicCurve } from "./deterministic.js";
-import { getPathogen } from "./pathogens/index.js";
 import { compileModel, ratesFor, waningSusceptibility } from "./model.js";
 import { buildNetwork } from "./network.js";
 import { pathogenParams } from "./presets.js";
@@ -91,7 +90,7 @@ describe("waning fitted to published protection", () => {
     const protection = (halfLife: number, delay: number) => (days: number) => 1 - waningSusceptibility(halfLife, delay)(days);
 
     it("matches Omicron's measured protection with its full-protection period, and wouldn't without it", () => {
-        const { delay, halfLife } = getPathogen(Pathogen.CovidOmicron).immunity!;
+        const { delay, halfLife } = Pathogen.CovidOmicron.immunity!;
         const omicron = protection(halfLife!.value, delay!.value);
         // Chemaitelly 2025: ≈ 81% at 3–6 months, ≈ 28% at 9–12 months.
         expect(omicron(137)).toBeCloseTo(0.81, 1);
@@ -102,14 +101,14 @@ describe("waning fitted to published protection", () => {
     });
 
     it("matches RSV's measured protection", () => {
-        const { delay, halfLife } = getPathogen(Pathogen.Rsv).immunity!;
+        const { delay, halfLife } = Pathogen.Rsv.immunity!;
         const rsv = protection(halfLife!.value, delay!.value);
         expect(rsv(91)).toBeCloseTo(0.7, 1);
         expect(rsv(274)).toBeCloseTo(0.19, 1);
     });
 
     it("resets the delay for presets that don't publish one", () => {
-        expect(pathogenParams(getPathogen(Pathogen.CovidOmicron), Population.All).immunityDelay).toBe(100);
-        expect(pathogenParams(getPathogen(Pathogen.CovidAncestral), Population.All).immunityDelay).toBe(0);
+        expect(pathogenParams(Pathogen.CovidOmicron, Population.All).immunityDelay).toBe(100);
+        expect(pathogenParams(Pathogen.CovidAncestral, Population.All).immunityDelay).toBe(0);
     });
 });

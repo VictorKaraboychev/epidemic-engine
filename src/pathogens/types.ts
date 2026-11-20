@@ -1,7 +1,7 @@
 import type { CitationId } from "./citations.js";
 
 /** The pathogens with cited data, by id (each has a file in this folder, listed in `index.ts`). A UI names each one. */
-export enum Pathogen {
+export enum PathogenId {
     CovidAncestral = "covid-ancestral",
     CovidOmicron = "covid-omicron",
     InfluenzaA = "influenza-a",
@@ -87,7 +87,7 @@ export enum Bound {
 
 /**
  * A number with the source it comes from and what else the source says about it. Values you set yourself
- * (`createPathogen`) have no source.
+ * (`new Pathogen({ … })`) have no source.
  */
 export interface Cited {
     value: number;
@@ -255,11 +255,11 @@ export type Vaccination =
       };
 
 /**
- * Everything known about a pathogen. The built-in ones (`getPathogen(Pathogen.Measles)`) are cited throughout; make
- * your own with `createPathogen`, or by changing a built-in one (`{ ...getPathogen(Pathogen.Measles), contacts: 12 }`).
+ * A pathogen's data, as plain objects (what the `Pathogen` class holds, and `pathogen.profile()` gives back). The
+ * built-in ones are cited throughout.
  */
 export interface PathogenProfile<Id extends string = string> {
-    /** A `Pathogen` for the built-in ones; any name for your own. */
+    /** A `PathogenId` for the built-in ones; any name for your own. */
     id: Id;
     values: PathogenValues;
     /**
@@ -282,4 +282,4 @@ export interface PathogenProfile<Id extends string = string> {
 }
 
 /** Typed identity: lets each built-in pathogen's file be checked against `PathogenProfile` where it is written. */
-export const definePathogen = (pathogen: PathogenProfile<Pathogen>) => pathogen;
+export const definePathogen = (pathogen: PathogenProfile<PathogenId>) => pathogen;

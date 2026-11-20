@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
 
 /**
  * Respiratory syncytial virus. Reinfection is common throughout life, so it's the disease where waning immunity matters
@@ -17,7 +17,7 @@ import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, Population
  *   the second [Ison 2024]; half-life ≈ 445 days. ≈ 40% of Americans 75+ vaccinated by late 2024 [Kriss 2024].
  */
 export const RSV = definePathogen({
-    id: Pathogen.Rsv,
+    id: PathogenId.Rsv,
     values: {
         r0: cited(3.0, "reis-2016", { interval: between(1.5, 4, IntervalKind.Range) }),
         recoveryDays: cited(6.4, "reis-2016"),

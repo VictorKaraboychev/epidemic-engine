@@ -1,7 +1,6 @@
-import { Pathogen } from "./pathogens/types.js";
 import { Population } from "./pathogens/types.js";
+import { Pathogen } from "./pathogens/pathogen.js";
 import { describe, expect, it } from "vitest";
-import { getPathogen } from "./pathogens/index.js";
 import { EdgeKind, buildNetwork, degreeOf, neighboursOf } from "./network.js";
 import { HOUSEHOLD_SIZES, HOUSEHOLD_WEIGHT } from "./population.js";
 import { pathogenParams } from "./presets.js";
@@ -41,8 +40,8 @@ describe("infectiousness profile", () => {
     });
 
     it("comes from the presets: fitted where published intervals call for it, flat (an infinite half-life) otherwise", () => {
-        expect(pathogenParams(getPathogen(Pathogen.CovidAncestral), Population.All)).toMatchObject({ recoveryDays: 8, infectiousnessHalfLife: 1.3 });
-        expect(pathogenParams(getPathogen(Pathogen.Measles), Population.All).infectiousnessHalfLife).toBe(Infinity);
+        expect(pathogenParams(Pathogen.CovidAncestral, Population.All)).toMatchObject({ recoveryDays: 8, infectiousnessHalfLife: 1.3 });
+        expect(pathogenParams(Pathogen.Measles, Population.All).infectiousnessHalfLife).toBe(Infinity);
     });
 });
 

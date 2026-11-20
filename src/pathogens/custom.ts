@@ -1,6 +1,6 @@
 /**
- * Your own pathogens, from plain numbers: `createPathogen({ id: "my-flu", r0: 1.8, latentDays: 2, recoveryDays: 5 })`.
- * The result works wherever a built-in one does (`new Outbreak({ pathogen })`, `pathogenParams`, …).
+ * Your own pathogens, from plain numbers: `new Pathogen({ id: "my-flu", r0: 1.8, latentDays: 2, recoveryDays: 5 })`
+ * reads a `PathogenSpec` into the same data the built-in ones have (`profileFromSpec`).
  */
 import { FatalityMeasure, type PathogenProfile, Population, PopulationKind, type Protection } from "./types.js";
 
@@ -74,8 +74,8 @@ const protectionOf = (name: string, spec: ProtectionSpec): Protection => {
     return effects;
 };
 
-/** A pathogen from your own numbers (checked: periods positive, shares between 0 and 1). Its values have no sources. */
-export const createPathogen = (spec: PathogenSpec): PathogenProfile => {
+/** A pathogen's data from your own numbers (checked: periods positive, shares between 0 and 1). Its values have no sources. */
+export const profileFromSpec = (spec: PathogenSpec): PathogenProfile => {
     for (const key of ["r0", "recoveryDays", "deathDays", "latentDays", "latentVariation", "infectiousnessHalfLife", "contacts", "dispersion"] as const)
         positive(key, spec[key]);
     share("ifr", spec.ifr);

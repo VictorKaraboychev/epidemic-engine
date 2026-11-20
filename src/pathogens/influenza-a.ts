@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
 
 /**
  * Seasonal influenza A.
@@ -14,7 +14,7 @@ import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, Population
  *   [Young 2018]. 47% of Americans vaccinated in 2023–24 [CDC FluVaxView].
  */
 export const INFLUENZA_A = definePathogen({
-    id: Pathogen.InfluenzaA,
+    id: PathogenId.InfluenzaA,
     values: {
         r0: cited(1.28, "biggerstaff-2014", { interval: between(1.19, 1.37, IntervalKind.IQR) }),
         recoveryDays: cited(5, "cdc-flu"),

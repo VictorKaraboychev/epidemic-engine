@@ -1,4 +1,4 @@
-import { Bound, Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
 
 /**
  * Seasonal influenza B. Hidden: in this model it behaves almost exactly like influenza A (R 1.23 vs 1.28, same
@@ -12,7 +12,7 @@ import { Bound, Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, Pop
  * - Vaccine against influenza B: 62% at 15–90 days, 43% at 91–180 days; half-life ≈ 157 days [Young 2018].
  */
 export const INFLUENZA_B = definePathogen({
-    id: Pathogen.InfluenzaB,
+    id: PathogenId.InfluenzaB,
     values: {
         r0: cited(1.23, "thompson-2022", { interval: between(1.06, 1.58, IntervalKind.Range), caveat: Caveat.Proxy }),
         recoveryDays: cited(5, "cdc-flu"),

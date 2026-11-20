@@ -1,4 +1,4 @@
-import { Bound, Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
 
 /**
  * Pertussis (whooping cough). Highly contagious, infectious for weeks, and immunity after infection fades over decades.
@@ -17,7 +17,7 @@ import { Bound, Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, Pop
  *   fit: early efficacy is near 1) [Misegades 2012]. ≈ 81% of US toddlers had 4 doses by age 2 [Hill 2026].
  */
 export const PERTUSSIS = definePathogen({
-    id: Pathogen.Pertussis,
+    id: PathogenId.Pertussis,
     values: {
         r0: cited(5.5, "kretzschmar-2010", { interval: between(5, 6, IntervalKind.Range) }),
         recoveryDays: cited(15, "wearing-rohani-2009", { also: ["cdc-pinkbook-pertussis"] }),

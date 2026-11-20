@@ -57,14 +57,14 @@ new Outbreak({
 });
 ```
 
-**Your own pathogen.** `createPathogen` takes plain numbers; the result works anywhere a built-in one does. Each
-optional part switches on its feature: `latentDays` the latent period, `immunity` waning, `vaccine` vaccination,
-`dispersion` superspreading.
+**Your own pathogen.** `new Pathogen({ … })` takes plain numbers; it works anywhere a built-in one does. Each optional
+part switches on its feature: `latentDays` the latent period, `immunity` waning, `vaccine` vaccination, `dispersion`
+superspreading.
 
 ```ts
-import { Outbreak, Pathogen, createPathogen, getPathogen } from "epidemic-engine";
+import { Outbreak, Pathogen, Population } from "epidemic-engine";
 
-const myFlu = createPathogen({
+const myFlu = new Pathogen({
     id: "my-flu",
     r0: 1.8,
     latentDays: 2,
@@ -76,7 +76,20 @@ const myFlu = createPathogen({
 new Outbreak({ pathogen: myFlu, vaccination: true, waning: true }).run();
 
 // Or change a built-in one:
-new Outbreak({ pathogen: { ...getPathogen(Pathogen.Measles), contacts: 12 } });
+new Outbreak({ pathogen: Pathogen.Measles.with({ contacts: 12 }) });
+```
+
+**Reading a pathogen.** Each one has its data and what follows from it:
+
+```ts
+Pathogen.Measles.r0; // 15
+Pathogen.Measles.features; // { exposed: true, waning: true, vaccination: true, superspreading: true }
+Pathogen.CovidAncestral.fatalityRate(Population.Elderly); // 0.046
+Pathogen.Measles.vaccineCoverage(); // 0.77
+Pathogen.Measles.params(); // the model parameters it sets
+Pathogen.Measles.values.r0; // { value: 15, citation: "guerra-2017", interval: { low: 12, high: 18, kind: "range" } }
+Pathogen.get("measles"); // by id, e.g. from a URL (`PathogenId.Measles`)
+Pathogen.all; // every built-in one
 ```
 
 The transmission rate is always solved for `r0` on the network. For a one-off, skip the pathogen and pass `r0` and
@@ -119,8 +132,8 @@ number of people infected (`offspring`); `outbreak.network` has their positions 
 | `Mers`                | 0.47 | 5 d    | 14 d (fatal: 11.5 d)   | 37% per case             |        |         | ✓              |
 | `Ebola`               | 1.83 | 11.4 d | 16.4 d (fatal: 7.5 d)  | 50% per case             |        | ✓       | ✓              |
 
-Every value is cited (`getPathogen(id)` has them with their sources, intervals and caveats). Your own pathogens
-(`createPathogen`) don't need sources. Fatality rates are
+Every value is cited (`Pathogen.Measles.values` has them with their sources, intervals and caveats;
+`Pathogen.Measles.citations` lists the sources). Your own pathogens don't need sources. Fatality rates are
 also given for population groups (`Population.Elderly`, `Population.Infants`, …) where published. A pathogen without
 the data for a feature throws if you ask for it.
 
@@ -128,18 +141,19 @@ the data for a feature throws if you ask for it.
 
 `Outbreak` is a thin layer over functions you can use directly, e.g. to define your own compartmental model:
 
-| Area        | Main exports                                                                                                                                            |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Start here  | `Outbreak`, `OutbreakOptions`, `OutbreakSummary`                                                                                                        |
-| Pathogens   | `Pathogen`, `Population`, `getPathogen`, `createPathogen`, `pathogenParams`, `availableFeatures`, `PATHOGENS`, `CITATIONS`, `citationsOf`, `Caveat`     |
-| Populations | `buildPopulationNetwork` (households, everyday and distant contacts, optional gatherings), `buildNetwork`, seeded `indexCaseOrder` / `vaccinationOrder` |
-| Models      | `seirdModel` (SEIRD with optional waning immunity and vaccination), `seirdParams`, `SeirdCompartment`, or any `CompartmentModel`                        |
-| Runs        | `solveTransmission`, `createEpidemic` + `advanceEpidemic` (event-driven) or `stepEpidemic`, `deterministicCurve`, `calibrateTheory`                     |
-| Measures    | `estimateR0`, `reproductionCurve`, `infectionTimeline`, `outbreakSummary`, the daily `History`                                                          |
-| Randomness  | `seededRandom`, `randomSeed`                                                                                                                            |
+| Area        | Main exports                                                                                                                                                                    |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Start here  | `Outbreak`, `OutbreakOptions`, `OutbreakSummary`                                                                                                                                |
+| Pathogens   | `Pathogen` (`Pathogen.Measles`, `new Pathogen({ … })`, `.with()`, `.params()`, `.features`, `.fatalityRate()`, `.citations`), `PathogenId`, `Population`, `CITATIONS`, `Caveat` |
+| Populations | `buildPopulationNetwork` (households, everyday and distant contacts, optional gatherings), `buildNetwork`, seeded `indexCaseOrder` / `vaccinationOrder`                         |
+| Models      | `seirdModel` (SEIRD with optional waning immunity and vaccination), `seirdParams`, `SeirdCompartment`, or any `CompartmentModel`                                                |
+| Runs        | `solveTransmission`, `createEpidemic` + `advanceEpidemic` (event-driven) or `stepEpidemic`, `deterministicCurve`, `calibrateTheory`                                             |
+| Measures    | `estimateR0`, `reproductionCurve`, `infectionTimeline`, `outbreakSummary`, the daily `History`                                                                                  |
+| Randomness  | `seededRandom`, `randomSeed`                                                                                                                                                    |
 
 Conventions: times are in days; shares are 0–1; lifelong protection and flat infectiousness are `Infinity`. Ids are
-enums (`Pathogen.Measles`, `Population.Elderly`, `Caveat.Proxy`); a UI supplies the words.
+enums (`PathogenId.Measles`, `Population.Elderly`, `Caveat.Proxy`); a UI supplies the words. A `Pathogen` is a class:
+to send one to a worker, send its id or `pathogen.profile()` (plain data) and rebuild it there.
 
 ## The model
 
@@ -169,8 +183,8 @@ npm run validate     # every pathogen on 20,000 people, against the literature (
 
 CI runs the checks on Node 20, 22 and 24, and the validation, on every pull request.
 
-Pathogens live in `src/pathogens/`, one file each (`definePathogen`), listed in `pathogens/index.ts` with its id in
-the `Pathogen` enum. Every published value is `cited(value, citationId, details?)`, citing an entry in
+Pathogens live in `src/pathogens/`, one file each (`definePathogen`), listed in `pathogens/data.ts`, with an id in
+`PathogenId` and a static member on `Pathogen`. Every published value is `cited(value, citationId, details?)`, citing an entry in
 `src/pathogens/citations.ts`; `pathogens.test.ts` checks every value is cited and inside its published interval.
 
 ## Data and citations

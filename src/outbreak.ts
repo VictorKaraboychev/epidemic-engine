@@ -12,8 +12,8 @@ import { type Theory, deterministicCurve } from "./deterministic.js";
 import { type History, appendDay, peakInfections, seriesOf, startHistory } from "./history.js";
 import { type CompiledModel, type Rates, SeirdCompartment, compileModel, ratesFor } from "./model.js";
 import type { Network } from "./network.js";
-import { type PathogenProfile, Population, getPathogen } from "./pathogens/index.js";
-import type { Pathogen } from "./pathogens/types.js";
+import { Population } from "./pathogens/index.js";
+import type { Pathogen } from "./pathogens/pathogen.js";
 import { buildPopulationNetwork, indexCaseOrder, luckSeed, seededIndexCases, seededVaccinated, vaccinatedCount, vaccinationOrder } from "./population.js";
 import { availableFeatures, pathogenParams, solveTransmission } from "./presets.js";
 import { estimateR0 } from "./r0.js";
@@ -24,10 +24,10 @@ import { type EpidemicState, createEpidemic, infectedCount, advanceEpidemic } fr
 
 export interface OutbreakOptions {
     /**
-     * A built-in pathogen (`Pathogen.Measles`), or your own (`createPathogen({ … })`, or a changed copy of a built-in
-     * one). Omit it to set everything with `params` and `r0` (or `params.beta`).
+     * A built-in pathogen (`Pathogen.Measles`), your own (`new Pathogen({ … })`), or a changed copy of a built-in one
+     * (`Pathogen.Measles.with({ contacts: 12 })`). Omit it to set everything with `params` and `r0` (or `params.beta`).
      */
-    pathogen?: Pathogen | PathogenProfile;
+    pathogen?: Pathogen;
     /** Whose fatality rate and vaccine coverage to use. Default `Population.All` (the pathogen's base group). */
     population?: Population;
     /** People in the network. Default 10,000. */
@@ -82,7 +82,7 @@ const DEFAULT_DISPERSION = 0.3;
 /** A stochastic outbreak on a contact network: set up from options, advanced a day at a time. */
 export class Outbreak {
     /** The pathogen's data, or null when the parameters were set by hand. */
-    readonly pathogen: PathogenProfile | null;
+    readonly pathogen: Pathogen | null;
     readonly seed: number;
     readonly features: ModelFeatures;
     readonly model: SeirdModel;
@@ -101,7 +101,7 @@ export class Outbreak {
     private record: History;
 
     constructor(options: OutbreakOptions = {}) {
-        const pathogen = typeof options.pathogen === "string" ? getPathogen(options.pathogen) : (options.pathogen ?? null);
+        const pathogen = options.pathogen ?? null;
         const population = options.population ?? Population.All;
         const people = options.people ?? 10_000;
         const seed = options.seed ?? randomSeed();

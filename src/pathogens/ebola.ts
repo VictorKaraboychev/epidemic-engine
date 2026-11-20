@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
 
 /**
  * Ebola virus disease, West Africa 2014. The one disease where deaths dominate, and where fatal cases have their own
@@ -13,7 +13,7 @@ import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, Population
  *   trial; about half of contacts in rings were vaccinated at once [Henao-Restrepo 2017]. No waning estimate.
  */
 export const EBOLA = definePathogen({
-    id: Pathogen.Ebola,
+    id: PathogenId.Ebola,
     values: {
         r0: cited(1.83, "who-ebola-nejm-2014", { interval: between(1.71, 2.02, IntervalKind.Range) }),
         recoveryDays: cited(16.4, "who-ebola-nejm-2014"),
