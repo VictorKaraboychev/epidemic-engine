@@ -36,7 +36,16 @@ export {
     type ProtectionSpec,
     type Vaccination,
 } from "./pathogens/index.js";
-export { DEFAULT_CONTACTS, Population, type PopulationOptions, type PopulationProfile } from "./population.js";
+export {
+    DEFAULT_CONTACTS,
+    type Figure,
+    Population,
+    type PopulationBuildOptions,
+    type PopulationData,
+    type PopulationOptions,
+    type PopulationProfile,
+} from "./population.js";
+export { networkFromContacts } from "./network.js";
 export {
     type ModelFeatures,
     type ProtectionParams,

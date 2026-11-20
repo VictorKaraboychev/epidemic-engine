@@ -34,7 +34,7 @@ import { Outbreak, Pathogen, SeirdCompartment } from "epidemic-engine";
 
 const outbreak = new Outbreak({ pathogen: Pathogen.Measles, people: 20_000, seed: 1 });
 outbreak.run();
-// { days: 88, over: true, everInfected: 20000, attackRate: 1, deaths: 42, peak: { day: 47, infected: 17421 } }
+// { days: 83, over: true, everInfected: 20000, attackRate: 1, deaths: 34, peak: { day: 44, infected: 17346 } }
 
 outbreak.count(SeirdCompartment.Recovered); // people recovered at the end
 outbreak.series(SeirdCompartment.Infected); // infected people, day by day
@@ -50,8 +50,8 @@ separating the outbreaks that took off from those that fizzled.
 import { runOutbreaks } from "epidemic-engine";
 
 const result = runOutbreaks({ pathogen: Pathogen.CovidAncestral, people: 20_000, runs: 100, seed: 1 });
-result.fizzled; // 0.04: the share that died out early
-result.major!.deaths; // { median: 205, low: 178, high: 233, mean: 205 }: the middle 95% of runs
+result.fizzled; // 0.06: the share that died out early
+result.major!.deaths; // { median: 202, low: 179, high: 230, mean: 202 }: the middle 95% of runs
 runOutbreaks({ pathogen: Pathogen.CovidAncestral, people: 20_000, runs: 100, uncertainty: true }); // values drawn from their published intervals too
 ```
 
@@ -91,7 +91,7 @@ new Outbreak({ pathogen: Pathogen.Measles.with({ contacts: 12 }) }); // or chang
 ```
 
 **Interventions.** `setParams()` changes parameters from the next day. Halving transmission on day 30 (COVID-19,
-50,000 people) cuts the share infected from 89% to 57%:
+50,000 people) cuts the share infected from 89% to 59%:
 
 ```ts
 const outbreak = new Outbreak({ pathogen: Pathogen.CovidAncestral, people: 50_000, initialCases: 10 });
@@ -128,7 +128,7 @@ population.describe();
 // 50,000 people, modelled on United States, 2024.
 // Ages: drawn from single-year counts [census-ages-2024], every household with an adult.
 // Households: 21,144, of the sizes given [census-households-2024]; infection passes 3.5× as readily within them [madewell-2020].
-// Contacts: 8 each on average, mostly neighbours, 18% with anyone [fu-2012], uneven as in contact diaries [fu-2012].
+// Contacts: 8 each on average, mostly neighbours, 18% with anyone [fu-2012]; as uneven as a coefficient of variation of 0.74 [fu-2012].
 new Outbreak({ pathogen: Pathogen.CovidAncestral, population }); // reuse it across outbreaks
 ```
 
@@ -138,19 +138,62 @@ new Outbreak({ pathogen: Pathogen.CovidAncestral, population }); // reuse it acr
 - **Households**: of US census sizes (table HH-4, 2024), everyone in one linked to everyone else in it, and infection
   passes 3.5× as readily within them (secondary attack rates of 16.6% vs 4.8%; Madewell et al. 2020).
 - **Everyday contacts**: people are placed in an area and linked to their nearest neighbours, 18% of contacts instead
-  with anyone (Fu et al. 2012); how many contacts people have varies as in contact diaries (coefficient of variation
-  ≈ 0.74; Fu et al. 2012, as POLYMOD finds across Europe). With superspreading, it varies far more: gatherings.
+  with anyone (Fu et al. 2012); how many contacts people have varies at random, with the coefficient of variation
+  contact diaries find (0.74; Fu et al. 2012, as POLYMOD finds across Europe) at any number of contacts. With
+  superspreading, it varies far more: gatherings.
 - **Fatality by age**: in an age band a pathogen's data covers, that band's rate; between rates published at single
   ages (COVID-19: 1, 25, 55, 75), log-linear, as fatality rises roughly exponentially with age (Levin et al. 2020),
   extended ten years past the oldest and then held; otherwise the overall rate. Deaths in the same COVID-19 outbreak
-  among 50,000 people: 500 by age, 2,050 if everyone had the elderly's rate.
+  among 50,000 people: 468 by age, 2,140 if everyone had the elderly's rate.
 - **Vaccination by age**, where coverage was published by age (RSV: 75 and over only); otherwise everyone at the
   pathogen's coverage.
-- Contacts don't depend on age (households mix ages; schools and workplaces aren't modelled), and transmission
-  doesn't either.
+- Who meets whom doesn't depend on age beyond households: no schools, workplaces or contact matrix (see below).
 
-For another country or setting, write a `PopulationProfile` with its own age counts, household sizes and contact
-data.
+**Your own profile.** For another country or setting, write a `PopulationProfile`; figures are plain numbers or cited
+ones (`cited(3.5, "madewell-2020")`):
+
+```ts
+const village = new Population({
+    people: 5_000,
+    contacts: 10,
+    profile: {
+        name: "A young village",
+        ages: { counts: [5, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 1, 1] }, // people by single year of age; the last: that age and older
+        households: { shares: [0.05, 0.1, 0.15, 0.2, 0.2, 0.15, 0.15], transmission: 3 }, // share of households of 1, 2, 3, … people
+        contacts: { cv: 0.6, distantShare: 0.05 }, // contacts' coefficient of variation, and the share with anyone
+    },
+});
+```
+
+Or start from a built-in one: `{ ...Population.US_2024, contacts: { ...Population.US_2024.contacts, distantShare: 0 } }`.
+
+**Your own people.** Bring who meets whom (and ages, if you have them) from your own data, e.g. a synthetic population:
+
+```ts
+const ring = Population.fromContacts({
+    people: 6,
+    contacts: [
+        [0, 1],
+        [1, 2],
+        [2, 0],
+        [3, 4],
+        [4, 5],
+        [5, 3],
+        [2, 3],
+    ], // pairs of people who meet
+    households: [0, 0, 0, 1, 1, 1], // optional: each person's household (-1: none)
+    householdTransmission: 3,
+    ages: [40, 38, 9, 71, 70, 45], // optional
+});
+```
+
+**Why no contact matrix.** Age-structured contact matrices (POLYMOD; Mossong et al. 2008) say who meets whom by age:
+teenagers average 18 contacts a day, people over 70 seven. Scaling each person's contacts by their age alone doesn't
+reproduce that on a network: contacts are mutual and neighbours are of every age, so it gave teenagers only 1.5× the
+contacts of people over 70 (POLYMOD: 2.6×) and moved attack rates by age by 1–2 points. Reproducing it needs settings
+or age-matched pairing (schools, workplaces), which is a larger model change: worth it for school closures or
+age-targeted vaccination, which the engine doesn't model yet. For outbreaks like these it changes little: COVID-19
+infects about 90% of every age either way.
 
 ## Pathogens
 

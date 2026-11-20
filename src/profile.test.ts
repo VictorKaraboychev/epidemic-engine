@@ -5,7 +5,7 @@ import { EdgeKind, buildNetwork, degreeOf, neighboursOf } from "./network.js";
 import { US_2024 } from "./population.js";
 
 const HOUSEHOLD_SIZES = US_2024.households!.shares;
-const HOUSEHOLD_WEIGHT = US_2024.households!.transmission.value;
+const HOUSEHOLD_WEIGHT = (US_2024.households!.transmission as { value: number }).value;
 import { pathogenParams } from "./presets.js";
 import { infectionTimeline, infectiousnessAfterInfection } from "./profile.js";
 import { seededRandom } from "./random.js";

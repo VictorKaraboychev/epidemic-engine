@@ -17,7 +17,9 @@ break the API, and a patch version (0.2.0 → 0.2.1) doesn't.
 - `Pathogen` class: built-in pathogens as static members (`Pathogen.Measles`), your own with `new Pathogen({ … })`
   from plain numbers, `with()` for a changed copy, and `params()`, `features`, `fatalityRate()`, `fatalityAt(age)`,
   `vaccineCoverage()`, `vaccineCoverageAt(age)`, `citations`, `r0`, `profile()`.
-- `Population` class, built from a `PopulationProfile` (`Population.US_2024` by default, every input cited): each person has an
+- `Population` class, built from a `PopulationProfile` (`Population.US_2024` by default, every input cited; figures as
+  plain numbers or cited, contact unevenness as a coefficient of variation, met at any number of contacts) or from
+  your own data (`new Population({ network, ages })`, `Population.fromContacts`, `networkFromContacts`): each person has an
   age from the 2024 census estimates (every household with an adult), households of census sizes, uneven and distant
   contacts, and gatherings with superspreading; `describe()` says how it's modelled.
 - Fatality by each person's age (published age bands, or log-linear between published ages) and vaccination by age

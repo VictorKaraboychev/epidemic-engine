@@ -29,10 +29,9 @@ export const US_2024: PopulationProfile = {
         transmission: cited(3.5, "madewell-2020"),
     },
     contacts: {
-        // How uneven contact numbers are: each person seeks a gamma-distributed share of the mean with this shape, so the
-        // network's degrees (households included) have a coefficient of variation of ≈ 0.74, as in a representative
-        // contact-diary study (mean 12.5 contacts a day, SD 9.3). POLYMOD finds similar unevenness across Europe.
-        variation: cited(0.32, "fu-2012", { also: ["mossong-2008"] }),
+        // How uneven contact numbers are: a coefficient of variation of ≈ 0.74 (mean 12.5 contacts a day, SD 9.3) in a
+        // representative contact-diary study; POLYMOD finds similar unevenness across Europe.
+        cv: cited(0.74, "fu-2012", { setting: "Taiwan (representative contact diaries)", also: ["mossong-2008"] }),
         // 18% of contacts are with people over 10 km from home: the rest are neighbours.
         distantShare: cited(0.18, "fu-2012"),
     },
