@@ -220,7 +220,7 @@ export class Population {
                     `infection passes ${profile.households.transmission.value}× as readily within them [${profile.households.transmission.citation ?? "your data"}].`,
             );
         lines.push(
-            `Contacts: ${this.contacts} a day on average with neighbours, ${Math.round(profile.contacts.distantShare.value * 100)}% with anyone ` +
+            `Contacts: ${this.contacts} each on average, mostly neighbours, ${Math.round(profile.contacts.distantShare.value * 100)}% with anyone ` +
                 `[${profile.contacts.distantShare.citation ?? "your data"}], uneven as in contact diaries [${profile.contacts.variation.citation ?? "your data"}]` +
                 (this.superspreading ? `, far more so with gatherings (superspreading).` : `.`),
         );
