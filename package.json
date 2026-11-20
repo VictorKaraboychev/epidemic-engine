@@ -2,7 +2,7 @@
     "name": "epidemic-engine",
     "version": "0.1.0",
     "private": true,
-    "description": "Stochastic epidemics on contact networks of up to a million people, with a deterministic reference and pathogens set from published estimates (every value cited). No dependencies.",
+    "description": "Stochastic epidemics on contact networks of up to a million people, with a deterministic reference and pathogens set from published estimates (every value cited).",
     "keywords": [
         "epidemic",
         "epidemiology",
@@ -54,13 +54,17 @@
         "typecheck": "tsc -p tsconfig.json",
         "test": "vitest run",
         "validate": "VALIDATE=1 vitest run src/validation",
-        "prepack": "npm run build",
-        "format": "prettier --write ."
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "prepare": "npm run build"
     },
     "devDependencies": {
         "@types/node": "^26.6.3",
         "prettier": "^3.10.1",
         "typescript": "^6.0.3",
         "vitest": "^5.1.0"
+    },
+    "dependencies": {
+        "pure-rand": "^8.4.2"
     }
 }

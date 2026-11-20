@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { mulberry32 } from "./random.js";
+import { seededRandom } from "./random.js";
 import { SpatialGrid } from "./spatial-grid.js";
 
-const random = mulberry32(1);
+const random = seededRandom(1);
 const XS = Float64Array.from({ length: 500 }, () => random() * 400);
 const YS = Float64Array.from({ length: 500 }, () => random() * 300);
 const within = (x: number, y: number, radius: number) => [...XS.keys()].filter((i) => Math.hypot(XS[i] - x, YS[i] - y) <= radius);

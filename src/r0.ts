@@ -5,7 +5,7 @@
  * or died), weighted by their shares; only time in infectious compartments can transmit.
  */
 import { type CompartmentModel, type ModelParams, atLeastOneDay, compileModel, exitShares, infectiousnessTable, stayDistribution, stayShape } from "./model.js";
-import { gammaMeanOne, mulberry32 } from "./random.js";
+import { gammaMeanOne, seededRandom } from "./random.js";
 import { type ReproductionCurve, reproductionAt } from "./reproduction.js";
 
 /** Total relative infectiousness over the first `days` days of a stay (the sum of days 0…days − 1). */
@@ -75,7 +75,7 @@ const samples = new Map<number, Float64Array>();
 const infectiousnessSample = (dispersion: number) => {
     let sample = samples.get(dispersion);
     if (!sample) {
-        const random = mulberry32(0x5eed);
+        const random = seededRandom(0x5eed);
         const perBin = 64;
         const draws = Float64Array.from({ length: INFECTIOUSNESS_BINS * perBin }, () => gammaMeanOne(random, dispersion)).sort();
         sample = Float64Array.from(

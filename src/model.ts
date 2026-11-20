@@ -11,7 +11,7 @@
  * Infection is separate: each day every infectious person infects each contact with probability β × the contact's
  * `susceptibility`, moving them to `infectionEntry`.
  */
-import { type Random, gammaMeanOne, mulberry32 } from "./random.js";
+import { type Random, gammaMeanOne, seededRandom } from "./random.js";
 
 /** Daily transmission probability per contact, plus whatever the model's exits and susceptibilities read. */
 export interface ModelParams {
@@ -285,7 +285,7 @@ const stayQuantiles = new Map<number, Float64Array>();
 export const stayQuantilesFor = (shape: number) => {
     let quantiles = stayQuantiles.get(shape);
     if (!quantiles) {
-        const random = mulberry32(0x57a9);
+        const random = seededRandom(0x57a9);
         const draws = Float64Array.from({ length: 64 * 256 }, () => gammaMeanOne(random, shape)).sort();
         quantiles = Float64Array.from({ length: 64 }, (_, bin) => draws.subarray(bin * 256, (bin + 1) * 256).reduce((sum, value) => sum + value, 0) / 256);
         const mean = quantiles.reduce((sum, value) => sum + value, 0) / quantiles.length;

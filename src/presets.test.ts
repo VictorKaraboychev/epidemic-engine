@@ -2,17 +2,17 @@ import { Population } from "./pathogens/types.js";
 import { Pathogen } from "./pathogens/types.js";
 import { describe, expect, it } from "vitest";
 import { getPathogen } from "./pathogens/index.js";
-import { buildSimulationNetwork } from "./population.js";
+import { buildPopulationNetwork } from "./population.js";
 import { availableFeatures, pathogenParams, solveTransmission } from "./presets.js";
 import { estimateR0 } from "./r0.js";
-import { mulberry32 } from "./random.js";
+import { seededRandom } from "./random.js";
 import { reproductionCurve } from "./reproduction.js";
-import { simulationModel } from "./seird.js";
+import { seirdModel } from "./seird.js";
 import { seirdParams } from "./test-support.js";
 
-const network = buildSimulationNetwork({ seed: 3, layout: { width: 1600, height: 900 }, population: 5000, contacts: 6, contactVariation: false });
-const reproduction = reproductionCurve(network, mulberry32(3));
-const SEIRD = simulationModel({ exposed: true, waning: false });
+const network = buildPopulationNetwork({ seed: 3, people: 5000, contacts: 6 });
+const reproduction = reproductionCurve(network, seededRandom(3));
+const SEIRD = seirdModel({ exposed: true, waning: false });
 
 describe("pathogen parameters", () => {
     it("are the pathogen's cited values, with infinite half-lives for lifelong protection and flat infectiousness", () => {

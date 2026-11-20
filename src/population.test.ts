@@ -1,34 +1,34 @@
 import { describe, expect, it } from "vitest";
 import { degreeOf } from "./network.js";
-import { buildSimulationNetwork, indexCaseOrder, luckSeed, seededIndexCases } from "./population.js";
-import { simulationModel } from "./seird.js";
+import { buildPopulationNetwork, indexCaseOrder, luckSeed, seededIndexCases } from "./population.js";
+import { seirdModel } from "./seird.js";
 import { createEpidemic } from "./stochastic.js";
 import { FIGURE_POPULATION, WIDE_LAYOUT } from "./test-support.js";
 
-const config = (overrides = {}) => ({ seed: 42, layout: WIDE_LAYOUT, population: FIGURE_POPULATION, contacts: 4, contactVariation: false, ...overrides });
+const config = (overrides = {}) => ({ seed: 42, world: WIDE_LAYOUT, people: FIGURE_POPULATION, contacts: 4, ...overrides });
 
 describe("population network", () => {
     it("builds the full population, the same for the same configuration", () => {
         for (const layout of [WIDE_LAYOUT, { width: 360, height: 320 }, { width: 1600, height: 900 }]) {
-            const network = buildSimulationNetwork(config({ layout, contactVariation: true }));
+            const network = buildPopulationNetwork(config({ world: layout, superspreading: true }));
             expect(network.count).toBe(FIGURE_POPULATION);
-            expect(buildSimulationNetwork(config({ layout, contactVariation: true }))).toEqual(network);
+            expect(buildPopulationNetwork(config({ world: layout, superspreading: true }))).toEqual(network);
         }
     });
 
     it("place tens of thousands of people quickly", () => {
         const started = performance.now();
-        const network = buildSimulationNetwork(config({ layout: { width: 1600, height: 1000 }, population: 20000, contactVariation: true }));
+        const network = buildPopulationNetwork(config({ world: { width: 1600, height: 1000 }, people: 20000, superspreading: true }));
         expect(performance.now() - started).toBeLessThan(2000);
         expect(network.count).toBe(20000);
         // Who-infected-whom must index past 32,767 people.
-        expect(createEpidemic(simulationModel({ exposed: false, waning: false }), network, [19999]).infectedBy).toBeInstanceOf(Int32Array);
+        expect(createEpidemic(seirdModel({ exposed: false, waning: false }), network, [19999]).infectedBy).toBeInstanceOf(Int32Array);
     });
 });
 
 describe("seeded choices", () => {
     it("take index cases with contacts in the seeded order, so a larger count extends a smaller one", () => {
-        const network = buildSimulationNetwork(config({ seed: 7, contacts: 3 }));
+        const network = buildPopulationNetwork(config({ seed: 7, contacts: 3 }));
         const order = indexCaseOrder(7, FIGURE_POPULATION);
         const three = seededIndexCases(order, network, 3);
         expect(three).toHaveLength(3);

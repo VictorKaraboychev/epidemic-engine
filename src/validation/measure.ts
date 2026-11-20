@@ -7,16 +7,14 @@ import { Population } from "../pathogens/types.js";
  */
 import { type Pathogen, getPathogen } from "../pathogens/index.js";
 import { compileModel, ratesFor } from "../model.js";
-import { buildSimulationNetwork, indexCaseOrder, luckSeed, seededIndexCases } from "../population.js";
+import { buildPopulationNetwork, indexCaseOrder, luckSeed, seededIndexCases } from "../population.js";
 import { availableFeatures, pathogenParams, solveTransmission } from "../presets.js";
-import { mulberry32 } from "../random.js";
+import { seededRandom } from "../random.js";
 import { reproductionCurve } from "../reproduction.js";
-import { simulationModel } from "../seird.js";
+import { seirdModel } from "../seird.js";
 import { createEpidemic, infectedCount, stepEpidemic } from "../stochastic.js";
 import { seirdParams } from "../test-support.js";
 
-/** The world the outbreaks run in (16:9). */
-const LAYOUT = { width: 1600, height: 900 };
 /** Superspreading's k when a disease has none (it then has no superspreading either: only for completeness). */
 const DEFAULT_DISPERSION = 0.3;
 
@@ -62,12 +60,12 @@ export const measurePreset = (
             deathDays: preset.deathDays! * scale,
             ...(options.infectiousnessHalfLife !== undefined ? { infectiousnessHalfLife: options.infectiousnessHalfLife } : {}),
         });
-        const network = buildSimulationNetwork({ seed, layout: LAYOUT, population: people, contacts: contacts!, contactVariation: superspreading });
-        const model = simulationModel({ exposed: availableFeatures(pathogen).exposed, waning: false });
+        const network = buildPopulationNetwork({ seed, people, contacts: contacts!, superspreading: superspreading });
+        const model = seirdModel({ exposed: availableFeatures(pathogen).exposed, waning: false });
         const solved = solveTransmission({
             model,
             params: base,
-            reproduction: reproductionCurve(network, mulberry32(seed)),
+            reproduction: reproductionCurve(network, seededRandom(seed)),
             r0: pathogen.values.r0.value,
             dispersion: superspreading ? (k ?? DEFAULT_DISPERSION) : null,
         });
@@ -76,7 +74,7 @@ export const measurePreset = (
         const params = { ...base, beta, dispersion };
         const compiled = compileModel(model);
         const rates = ratesFor(model, params);
-        const random = mulberry32(luckSeed(seed, 0));
+        const random = seededRandom(luckSeed(seed, 0));
         let state = createEpidemic(model, network, seededIndexCases(indexCaseOrder(seed, people), network, 5));
         const infectedOn = new Int32Array(people).fill(-1);
         for (const person of state.indexCases) infectedOn[person] = 0;
