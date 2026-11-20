@@ -4,14 +4,14 @@
  * `data.ts`, one file each.
  */
 import type { CitationId } from "./citations.js";
-import { type Cited, type PathogenProfile, type PathogenValues, type PopulationGroup, Population, citationsFor, protectionCitations } from "./types.js";
+import { type Cited, type PathogenProfile, type PathogenValues, type PopulationGroup, Group, citationsFor, protectionCitations } from "./types.js";
 
 export { CITATIONS, type Citation, type CitationId } from "./citations.js";
 export * from "./types.js";
 export * from "./custom.js";
 
 /** True when the disease gives fatal infections their own infectious period. */
-export const hasOutcomeSpecificPeriods = (pathogen: PathogenProfile) => pathogen.values.deathDays.value !== pathogen.values.recoveryDays.value;
+export const hasOutcomeSpecificPeriods = (pathogen: PathogenProfile) => pathogen.values.fatalInfectiousDays.value !== pathogen.values.infectiousDays.value;
 
 /** The disease's base group: its overall data, for everyone or whoever the sources measured it in (the first group). */
 export const baseGroupOf = (pathogen: PathogenProfile) => pathogen.populations.groups[0];
@@ -20,14 +20,14 @@ export const baseGroupOf = (pathogen: PathogenProfile) => pathogen.populations.g
 export const NO_FATALITY = 0;
 
 /** The fatality rate a disease uses for a population: the group's own when it has one, else everyone's, else none. */
-export const fatalityRate = (pathogen: PathogenProfile, population: Population) =>
+export const fatalityRate = (pathogen: PathogenProfile, population: Group) =>
     (populationGroup(pathogen, population)?.ifr ?? baseGroupOf(pathogen).ifr)?.value ?? NO_FATALITY;
 
 /**
  * Vaccine coverage for a population: the group's own figure, else the base group's, else null (no figure that
  * applies, or no vaccine).
  */
-export const vaccineCoverage = (pathogen: PathogenProfile, population: Population) => {
+export const vaccineCoverage = (pathogen: PathogenProfile, population: Group) => {
     if (!pathogen.vaccination || "none" in pathogen.vaccination) return null;
     return populationGroup(pathogen, population)?.vaccineCoverage ?? baseGroupOf(pathogen).vaccineCoverage ?? null;
 };
@@ -36,7 +36,7 @@ export const vaccineCoverage = (pathogen: PathogenProfile, population: Populatio
  * The coverage the simulator vaccinates for a population: the group's own figure, else the base group's, else the only
  * published one (e.g. RSV's, for people 75+; the preset's coverage line says whom it covers). Null without any.
  */
-export const simulatedCoverage = (pathogen: PathogenProfile, population: Population) =>
+export const simulatedCoverage = (pathogen: PathogenProfile, population: Group) =>
     vaccineCoverage(pathogen, population) ?? pathogen.populations.groups.find((group) => group.vaccineCoverage)?.vaccineCoverage ?? null;
 
 /** The groups besides the base group with their own fatality rate (others may have only vaccine coverage). */
@@ -44,11 +44,11 @@ export const fatalityGroups = (pathogen: PathogenProfile | null) =>
     pathogen?.populations.groups.slice(1).filter((group): group is PopulationGroup => Boolean(group.ifr)) ?? [];
 
 /**
- * The disease's data for a population group, or null for a group it has no data for. `Population.All` selects the base group,
+ * The disease's data for a population group, or null for a group it has no data for. `Group.All` selects the base group,
  * whoever it covers.
  */
-export const populationGroup = (pathogen: PathogenProfile | null, population: Population) =>
-    !pathogen ? null : population === Population.All ? baseGroupOf(pathogen) : (pathogen.populations.groups.find((group) => group.id === population) ?? null);
+export const populationGroup = (pathogen: PathogenProfile | null, population: Group) =>
+    !pathogen ? null : population === Group.All ? baseGroupOf(pathogen) : (pathogen.populations.groups.find((group) => group.id === population) ?? null);
 
 /**
  * The disease's values keyed by the simulator parameter each sets: its own values, plus immunity's half-life (which
@@ -84,11 +84,11 @@ export const citedValuesOf = (pathogen: PathogenProfile): Cited[] => {
  * the other values, immunity, the population groups, then the vaccine.
  */
 export const citationsOf = (pathogen: PathogenProfile): CitationId[] => {
-    const { r0, recoveryDays, deathDays, ...rest } = pathogen.values as PathogenValues;
+    const { r0, infectiousDays, fatalInfectiousDays, ...rest } = pathogen.values as PathogenValues;
     // Each source once, where it's first cited.
     return [
         ...new Set([
-            ...[r0, recoveryDays, deathDays, baseGroupOf(pathogen).ifr].flatMap((value) => (value ? citationsFor(value) : [])),
+            ...[r0, infectiousDays, fatalInfectiousDays, baseGroupOf(pathogen).ifr].flatMap((value) => (value ? citationsFor(value) : [])),
             ...Object.values(rest).flatMap(citationsFor),
             ...(pathogen.immunity ? protectionCitations(pathogen.immunity) : []),
             ...fatalityGroups(pathogen).flatMap((group) => citationsFor(group.ifr!)),

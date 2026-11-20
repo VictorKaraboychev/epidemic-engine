@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Group, PopulationKind, between, cited } from "./types.js";
 
 /**
  * Ebola virus disease, West Africa 2014. The one disease where deaths dominate, and where fatal cases have their own
@@ -16,8 +16,8 @@ export const EBOLA = {
     id: PathogenId.Ebola,
     values: {
         r0: cited(1.83, "who-ebola-nejm-2014", { interval: between(1.71, 2.02, IntervalKind.Range) }),
-        recoveryDays: cited(16.4, "who-ebola-nejm-2014"),
-        deathDays: cited(7.5, "who-ebola-nejm-2014"),
+        infectiousDays: cited(16.4, "who-ebola-nejm-2014"),
+        fatalInfectiousDays: cited(7.5, "who-ebola-nejm-2014"),
         generationInterval: cited(15.3, "who-ebola-nejm-2014", { caveat: Caveat.Proxy }),
         infectiousnessHalfLife: cited(7.9, "who-ebola-nejm-2014", { caveat: Caveat.Fitted }),
         latentDays: cited(11.4, "who-ebola-nejm-2014"),
@@ -35,8 +35,8 @@ export const EBOLA = {
         kind: PopulationKind.Group,
         measure: FatalityMeasure.Case,
         groups: [
-            { id: Population.All, covers: "reported cases", ifr: cited(0.5, "who-ebola-factsheet", { interval: between(0.25, 0.9, IntervalKind.Range) }) },
-            { id: Population.Contacts, covers: "contacts of cases in vaccination rings", vaccineCoverage: cited(0.52, "henao-restrepo-2017") },
+            { id: Group.All, covers: "reported cases", ifr: cited(0.5, "who-ebola-factsheet", { interval: between(0.25, 0.9, IntervalKind.Range) }) },
+            { id: Group.Contacts, covers: "contacts of cases in vaccination rings", vaccineCoverage: cited(0.52, "henao-restrepo-2017") },
         ],
     },
 } satisfies PathogenProfile<PathogenId>;

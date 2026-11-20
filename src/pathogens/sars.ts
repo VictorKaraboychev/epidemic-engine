@@ -1,4 +1,4 @@
-import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
+import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Group, PopulationKind, between, cited } from "./types.js";
 
 /**
  * SARS (2003). Similar R₀ to COVID-19, but almost no spread before symptoms and far deadlier; famous for superspreading
@@ -19,8 +19,8 @@ export const SARS = {
     id: PathogenId.Sars,
     values: {
         r0: cited(2.7, "riley-2003", { interval: between(2.2, 3.7, IntervalKind.CI95) }),
-        recoveryDays: cited(26.5, "leung-2004", { also: ["who-sars-consensus"], caveat: Caveat.ClinicalDuration }),
-        deathDays: cited(23.7, "leung-2004", { also: ["who-sars-consensus"], caveat: Caveat.ClinicalDuration }),
+        infectiousDays: cited(26.5, "leung-2004", { also: ["who-sars-consensus"], caveat: Caveat.ClinicalDuration }),
+        fatalInfectiousDays: cited(23.7, "leung-2004", { also: ["who-sars-consensus"], caveat: Caveat.ClinicalDuration }),
         generationInterval: cited(8.4, "lipsitch-2003", { caveat: Caveat.Proxy }),
         infectiousnessHalfLife: cited(5, "lipsitch-2003", { caveat: Caveat.Fitted }),
         latentDays: cited(4.6, "leung-2004", { also: ["who-sars-consensus"], interval: between(3.8, 5.8, IntervalKind.CI95) }),
@@ -32,12 +32,12 @@ export const SARS = {
         kind: PopulationKind.Age,
         measure: FatalityMeasure.Case,
         groups: [
-            { id: Population.All, covers: "probable cases", ifr: cited(0.096, "who-sars-summary") },
+            { id: Group.All, covers: "probable cases", ifr: cited(0.096, "who-sars-summary") },
 
-            { id: Population.Young, covers: "24 and under", ifr: cited(0.01, "who-sars-update-49", { bound: Bound.Below }) },
-            { id: Population.Adults, covers: "25–44", ifr: cited(0.06, "who-sars-update-49") },
-            { id: Population.MiddleAged, covers: "45–64", ifr: cited(0.15, "who-sars-update-49") },
-            { id: Population.Elderly, covers: "65+", ifr: cited(0.5, "who-sars-update-49", { bound: Bound.Above }) },
+            { id: Group.Young, covers: "24 and under", ifr: cited(0.01, "who-sars-update-49", { bound: Bound.Below }) },
+            { id: Group.Adults, covers: "25–44", ifr: cited(0.06, "who-sars-update-49") },
+            { id: Group.MiddleAged, covers: "45–64", ifr: cited(0.15, "who-sars-update-49") },
+            { id: Group.Elderly, covers: "65+", ifr: cited(0.5, "who-sars-update-49", { bound: Bound.Above }) },
         ],
     },
     vaccination: { none: "li-2020-vaccines" },

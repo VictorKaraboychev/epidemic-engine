@@ -2,7 +2,7 @@ import { Pathogen } from "./pathogens/pathogen.js";
 import { describe, expect, it } from "vitest";
 import { SeirdCompartment } from "./model.js";
 import { DEFAULT_MAX_DAYS, Outbreak } from "./outbreak.js";
-import { Population } from "./pathogens/types.js";
+import { Group } from "./pathogens/types.js";
 
 describe("Outbreak", () => {
     it("runs a pathogen's outbreak from its published data", () => {
@@ -37,7 +37,7 @@ describe("Outbreak", () => {
     });
 
     it("takes your own parameters without a pathogen, solving the rate for an R₀", () => {
-        const outbreak = new Outbreak({ people: 3000, seed: 5, r0: 2, params: { recoveryDays: 7, deathDays: 7, ifr: 0 } });
+        const outbreak = new Outbreak({ people: 3000, seed: 5, r0: 2, params: { infectiousDays: 7, fatalInfectiousDays: 7, ifr: 0 } });
         expect(outbreak.pathogen).toBeNull();
         expect(outbreak.r0).toBe(2);
         const summary = outbreak.run();
@@ -47,7 +47,7 @@ describe("Outbreak", () => {
     });
 
     it("vaccinates the pathogen's coverage for a population, and needs the data for each feature", () => {
-        const outbreak = new Outbreak({ pathogen: Pathogen.Measles, population: Population.All, people: 4000, seed: 2, vaccination: true });
+        const outbreak = new Outbreak({ pathogen: Pathogen.Measles, population: Group.All, people: 4000, seed: 2, vaccination: true });
         expect(outbreak.vaccinated.length / 4000).toBeCloseTo(0.77, 2);
         expect(outbreak.count(SeirdCompartment.Vaccinated)).toBe(outbreak.vaccinated.length);
         expect(() => new Outbreak({ pathogen: Pathogen.Sars, people: 500, vaccination: true })).toThrow(/vaccination/);

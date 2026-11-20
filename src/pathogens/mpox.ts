@@ -1,4 +1,4 @@
-import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
+import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Group, PopulationKind, between, cited } from "./types.js";
 
 /**
  * Mpox, 2022 clade IIb outbreak, which spread almost entirely among gay, bisexual and other men who have sex with men
@@ -18,8 +18,8 @@ export const MPOX = {
     id: PathogenId.Mpox,
     values: {
         r0: cited(1.94, "zhang-2024", { interval: between(1.81, 2.19, IntervalKind.CrI95) }),
-        recoveryDays: cited(21, "cdc-mpox", { interval: between(14, 28, IntervalKind.Range) }),
-        deathDays: cited(21, "cdc-mpox", { interval: between(14, 28, IntervalKind.Range) }),
+        infectiousDays: cited(21, "cdc-mpox", { interval: between(14, 28, IntervalKind.Range) }),
+        fatalInfectiousDays: cited(21, "cdc-mpox", { interval: between(14, 28, IntervalKind.Range) }),
         generationInterval: cited(8.5, "madewell-2023", { interval: between(7.3, 9.9, IntervalKind.CrI95), caveat: Caveat.Proxy }),
         // Most spread is around symptom onset, though lesions take weeks to heal.
         infectiousnessHalfLife: cited(0.9, "madewell-2023", { caveat: Caveat.Fitted }),
@@ -39,7 +39,7 @@ export const MPOX = {
         measure: FatalityMeasure.Case,
         groups: [
             {
-                id: Population.Gbmsm,
+                id: Group.Gbmsm,
                 covers: "confirmed cases, almost all among gay, bisexual and other men who have sex with men (GBMSM)",
                 ifr: cited(0.0008, "who-mpox-2022"),
                 vaccineCoverage: cited(0.227, "owens-2023"),

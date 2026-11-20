@@ -12,12 +12,11 @@ import { DESKTOP } from "./test-support.js";
 const MODEL = seirdModel({ exposed: false, waning: false });
 const PARAMS: SeirdModelParams = {
     beta: 0.3,
-    recoveryDays: 5,
-    deathDays: 5,
+    infectiousDays: 5,
+    fatalInfectiousDays: 5,
     ifr: 0,
     latentDays: 3,
     latentVariation: 0.5,
-    immunityHalfLife: 180,
     dispersion: null,
 };
 

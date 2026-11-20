@@ -1,4 +1,4 @@
-import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
+import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Group, PopulationKind, between, cited } from "./types.js";
 
 /**
  * Seasonal influenza B. In this model it behaves almost exactly like influenza A (R 1.23 vs 1.28, same fatality
@@ -15,8 +15,8 @@ export const INFLUENZA_B = {
     id: PathogenId.InfluenzaB,
     values: {
         r0: cited(1.23, "thompson-2022", { interval: between(1.06, 1.58, IntervalKind.Range), caveat: Caveat.Proxy }),
-        recoveryDays: cited(5, "cdc-flu"),
-        deathDays: cited(5, "cdc-flu"),
+        infectiousDays: cited(5, "cdc-flu"),
+        fatalInfectiousDays: cited(5, "cdc-flu"),
         generationInterval: cited(3.6, "cowling-2009", { interval: between(2.9, 4.3, IntervalKind.CI95), caveat: Caveat.Proxy }),
         infectiousnessHalfLife: cited(1.6, "cowling-2009", { caveat: Caveat.Fitted }),
         latentDays: cited(0.6, "lessler-2009", { bound: Bound.Below }),
@@ -30,16 +30,16 @@ export const INFLUENZA_B = {
         measure: FatalityMeasure.Illness,
         groups: [
             {
-                id: Population.All,
+                id: Group.All,
                 covers: "all ages",
                 ifr: cited(0.0007, "cdc-flu-burden-2024"),
                 vaccineCoverage: cited(0.472, "cdc-fluvaxview-2024"),
             },
 
-            { id: Population.Infants, covers: "0–4", ifr: cited(268 / 2_903_633, "cdc-flu-burden-2024") },
-            { id: Population.Adults, covers: "18–49", ifr: cited(2_705 / 16_351_383, "cdc-flu-burden-2024") },
-            { id: Population.MiddleAged, covers: "50–64", ifr: cited(5_701 / 9_042_884, "cdc-flu-burden-2024") },
-            { id: Population.Elderly, covers: "65+", ifr: cited(19_038 / 2_610_181, "cdc-flu-burden-2024") },
+            { id: Group.Infants, covers: "0–4", ifr: cited(268 / 2_903_633, "cdc-flu-burden-2024") },
+            { id: Group.Adults, covers: "18–49", ifr: cited(2_705 / 16_351_383, "cdc-flu-burden-2024") },
+            { id: Group.MiddleAged, covers: "50–64", ifr: cited(5_701 / 9_042_884, "cdc-flu-burden-2024") },
+            { id: Group.Elderly, covers: "65+", ifr: cited(19_038 / 2_610_181, "cdc-flu-burden-2024") },
         ],
     },
     vaccination: {

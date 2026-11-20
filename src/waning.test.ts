@@ -1,4 +1,4 @@
-import { Population } from "./pathogens/types.js";
+import { Group } from "./pathogens/types.js";
 import { Pathogen } from "./pathogens/pathogen.js";
 import { describe, expect, it } from "vitest";
 import { deterministicCurve } from "./deterministic.js";
@@ -12,7 +12,15 @@ import { type SeirdModelParams, seirdModel } from "./seird.js";
 import { createEpidemic, infectedCount, stepEpidemic } from "./stochastic.js";
 import { DESKTOP } from "./test-support.js";
 
-const PARAMS: SeirdModelParams = { beta: 0.35, recoveryDays: 5, deathDays: 5, ifr: 0, latentDays: 2, latentVariation: 0.5, immunityHalfLife: 60 };
+const PARAMS: SeirdModelParams = {
+    beta: 0.35,
+    infectiousDays: 5,
+    fatalInfectiousDays: 5,
+    ifr: 0,
+    latentDays: 2,
+    latentVariation: 0.5,
+    immunity: { halfLife: 60 },
+};
 const WANING = seirdModel({ exposed: false, waning: true });
 const PLAIN = seirdModel({ exposed: false, waning: false });
 const [, , R] = [0, 1, 2];
@@ -49,7 +57,7 @@ describe("waning immunity", () => {
         }
         expect(delays.length).toBeGreaterThan(0);
         // At most the share who have lost protection (it halves every 60 days) can be reinfected that soon.
-        const lapsed = waningSusceptibility(PARAMS.immunityHalfLife);
+        const lapsed = waningSusceptibility(PARAMS.immunity!.halfLife!);
         for (const days of [5, 15, 30]) {
             expect(delays.filter((delay) => delay <= days).length / recoveredOn.size).toBeLessThanOrEqual(lapsed(days) + 0.03);
         }
@@ -69,7 +77,7 @@ describe("waning immunity", () => {
 
     it("counts recovered people whose protection has lapsed as susceptible", () => {
         // Half-life 60 days, no delay: 60 days after recovering, about half of a cohort counts as susceptible.
-        const theory = deterministicCurve(WANING, { ...PARAMS, beta: 0, immunityHalfLife: 60 }, 0.0001, 1000, 1000, 200);
+        const theory = deterministicCurve(WANING, { ...PARAMS, beta: 0, immunity: { halfLife: 60 } }, 0.0001, 1000, 1000, 200);
         const recoveredOnDay = 6; // ≈ when the index cases have recovered
         expect(theory.series[R][recoveredOnDay + 60] / (theory.series[R][recoveredOnDay + 60] + theory.series[0][recoveredOnDay + 60])).toBeLessThan(0.7);
         for (const day of [0, 50, 200]) expect(theory.series.reduce((sum, series) => sum + series[day], 0)).toBeCloseTo(1000, 6);
@@ -77,7 +85,7 @@ describe("waning immunity", () => {
 
     it("keeps R₀ unchanged, and gives the theory curve a second wave once immunity has faded", () => {
         expect(estimateR0(WANING, PARAMS, treeCurve(4))).toBeCloseTo(estimateR0(PLAIN, PARAMS, treeCurve(4)));
-        const theory = deterministicCurve(WANING, { ...PARAMS, immunityHalfLife: 90 }, 2.5, 1000, 1, 1095);
+        const theory = deterministicCurve(WANING, { ...PARAMS, immunity: { halfLife: 90 } }, 2.5, 1000, 1, 1095);
         for (const day of [0, 300, 1095]) expect(theory.series.reduce((sum, series) => sum + series[day], 0)).toBeCloseTo(1000, 6);
         const plain = deterministicCurve(PLAIN, PARAMS, 2.5, 1000, 1, 1095);
         expect(plain.infected[1095]).toBeLessThan(0.5);
@@ -108,7 +116,7 @@ describe("waning fitted to published protection", () => {
     });
 
     it("resets the delay for presets that don't publish one", () => {
-        expect(pathogenParams(Pathogen.CovidOmicron, Population.All).immunityDelay).toBe(100);
-        expect(pathogenParams(Pathogen.CovidAncestral, Population.All).immunityDelay).toBe(0);
+        expect(pathogenParams(Pathogen.CovidOmicron, Group.All).immunity?.delay).toBe(100);
+        expect(pathogenParams(Pathogen.CovidAncestral, Group.All).immunity?.delay).toBe(0);
     });
 });

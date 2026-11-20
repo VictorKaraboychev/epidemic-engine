@@ -95,9 +95,9 @@ export enum SeirdCompartment {
 
 export interface SirdParams extends ModelParams {
     /** Mean infectious days for infections that end in recovery. */
-    recoveryDays: number;
+    infectiousDays: number;
     /** Mean infectious days for infections that end in death. */
-    deathDays: number;
+    fatalInfectiousDays: number;
     /** Share of infections that are fatal. */
     ifr: number;
 }
@@ -113,8 +113,8 @@ export const SIRD_MODEL: CompartmentModel<SirdParams> = {
             infected: true,
             infectious: true,
             exits: [
-                { to: SeirdCompartment.Recovered, share: (p) => 1 - p.ifr, days: (p) => p.recoveryDays },
-                { to: SeirdCompartment.Died, share: (p) => p.ifr, days: (p) => p.deathDays },
+                { to: SeirdCompartment.Recovered, share: (p) => 1 - p.ifr, days: (p) => p.infectiousDays },
+                { to: SeirdCompartment.Died, share: (p) => p.ifr, days: (p) => p.fatalInfectiousDays },
             ],
         },
         { key: SeirdCompartment.Recovered, name: "recovered" },

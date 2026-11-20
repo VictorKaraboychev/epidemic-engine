@@ -1,4 +1,4 @@
-import { Population } from "./pathogens/types.js";
+import { Group } from "./pathogens/types.js";
 import { Pathogen } from "./pathogens/pathogen.js";
 import { describe, expect, it } from "vitest";
 import { EdgeKind, buildNetwork, degreeOf, neighboursOf } from "./network.js";
@@ -10,7 +10,7 @@ import { type SeirdModelParams, seirdModel } from "./seird.js";
 import { seirdParams } from "./test-support.js";
 
 const SEIRD = seirdModel({ exposed: true, waning: false });
-const params = (overrides: Partial<SeirdModelParams>) => seirdParams({ beta: 0.2, latentDays: 5, recoveryDays: 8, deathDays: 8, ...overrides });
+const params = (overrides: Partial<SeirdModelParams>) => seirdParams({ beta: 0.2, latentDays: 5, infectiousDays: 8, fatalInfectiousDays: 8, ...overrides });
 
 describe("infectiousness profile", () => {
     it("is zero while latent, sums to one, and its mean is the intrinsic generation interval", () => {
@@ -46,8 +46,8 @@ describe("infectiousness profile", () => {
     });
 
     it("comes from the presets: fitted where published intervals call for it, flat (an infinite half-life) otherwise", () => {
-        expect(pathogenParams(Pathogen.CovidAncestral, Population.All)).toMatchObject({ recoveryDays: 8, infectiousnessHalfLife: 1.3 });
-        expect(pathogenParams(Pathogen.Measles, Population.All).infectiousnessHalfLife).toBe(Infinity);
+        expect(pathogenParams(Pathogen.CovidAncestral, Group.All)).toMatchObject({ infectiousDays: 8, infectiousnessHalfLife: 1.3 });
+        expect(pathogenParams(Pathogen.Measles, Group.All).infectiousnessHalfLife).toBe(Infinity);
     });
 });
 

@@ -11,7 +11,7 @@ import { DESKTOP, SEIRS_V_MODEL, type SeirsParams, star } from "./test-support.j
 
 const [S, I, R, D] = [0, 1, 2, 3];
 const SIRD = compileModel(SIRD_MODEL);
-const sird = (params: Partial<SirdParams> = {}): SirdParams => ({ beta: 0.3, recoveryDays: 5, deathDays: 5, ifr: 0.1, ...params });
+const sird = (params: Partial<SirdParams> = {}): SirdParams => ({ beta: 0.3, infectiousDays: 5, fatalInfectiousDays: 5, ifr: 0.1, ...params });
 
 /** Runs until the outbreak ends (or `maxDays`), returning every day's state. */
 const runSird = (params: SirdParams, indexCases = [0, 1], seed = 3, network = buildNetwork(seededRandom(21), DESKTOP), maxDays = 1000) => {
@@ -123,12 +123,12 @@ describe("outcome-specific infectious periods", () => {
     const k = treeCurve(excessDegree(network));
 
     it("a pathogen that kills quickly has a lower R₀ than one that kills slowly", () => {
-        expect(estimateR0(SIRD_MODEL, sird({ beta: 0.2, recoveryDays: 16, deathDays: 4, ifr: 0.5 }), k)).toBeLessThan(
-            estimateR0(SIRD_MODEL, sird({ beta: 0.2, recoveryDays: 16, deathDays: 16, ifr: 0.5 }), k),
+        expect(estimateR0(SIRD_MODEL, sird({ beta: 0.2, infectiousDays: 16, fatalInfectiousDays: 4, ifr: 0.5 }), k)).toBeLessThan(
+            estimateR0(SIRD_MODEL, sird({ beta: 0.2, infectiousDays: 16, fatalInfectiousDays: 16, ifr: 0.5 }), k),
         );
         // With nobody dying, the death period can't matter.
-        expect(estimateR0(SIRD_MODEL, sird({ beta: 0.2, recoveryDays: 16, deathDays: 4, ifr: 0 }), k)).toBeCloseTo(
-            estimateR0(SIRD_MODEL, sird({ beta: 0.2, recoveryDays: 16, deathDays: 30, ifr: 0 }), k),
+        expect(estimateR0(SIRD_MODEL, sird({ beta: 0.2, infectiousDays: 16, fatalInfectiousDays: 4, ifr: 0 }), k)).toBeCloseTo(
+            estimateR0(SIRD_MODEL, sird({ beta: 0.2, infectiousDays: 16, fatalInfectiousDays: 30, ifr: 0 }), k),
         );
     });
 
@@ -139,16 +139,17 @@ describe("outcome-specific infectious periods", () => {
             SIRD_MODEL,
             network,
             start,
-            ratesFor(SIRD_MODEL, sird({ beta: 0, recoveryDays: 30, deathDays: 30, ifr: 1 })),
+            ratesFor(SIRD_MODEL, sird({ beta: 0, infectiousDays: 30, fatalInfectiousDays: 30, ifr: 1 })),
             seededRandom(1),
         );
         for (const node of start.indexCases) expect(next.exits[node]).toBe(1);
     });
 
     it("ends fatal infections at the death period's rate", () => {
-        const meanDuration = (deathDays: number) => {
+        const meanDuration = (fatalInfectiousDays: number) => {
             let total = 0;
-            for (let seed = 0; seed < 40; seed++) total += runSird(sird({ beta: 0, recoveryDays: 30, deathDays, ifr: 1 }), [0], seed, network).final.day;
+            for (let seed = 0; seed < 40; seed++)
+                total += runSird(sird({ beta: 0, infectiousDays: 30, fatalInfectiousDays, ifr: 1 }), [0], seed, network).final.day;
             return total / 40;
         };
         expect(meanDuration(1)).toBe(1);
@@ -165,14 +166,17 @@ describe("R₀", () => {
     it("is zero without transmission and grows with transmission and duration", () => {
         expect(estimateR0(SIRD_MODEL, sird({ beta: 0 }), treeCurve(3))).toBe(0);
         expect(estimateR0(SIRD_MODEL, sird({ beta: 0.4 }), treeCurve(3))).toBeGreaterThan(estimateR0(SIRD_MODEL, sird({ beta: 0.2 }), treeCurve(3)));
-        expect(estimateR0(SIRD_MODEL, sird({ beta: 0.2, recoveryDays: 10, deathDays: 10 }), treeCurve(3))).toBeGreaterThan(
+        expect(estimateR0(SIRD_MODEL, sird({ beta: 0.2, infectiousDays: 10, fatalInfectiousDays: 10 }), treeCurve(3))).toBeGreaterThan(
             estimateR0(SIRD_MODEL, sird({ beta: 0.2 }), treeCurve(3)),
         );
     });
 
     it("betaForR0 inverts estimateR0 when the target is reachable, and clamps when it isn't", () => {
         for (const target of [1.2, 1.5, 2.8]) {
-            for (const params of [sird({ recoveryDays: 8, deathDays: 8, ifr: 0.01 }), sird({ recoveryDays: 8, deathDays: 2, ifr: 0.5 })]) {
+            for (const params of [
+                sird({ infectiousDays: 8, fatalInfectiousDays: 8, ifr: 0.01 }),
+                sird({ infectiousDays: 8, fatalInfectiousDays: 2, ifr: 0.5 }),
+            ]) {
                 const beta = betaForR0(SIRD_MODEL, params, treeCurve(4), target, 0.01, 0.95);
                 expect(estimateR0(SIRD_MODEL, { ...params, beta }, treeCurve(4))).toBeCloseTo(target, 6);
             }
@@ -182,7 +186,7 @@ describe("R₀", () => {
     });
 
     it("weights infectious days by outcome", () => {
-        expect(meanInfectiousDays(SIRD_MODEL, sird({ recoveryDays: 10, deathDays: 2, ifr: 0.25 }))).toBeCloseTo(8);
+        expect(meanInfectiousDays(SIRD_MODEL, sird({ infectiousDays: 10, fatalInfectiousDays: 2, ifr: 0.25 }))).toBeCloseTo(8);
     });
 });
 
@@ -190,7 +194,7 @@ describe("deterministicCurve (SIRD)", () => {
     const total = (theory: ReturnType<typeof deterministicCurve>, day: number) => theory.series.reduce((sum, series) => sum + series[day], 0);
 
     it("conserves the population", () => {
-        const theory = deterministicCurve(SIRD_MODEL, sird({ recoveryDays: 12, deathDays: 4, ifr: 0.4 }), 2.5, 250, 1, 120);
+        const theory = deterministicCurve(SIRD_MODEL, sird({ infectiousDays: 12, fatalInfectiousDays: 4, ifr: 0.4 }), 2.5, 250, 1, 120);
         for (let day = 0; day <= 120; day++) expect(total(theory, day)).toBeCloseTo(250, 6);
     });
 
@@ -202,8 +206,8 @@ describe("deterministicCurve (SIRD)", () => {
     });
 
     it("splits ended infections into deaths at the fatality rate", () => {
-        for (const deathDays of [2, 5, 15]) {
-            const theory = deterministicCurve(SIRD_MODEL, sird({ deathDays, ifr: 0.3 }), 3, 250, 1, 600);
+        for (const fatalInfectiousDays of [2, 5, 15]) {
+            const theory = deterministicCurve(SIRD_MODEL, sird({ fatalInfectiousDays, ifr: 0.3 }), 3, 250, 1, 600);
             expect(theory.series[D][600] / (theory.series[R][600] + theory.series[D][600])).toBeCloseTo(0.3, 6);
         }
     });

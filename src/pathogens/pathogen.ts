@@ -18,7 +18,7 @@ import { MPOX } from "./mpox.js";
 import { PERTUSSIS } from "./pertussis.js";
 import { RSV } from "./rsv.js";
 import { SARS } from "./sars.js";
-import { type PathogenId, type PathogenProfile, type PathogenValues, Population, type Populations, type Protection, type Vaccination } from "./types.js";
+import { type PathogenId, type PathogenProfile, type PathogenValues, Group, type Populations, type Protection, type Vaccination } from "./types.js";
 
 export class Pathogen implements PathogenProfile {
     static readonly CovidAncestral = new Pathogen(COVID_ANCESTRAL);
@@ -64,7 +64,7 @@ export class Pathogen implements PathogenProfile {
     readonly vaccination?: Vaccination;
 
     /**
-     * Your own pathogen from plain numbers (`{ id, r0, recoveryDays, latentDays?, ifr?, immunity?, vaccine?, … }`; see
+     * Your own pathogen from plain numbers (`{ id, r0, infectiousDays, latentDays?, ifr?, immunity?, vaccine?, … }`; see
      * `PathogenSpec`), or from full data (`PathogenProfile`, with sources).
      */
     constructor(data: PathogenSpec | PathogenProfile) {
@@ -110,17 +110,17 @@ export class Pathogen implements PathogenProfile {
     }
 
     /** The model parameters it sets for a population group (lifelong protection and flat infectiousness: `Infinity`). */
-    params(population: Population = Population.All): Partial<PathogenParams> {
+    params(population: Group = Group.All): Partial<PathogenParams> {
         return pathogenParams(this, population);
     }
 
     /** The share of infections (or illnesses, or cases: see `populations.measure`) that are fatal, for a group. */
-    fatalityRate(population: Population = Population.All): number {
+    fatalityRate(population: Group = Group.All): number {
         return fatalityRate(this, population);
     }
 
     /** The share vaccinated before an outbreak, for a group; null without a vaccine. */
-    vaccineCoverage(population: Population = Population.All): number | null {
+    vaccineCoverage(population: Group = Group.All): number | null {
         return simulatedCoverage(this, population)?.value ?? null;
     }
 }

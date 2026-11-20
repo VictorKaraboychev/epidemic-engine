@@ -12,14 +12,14 @@ import { type Theory, deterministicCurve } from "./deterministic.js";
 import { type History, appendDay, peakInfections, seriesOf, startHistory } from "./history.js";
 import { type CompiledModel, type Rates, SeirdCompartment, compileModel, ratesFor } from "./model.js";
 import type { Network } from "./network.js";
-import { Population } from "./pathogens/index.js";
+import { Group } from "./pathogens/index.js";
 import type { Pathogen } from "./pathogens/pathogen.js";
 import { buildPopulationNetwork, indexCaseOrder, luckSeed, seededIndexCases, seededVaccinated, vaccinatedCount, vaccinationOrder } from "./population.js";
 import { availableFeatures, pathogenParams, solveTransmission } from "./presets.js";
 import { estimateR0 } from "./r0.js";
 import { type Random, seededRandom, randomSeed } from "./random.js";
 import { reproductionCurve } from "./reproduction.js";
-import { type ModelFeatures, type SeirdModel, type SeirdModelParams, seirdModel, seirdParams } from "./seird.js";
+import { type ModelFeatures, type SeirdModel, type SeirdModelParams, seirdModel, seirdParams, withParams } from "./seird.js";
 import { type EpidemicState, createEpidemic, infectedCount, advanceEpidemic } from "./stochastic.js";
 
 export interface OutbreakOptions {
@@ -28,8 +28,8 @@ export interface OutbreakOptions {
      * (`Pathogen.Measles.with({ contacts: 12 })`). Omit it to set everything with `params` and `r0` (or `params.beta`).
      */
     pathogen?: Pathogen;
-    /** Whose fatality rate and vaccine coverage to use. Default `Population.All` (the pathogen's base group). */
-    population?: Population;
+    /** Whose fatality rate and vaccine coverage to use. Default `Group.All` (the pathogen's base group). */
+    population?: Group;
     /** People in the network. Default 10,000. */
     people?: number;
     /** Average everyday contacts per person. Default: the pathogen's; 3 without one. */
@@ -102,7 +102,7 @@ export class Outbreak {
 
     constructor(options: OutbreakOptions = {}) {
         const pathogen = options.pathogen ?? null;
-        const population = options.population ?? Population.All;
+        const population = options.population ?? Group.All;
         const people = options.people ?? 10_000;
         const seed = options.seed ?? randomSeed();
         const available = availableFeatures(pathogen);
@@ -121,7 +121,7 @@ export class Outbreak {
         const contacts = options.contacts ?? pathogenContacts ?? DEFAULT_CONTACTS;
         const network = buildPopulationNetwork({ seed, people, contacts, world: options.world, superspreading: features.superspreading });
         const model = seirdModel(features);
-        const base = seirdParams({ ...pathogenModelParams, ...options.params });
+        const base = withParams(seirdParams(pathogenModelParams), options.params);
         const reproduction = reproductionCurve(network, seededRandom(seed ^ REPRODUCTION_SALT));
         const r0 = options.r0 ?? pathogen?.values.r0.value ?? null;
         const solved = solveTransmission({

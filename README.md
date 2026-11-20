@@ -48,7 +48,7 @@ import { Outbreak, Pathogen, Population } from "epidemic-engine";
 
 new Outbreak({
     pathogen: Pathogen.CovidAncestral,
-    population: Population.Elderly, // whose fatality rate and vaccine coverage to use
+    population: Group.Elderly, // whose fatality rate and vaccine coverage to use
     people: 100_000,
     initialCases: 5, // or the people to start with: [12, 345]
     vaccination: true, // also `waning` and `superspreading`, where the pathogen has the data
@@ -68,7 +68,7 @@ const myFlu = new Pathogen({
     id: "my-flu",
     r0: 1.8,
     latentDays: 2,
-    recoveryDays: 5,
+    infectiousDays: 5,
     ifr: 0.001,
     immunity: { halfLife: 365 }, // or { lifelong: true }
     vaccine: { efficacy: 0.6, coverage: 0.4, halfLife: 180 },
@@ -84,7 +84,7 @@ new Outbreak({ pathogen: Pathogen.Measles.with({ contacts: 12 }) });
 ```ts
 Pathogen.Measles.r0; // 15
 Pathogen.Measles.features; // { exposed: true, waning: true, vaccination: true, superspreading: true }
-Pathogen.CovidAncestral.fatalityRate(Population.Elderly); // 0.046
+Pathogen.CovidAncestral.fatalityRate(Group.Elderly); // 0.046
 Pathogen.Measles.vaccineCoverage(); // 0.77
 Pathogen.Measles.params(); // the model parameters it sets
 Pathogen.Measles.values.r0; // { value: 15, citation: "guerra-2017", interval: { low: 12, high: 18, kind: "range" } }
@@ -134,7 +134,7 @@ number of people infected (`offspring`); `outbreak.network` has their positions 
 
 Every value is cited (`Pathogen.Measles.values` has them with their sources, intervals and caveats;
 `Pathogen.Measles.citations` lists the sources). Your own pathogens don't need sources. Fatality rates are
-also given for population groups (`Population.Elderly`, `Population.Infants`, …) where published. A pathogen without
+also given for population groups (`Group.Elderly`, `Group.Infants`, …) where published. A pathogen without
 the data for a feature throws if you ask for it.
 
 ## API
@@ -152,7 +152,7 @@ the data for a feature throws if you ask for it.
 | Randomness  | `seededRandom`, `randomSeed`                                                                                                                                                    |
 
 Conventions: times are in days; shares are 0–1; lifelong protection and flat infectiousness are `Infinity`. Ids are
-enums (`PathogenId.Measles`, `Population.Elderly`, `Caveat.Proxy`); a UI supplies the words. A `Pathogen` is a class:
+enums (`PathogenId.Measles`, `Group.Elderly`, `Caveat.Proxy`); a UI supplies the words. A `Pathogen` is a class:
 to send one to a worker, send its id or `pathogen.profile()` (plain data) and rebuild it there.
 
 ## The model

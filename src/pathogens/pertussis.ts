@@ -1,4 +1,4 @@
-import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
+import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Group, PopulationKind, between, cited } from "./types.js";
 
 /**
  * Pertussis (whooping cough). Highly contagious, infectious for weeks, and immunity after infection fades over decades.
@@ -20,8 +20,8 @@ export const PERTUSSIS = {
     id: PathogenId.Pertussis,
     values: {
         r0: cited(5.5, "kretzschmar-2010", { interval: between(5, 6, IntervalKind.Range) }),
-        recoveryDays: cited(15, "wearing-rohani-2009", { also: ["cdc-pinkbook-pertussis"] }),
-        deathDays: cited(15, "wearing-rohani-2009", { also: ["cdc-pinkbook-pertussis"] }),
+        infectiousDays: cited(15, "wearing-rohani-2009", { also: ["cdc-pinkbook-pertussis"] }),
+        fatalInfectiousDays: cited(15, "wearing-rohani-2009", { also: ["cdc-pinkbook-pertussis"] }),
         // Household serial interval, mother to infant [te Beest 2014]. Flat infectiousness: simulated outbreaks still
         // run about half as long (≈ 11 days), as contacts are infected early in the long infectious period.
         generationInterval: cited(20, "te-beest-2014", { interval: between(16, 23, IntervalKind.CI95), caveat: Caveat.Proxy }),
@@ -34,11 +34,11 @@ export const PERTUSSIS = {
         kind: PopulationKind.Age,
         measure: FatalityMeasure.Case,
         groups: [
-            { id: Population.All, covers: "all ages", ifr: cited(0.0012, "skoff-2019") },
+            { id: Group.All, covers: "all ages", ifr: cited(0.0012, "skoff-2019") },
 
-            { id: Population.Infants, covers: "under 1", ifr: cited(261 / 50_950, "skoff-2019") },
-            { id: Population.Children, covers: "4 DTaP doses by age 2", vaccineCoverage: cited(0.807, "hill-2026") },
-            { id: Population.Elderly, covers: "65+", ifr: cited(14 / 8_177, "skoff-2019") },
+            { id: Group.Infants, covers: "under 1", ifr: cited(261 / 50_950, "skoff-2019") },
+            { id: Group.Children, covers: "4 DTaP doses by age 2", vaccineCoverage: cited(0.807, "hill-2026") },
+            { id: Group.Elderly, covers: "65+", ifr: cited(14 / 8_177, "skoff-2019") },
         ],
     },
     vaccination: {

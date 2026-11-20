@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Group, PopulationKind, between, cited } from "./types.js";
 
 /**
  * COVID-19, Omicron variant.
@@ -19,8 +19,8 @@ export const COVID_OMICRON = {
     id: PathogenId.CovidOmicron,
     values: {
         r0: cited(9.5, "liu-rocklov-2022", { interval: between(5.5, 24, IntervalKind.Range) }),
-        recoveryDays: cited(8, "boucau-2022"),
-        deathDays: cited(8, "boucau-2022"),
+        infectiousDays: cited(8, "boucau-2022"),
+        fatalInfectiousDays: cited(8, "boucau-2022"),
         generationInterval: cited(2.99, "xu-2023", { interval: between(2.48, 3.49, IntervalKind.CI95) }),
         infectiousnessHalfLife: cited(2.5, "xu-2023", { caveat: Caveat.Fitted }),
         latentDays: cited(2.7, "jiang-2023", { interval: between(2.53, 2.78, IntervalKind.CI95) }),
@@ -41,12 +41,12 @@ export const COVID_OMICRON = {
         kind: PopulationKind.Age,
         measure: FatalityMeasure.Infection,
         groups: [
-            { id: Population.All, covers: "all ages", ifr: cited(0.001, "liu-ijid-2022"), vaccineCoverage: cited(0.69, "fast-2022") },
+            { id: Group.All, covers: "all ages", ifr: cited(0.001, "liu-ijid-2022"), vaccineCoverage: cited(0.69, "fast-2022") },
 
-            { id: Population.Infants, covers: "1", ifr: cited(0.000011, "liu-ijid-2022", { also: ["covid-forecasting-2022"] }) },
-            { id: Population.Adults, covers: "25", ifr: cited(0.000021, "liu-ijid-2022", { also: ["levin-2020"] }) },
-            { id: Population.MiddleAged, covers: "55", ifr: cited(0.00084, "liu-ijid-2022", { also: ["levin-2020"] }) },
-            { id: Population.Elderly, covers: "75", ifr: cited(0.0097, "liu-ijid-2022", { also: ["levin-2020"] }) },
+            { id: Group.Infants, covers: "1", ifr: cited(0.000011, "liu-ijid-2022", { also: ["covid-forecasting-2022"] }) },
+            { id: Group.Adults, covers: "25", ifr: cited(0.000021, "liu-ijid-2022", { also: ["levin-2020"] }) },
+            { id: Group.MiddleAged, covers: "55", ifr: cited(0.00084, "liu-ijid-2022", { also: ["levin-2020"] }) },
+            { id: Group.Elderly, covers: "75", ifr: cited(0.0097, "liu-ijid-2022", { also: ["levin-2020"] }) },
         ],
     },
     vaccination: {

@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Group, PopulationKind, between, cited } from "./types.js";
 
 /**
  * COVID-19, ancestral strain, before vaccines.
@@ -18,8 +18,8 @@ export const COVID_ANCESTRAL = {
     id: PathogenId.CovidAncestral,
     values: {
         r0: cited(2.79, "liu-2020"),
-        recoveryDays: cited(8, "he-2020"),
-        deathDays: cited(8, "he-2020"),
+        infectiousDays: cited(8, "he-2020"),
+        fatalInfectiousDays: cited(8, "he-2020"),
         generationInterval: cited(5.2, "ganyani-2020", { interval: between(3.78, 6.78, IntervalKind.CrI95) }),
         // Fitted with the published latent and infectious periods; the 5.5-day latent period allows only the upper end
         // of the generation interval's credible interval (6.8 days).
@@ -40,16 +40,16 @@ export const COVID_ANCESTRAL = {
         kind: PopulationKind.Age,
         measure: FatalityMeasure.Infection,
         groups: [
-            { id: Population.All, covers: "all ages", ifr: cited(0.0047, "covid-forecasting-2022"), vaccineCoverage: cited(0.69, "fast-2022") },
+            { id: Group.All, covers: "all ages", ifr: cited(0.0047, "covid-forecasting-2022"), vaccineCoverage: cited(0.69, "fast-2022") },
 
             {
-                id: Population.Infants,
+                id: Group.Infants,
                 covers: "1",
                 ifr: cited(0.000054, "covid-forecasting-2022", { interval: between(0.000021, 0.000114, IntervalKind.UI95) }),
             },
-            { id: Population.Adults, covers: "25", ifr: cited(0.0001, "levin-2020") },
-            { id: Population.MiddleAged, covers: "55", ifr: cited(0.004, "levin-2020") },
-            { id: Population.Elderly, covers: "75", ifr: cited(0.046, "levin-2020") },
+            { id: Group.Adults, covers: "25", ifr: cited(0.0001, "levin-2020") },
+            { id: Group.MiddleAged, covers: "55", ifr: cited(0.004, "levin-2020") },
+            { id: Group.Elderly, covers: "75", ifr: cited(0.046, "levin-2020") },
         ],
     },
     vaccination: {

@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Group, PopulationKind, between, cited } from "./types.js";
 
 /**
  * Respiratory syncytial virus. Reinfection is common throughout life, so it's the disease where waning immunity matters
@@ -20,8 +20,8 @@ export const RSV = {
     id: PathogenId.Rsv,
     values: {
         r0: cited(3.0, "reis-2016", { interval: between(1.5, 4, IntervalKind.Range) }),
-        recoveryDays: cited(6.4, "reis-2016"),
-        deathDays: cited(6.4, "reis-2016"),
+        infectiousDays: cited(6.4, "reis-2016"),
+        fatalInfectiousDays: cited(6.4, "reis-2016"),
         // Flat infectiousness: simulated outbreaks run a little shorter (≈ 6 days).
         generationInterval: cited(7.5, "vink-2014", { caveat: Caveat.Proxy }),
         latentDays: cited(3, "lessler-2009", { also: ["cdc-rsv-spread"] }),
@@ -40,8 +40,8 @@ export const RSV = {
         kind: PopulationKind.Age,
         measure: FatalityMeasure.Illness,
         groups: [
-            { id: Population.Under5, covers: "under 5", ifr: cited(0.0031, "li-2022", { caveat: Caveat.OtherSetting }) },
-            { id: Population.Elderly, covers: "75+", vaccineCoverage: cited(0.397, "kriss-2024") },
+            { id: Group.Under5, covers: "under 5", ifr: cited(0.0031, "li-2022", { caveat: Caveat.OtherSetting }) },
+            { id: Group.Elderly, covers: "75+", vaccineCoverage: cited(0.397, "kriss-2024") },
         ],
     },
 } satisfies PathogenProfile<PathogenId>;

@@ -5,25 +5,43 @@
  */
 import { type CompartmentModel, SeirdCompartment, type SeirdParams, vaccineSusceptibility, waningSusceptibility } from "./model.js";
 
-/** Every parameter any of the simulator's models reads (each model ignores the ones it doesn't use). */
+/** Protection after recovery (immunity) or vaccination. Every field is optional; omitted, there is none of it. */
+export interface ProtectionParams {
+    /** Days for protection to halve once it starts to wane (default `Infinity`: it never wanes). */
+    halfLife?: number;
+    /** Days of full protection before it starts to wane (default 0; `Infinity`: lifelong). */
+    delay?: number;
+    /** For people infected anyway: how much less likely to die (0–1, default 0)… */
+    deathProtection?: number;
+    /** …and how much less infectious (0–1, default 0). */
+    spreadProtection?: number;
+}
+
+/** The vaccine: protection against infection at first, and how it wanes. */
+export interface VaccineParams extends ProtectionParams {
+    /** The share of the vaccinated protected from infection at first (0–1). */
+    efficacy: number;
+}
+
+/** The SEIRD model's parameters (each model ignores those of parts it doesn't have). */
 export interface SeirdModelParams extends SeirdParams {
     /** Coefficient of variation of the latent period (its shape is 1 / CV²). */
     latentVariation: number;
     /** Days for infectiousness to halve over the infectious period (`Infinity`, or omitted: flat). */
     infectiousnessHalfLife?: number;
-    /** Days for protection against reinfection to halve, once it starts to wane (`Infinity`: lifelong). */
-    immunityHalfLife: number;
-    /** Days of full protection after recovery before it starts to wane (0: it wanes from the start; `Infinity`: lifelong). */
-    immunityDelay?: number;
-    /** Vaccine protection against infection at first (0–1), and days for it to halve (`Infinity`: lifelong). */
-    vaccineEfficacy?: number;
-    vaccineHalfLife?: number;
-    /** For people infected despite a vaccine, or reinfected: how much less likely to die, and less infectious (0–1). */
-    vaccineDeathProtection?: number;
-    vaccineSpreadProtection?: number;
-    immunityDeathProtection?: number;
-    immunitySpreadProtection?: number;
+    /** Protection after recovery, with waning immunity (omitted: lifelong). */
+    immunity?: ProtectionParams;
+    /** The vaccine, with vaccination (omitted: none). */
+    vaccine?: VaccineParams;
 }
+
+/** Parameters with `changes` applied, `immunity` and `vaccine` field by field. */
+export const withParams = <P extends SeirdModelParams>(params: P, changes: Partial<SeirdModelParams> = {}): P => ({
+    ...params,
+    ...changes,
+    ...(changes.immunity || params.immunity ? { immunity: { ...params.immunity, ...changes.immunity } } : {}),
+    ...(changes.vaccine || params.vaccine ? { vaccine: { ...params.vaccine, ...changes.vaccine } as VaccineParams } : {}),
+});
 
 export type SeirdModel = CompartmentModel<SeirdModelParams>;
 
@@ -71,9 +89,9 @@ export const seirdModel = ({
                       {
                           key: SeirdCompartment.Vaccinated,
                           name: "vaccinated",
-                          susceptibilityAfter: (p: SeirdModelParams) => vaccineSusceptibility(p.vaccineEfficacy ?? 0, p.vaccineHalfLife ?? Infinity),
+                          susceptibilityAfter: (p: SeirdModelParams) => vaccineSusceptibility(p.vaccine?.efficacy ?? 0, p.vaccine?.halfLife ?? Infinity),
                           // Breakthrough infections: less likely to be fatal, and less infectious.
-                          protects: (p: SeirdModelParams) => ({ death: p.vaccineDeathProtection ?? 0, spread: p.vaccineSpreadProtection ?? 0 }),
+                          protects: (p: SeirdModelParams) => ({ death: p.vaccine?.deathProtection ?? 0, spread: p.vaccine?.spreadProtection ?? 0 }),
                       },
                   ]
                 : []),
@@ -105,17 +123,17 @@ export const seirdModel = ({
                     return (day) => 2 ** (-day / halfLife);
                 },
                 exits: [
-                    { to: SeirdCompartment.Recovered, share: (p) => 1 - p.ifr, days: (p) => p.recoveryDays },
-                    { to: SeirdCompartment.Died, share: (p) => p.ifr, days: (p) => p.deathDays },
+                    { to: SeirdCompartment.Recovered, share: (p) => 1 - p.ifr, days: (p) => p.infectiousDays },
+                    { to: SeirdCompartment.Died, share: (p) => p.ifr, days: (p) => p.fatalInfectiousDays },
                 ],
             },
             waning
                 ? {
                       key: SeirdCompartment.Recovered,
                       name: "recovered",
-                      susceptibilityAfter: (p) => waningSusceptibility(p.immunityHalfLife, p.immunityDelay ?? 0),
+                      susceptibilityAfter: (p) => waningSusceptibility(p.immunity?.halfLife ?? Infinity, p.immunity?.delay ?? 0),
                       // Reinfections: less likely to be fatal, and less infectious.
-                      protects: (p) => ({ death: p.immunityDeathProtection ?? 0, spread: p.immunitySpreadProtection ?? 0 }),
+                      protects: (p) => ({ death: p.immunity?.deathProtection ?? 0, spread: p.immunity?.spreadProtection ?? 0 }),
                   }
                 : { key: SeirdCompartment.Recovered, name: "recovered" },
             { key: SeirdCompartment.Died, name: "died", dead: true },
@@ -138,33 +156,28 @@ export const withStagesScaled = <P extends SeirdModelParams>(params: P, scale: n
         : {
               ...params,
               latentDays: params.latentDays * scale,
-              recoveryDays: params.recoveryDays * scale,
-              deathDays: params.deathDays * scale,
+              infectiousDays: params.infectiousDays * scale,
+              fatalInfectiousDays: params.fatalInfectiousDays * scale,
               // A flat profile (an infinite half-life) stays flat.
               ...(params.infectiousnessHalfLife !== undefined ? { infectiousnessHalfLife: params.infectiousnessHalfLife * scale } : {}),
           };
 
 /**
- * A complete set of SEIRD parameters: `overrides` (e.g. a disease's `pathogenParams`) over defaults for a mild disease
- * with flat infectiousness, 1% fatality and no protection after infection or vaccination. The default `beta` is a
- * placeholder: solve it for an R₀ with `solveTransmission`.
+ * A complete set of SEIRD parameters: `overrides` (e.g. a pathogen's `params()`) over defaults for a mild disease with
+ * flat infectiousness, 1% fatality, lifelong immunity and no vaccine. The default `beta` is a placeholder: solve it
+ * for an R₀ with `solveTransmission`.
  */
-export const seirdParams = (overrides: Partial<SeirdModelParams> = {}): SeirdModelParams => ({
-    beta: 0.3,
-    dispersion: null,
-    recoveryDays: 4,
-    deathDays: 4,
-    ifr: 0.01,
-    latentDays: 3,
-    latentVariation: 0.5,
-    infectiousnessHalfLife: Infinity,
-    immunityHalfLife: 180,
-    immunityDelay: 0,
-    vaccineEfficacy: 0.8,
-    vaccineHalfLife: 365,
-    vaccineDeathProtection: 0,
-    vaccineSpreadProtection: 0,
-    immunityDeathProtection: 0,
-    immunitySpreadProtection: 0,
-    ...overrides,
-});
+export const seirdParams = (overrides: Partial<SeirdModelParams> = {}): SeirdModelParams =>
+    withParams(
+        {
+            beta: 0.3,
+            dispersion: null,
+            infectiousDays: 4,
+            fatalInfectiousDays: 4,
+            ifr: 0.01,
+            latentDays: 3,
+            latentVariation: 0.5,
+            infectiousnessHalfLife: Infinity,
+        },
+        overrides,
+    );
