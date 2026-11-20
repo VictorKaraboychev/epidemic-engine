@@ -118,12 +118,12 @@ of people infected (`offspring`); `outbreak.population` has their ages and `outb
 
 ## The population
 
-A `Population` is built from a `PopulationProfile`, by default `US_2024`, and `describe()` says how:
+A `Population` is built from a `PopulationProfile`, by default `Population.US_2024`, and `describe()` says how:
 
 ```ts
 import { Population } from "epidemic-engine";
 
-const population = new Population({ people: 50_000, seed: 1 });
+const population = new Population({ people: 50_000, profile: Population.US_2024, seed: 1 }); // the default profile
 population.describe();
 // 50,000 people, modelled on United States, 2024.
 // Ages: drawn from single-year counts [census-ages-2024], every household with an adult.

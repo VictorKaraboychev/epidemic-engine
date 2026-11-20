@@ -4,7 +4,7 @@
  *
  * - Start here: `Outbreak` (one outbreak) and `runOutbreaks` (many, summed up).
  * - Pathogens: `Pathogen` (`Pathogen.Measles`, `new Pathogen({ … })` for your own), `Group`, `CITATIONS`.
- * - People: `Population` (ages, households, contacts; `US_2024` by default).
+ * - People: `Population` (ages, households, contacts; `Population.US_2024` by default).
  * - Model: `seirdModel` and its parameters, `SeirdCompartment`.
  * - Results: `History` and its readers, the reference curve (`Theory`), `infectionTimeline`.
  *
@@ -36,7 +36,7 @@ export {
     type ProtectionSpec,
     type Vaccination,
 } from "./pathogens/index.js";
-export { DEFAULT_CONTACTS, Population, type PopulationOptions, type PopulationProfile, US_2024 } from "./population.js";
+export { DEFAULT_CONTACTS, Population, type PopulationOptions, type PopulationProfile } from "./population.js";
 export {
     type ModelFeatures,
     type ProtectionParams,

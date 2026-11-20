@@ -156,6 +156,11 @@ export const drawAges = (network: Pick<Network, "count" | "householdOf">, counts
 
 /** A population: its people, their ages and the network of who meets whom. See the module comment for the model. */
 export class Population {
+    /** The United States in 2024 (the default profile): census ages and households, cited contact patterns. */
+    static readonly US_2024: PopulationProfile = US_2024;
+    /** Every built-in profile. */
+    static readonly profiles: readonly PopulationProfile[] = [US_2024];
+
     readonly people: number;
     readonly contacts: number;
     readonly seed: number;

@@ -41,6 +41,12 @@ describe("Population", () => {
         expect(description).toMatch(/fu-2012/);
     });
 
+    it("has the built-in profiles as static members, the US in 2024 by default", () => {
+        expect(Population.US_2024).toBe(US_2024);
+        expect(Population.profiles).toContain(Population.US_2024);
+        expect(new Population({ people: 2000, seed: 1, profile: Population.US_2024 }).ages).toEqual(new Population({ people: 2000, seed: 1 }).ages);
+    });
+
     it("can be built without ages or households", () => {
         const plain = new Population({ people: 1000, seed: 1, profile: { name: "plain", contacts: US_2024.contacts } });
         expect(plain.ages).toBeNull();
