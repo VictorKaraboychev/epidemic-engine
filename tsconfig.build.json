@@ -1,0 +1,14 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "noEmit": false,
+        "tsBuildInfoFile": null,
+        "rootDir": "src",
+        "outDir": "dist",
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "types": []
+    },
+    "exclude": ["src/**/*.test.ts", "src/validation", "src/test-support.ts"]
+}

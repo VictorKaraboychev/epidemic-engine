@@ -1,0 +1,64 @@
+{
+    "name": "epidemic-engine",
+    "version": "0.1.0",
+    "private": true,
+    "description": "Stochastic epidemics on contact networks of up to a million people, with a deterministic reference and pathogens set from published estimates (every value cited). No dependencies.",
+    "keywords": [
+        "epidemic",
+        "epidemiology",
+        "SEIR",
+        "SIR",
+        "stochastic",
+        "network",
+        "simulation",
+        "infectious disease"
+    ],
+    "homepage": "https://github.com/VictorKaraboychev/epidemic-engine#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/VictorKaraboychev/epidemic-engine.git"
+    },
+    "bugs": {
+        "url": "https://github.com/VictorKaraboychev/epidemic-engine/issues"
+    },
+    "license": "MIT",
+    "author": "Victor Karaboychev",
+    "contributors": [
+        "Ziyuan Zhang"
+    ],
+    "type": "module",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        },
+        "./package.json": "./package.json"
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist",
+        "src",
+        "!src/**/*.test.ts",
+        "!src/validation",
+        "!src/test-support.ts",
+        "README.md",
+        "LICENSE"
+    ],
+    "engines": {
+        "node": ">=20"
+    },
+    "scripts": {
+        "build": "rm -rf dist && tsc -p tsconfig.build.json",
+        "typecheck": "tsc -p tsconfig.json",
+        "test": "vitest run",
+        "validate": "VALIDATE=1 vitest run src/validation",
+        "prepack": "npm run build"
+    },
+    "devDependencies": {
+        "@types/node": "^26.6.3",
+        "typescript": "^6.0.3",
+        "vitest": "^5.1.0"
+    }
+}
