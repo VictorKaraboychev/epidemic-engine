@@ -15,14 +15,14 @@ import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile
 export const EBOLA = {
     id: PathogenId.Ebola,
     values: {
-        r0: cited(1.83, "who-ebola-nejm-2014", { interval: between(1.71, 2.02, IntervalKind.Range) }),
-        infectiousDays: cited(16.4, "who-ebola-nejm-2014"),
-        fatalInfectiousDays: cited(7.5, "who-ebola-nejm-2014"),
+        r0: cited(1.83, "who-ebola-nejm-2014", { setting: "Liberia, 2014", interval: between(1.71, 2.02, IntervalKind.Range) }),
+        infectiousDays: cited(16.4, "who-ebola-nejm-2014", { setting: "West Africa, 2014" }),
+        fatalInfectiousDays: cited(7.5, "who-ebola-nejm-2014", { setting: "West Africa, 2014" }),
         generationInterval: cited(15.3, "who-ebola-nejm-2014", { caveat: Caveat.Proxy }),
         infectiousnessHalfLife: cited(7.9, "who-ebola-nejm-2014", { caveat: Caveat.Fitted }),
-        latentDays: cited(11.4, "who-ebola-nejm-2014"),
+        latentDays: cited(11.4, "who-ebola-nejm-2014", { setting: "West Africa, 2014" }),
         latentVariation: cited(0.8, "who-ebola-nejm-2014", { caveat: Caveat.Proxy }),
-        dispersion: cited(0.18, "althaus-2015", { interval: between(0.1, 0.26, IntervalKind.CI95) }),
+        dispersion: cited(0.18, "althaus-2015", { setting: "Conakry, 2014", interval: between(0.1, 0.26, IntervalKind.CI95) }),
     },
     contacts: 3,
     vaccination: {

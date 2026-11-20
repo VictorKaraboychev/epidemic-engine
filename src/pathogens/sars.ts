@@ -18,26 +18,36 @@ import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, type Pathogen
 export const SARS = {
     id: PathogenId.Sars,
     values: {
-        r0: cited(2.7, "riley-2003", { interval: between(2.2, 3.7, IntervalKind.CI95) }),
+        r0: cited(2.7, "riley-2003", { setting: "Hong Kong, 2003 (excluding superspreading events)", interval: between(2.2, 3.7, IntervalKind.CI95) }),
         infectiousDays: cited(26.5, "leung-2004", { also: ["who-sars-consensus"], caveat: Caveat.ClinicalDuration }),
         fatalInfectiousDays: cited(23.7, "leung-2004", { also: ["who-sars-consensus"], caveat: Caveat.ClinicalDuration }),
         generationInterval: cited(8.4, "lipsitch-2003", { caveat: Caveat.Proxy }),
         infectiousnessHalfLife: cited(5, "lipsitch-2003", { caveat: Caveat.Fitted }),
         latentDays: cited(4.6, "leung-2004", { also: ["who-sars-consensus"], interval: between(3.8, 5.8, IntervalKind.CI95) }),
         latentVariation: cited(0.65, "lessler-2009", { interval: between(0.55, 0.75, IntervalKind.CI95), caveat: Caveat.Proxy }),
-        dispersion: cited(0.16, "lloyd-smith-2005", { interval: between(0.11, 0.64, IntervalKind.CI90) }),
+        dispersion: cited(0.16, "lloyd-smith-2005", { setting: "Singapore, 2003", interval: between(0.11, 0.64, IntervalKind.CI90) }),
     },
     contacts: 4,
     populations: {
         kind: PopulationKind.Age,
         measure: FatalityMeasure.Case,
         groups: [
-            { id: Group.All, covers: "probable cases", ifr: cited(0.096, "who-sars-summary") },
+            { id: Group.All, covers: "probable cases", ifr: cited(0.096, "who-sars-summary", { setting: "Probable cases worldwide, 2002–03" }) },
 
-            { id: Group.Young, covers: "24 and under", ages: { from: 0, to: 24 }, ifr: cited(0.01, "who-sars-update-49", { bound: Bound.Below }) },
-            { id: Group.Adults, covers: "25–44", ages: { from: 25, to: 44 }, ifr: cited(0.06, "who-sars-update-49") },
-            { id: Group.MiddleAged, covers: "45–64", ages: { from: 45, to: 64 }, ifr: cited(0.15, "who-sars-update-49") },
-            { id: Group.Elderly, covers: "65+", ages: { from: 65, to: Infinity }, ifr: cited(0.5, "who-sars-update-49", { bound: Bound.Above }) },
+            {
+                id: Group.Young,
+                covers: "24 and under",
+                ages: { from: 0, to: 24 },
+                ifr: cited(0.01, "who-sars-update-49", { setting: "May 2003", bound: Bound.Below }),
+            },
+            { id: Group.Adults, covers: "25–44", ages: { from: 25, to: 44 }, ifr: cited(0.06, "who-sars-update-49", { setting: "May 2003" }) },
+            { id: Group.MiddleAged, covers: "45–64", ages: { from: 45, to: 64 }, ifr: cited(0.15, "who-sars-update-49", { setting: "May 2003" }) },
+            {
+                id: Group.Elderly,
+                covers: "65+",
+                ages: { from: 65, to: Infinity },
+                ifr: cited(0.5, "who-sars-update-49", { setting: "May 2003", bound: Bound.Above }),
+            },
         ],
     },
     vaccination: { none: "li-2020-vaccines" },

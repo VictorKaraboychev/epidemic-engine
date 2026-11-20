@@ -100,6 +100,8 @@ export interface Cited {
     bound?: Bound;
     /** Why the value should be read with care, if it should. */
     caveat?: Caveat;
+    /** Where and when it was measured, as the source reports it (e.g. "US, 2023–24 season"), so you can judge whether it applies. */
+    setting?: string;
 }
 
 /** Everything about a value beyond the number and its main source. */

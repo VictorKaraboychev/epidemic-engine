@@ -24,7 +24,7 @@ export const COVID_ANCESTRAL = {
         // Fitted with the published latent and infectious periods; the 5.5-day latent period allows only the upper end
         // of the generation interval's credible interval (6.8 days).
         infectiousnessHalfLife: cited(1.3, "ganyani-2020", { also: ["he-2020"], caveat: Caveat.Fitted }),
-        latentDays: cited(5.5, "xin-2022", { interval: between(5.1, 5.9, IntervalKind.CI95) }),
+        latentDays: cited(5.5, "xin-2022", { setting: "Contact tracing, China", interval: between(5.1, 5.9, IntervalKind.CI95) }),
         latentVariation: cited(0.44, "lauer-2020", { interval: between(0.28, 0.59, IntervalKind.CI95), caveat: Caveat.Proxy }),
         dispersion: cited(0.1, "endo-2020", { interval: between(0.05, 0.2, IntervalKind.CrI95) }),
     },
@@ -40,7 +40,12 @@ export const COVID_ANCESTRAL = {
         kind: PopulationKind.Age,
         measure: FatalityMeasure.Infection,
         groups: [
-            { id: Group.All, covers: "all ages", ifr: cited(0.0047, "covid-forecasting-2022"), vaccineCoverage: cited(0.69, "fast-2022") },
+            {
+                id: Group.All,
+                covers: "all ages",
+                ifr: cited(0.0047, "covid-forecasting-2022", { setting: "Median country, April 2020" }),
+                vaccineCoverage: cited(0.69, "fast-2022", { setting: "US, age 5 and over, mid-2022" }),
+            },
 
             {
                 id: Group.Infants,
@@ -48,9 +53,14 @@ export const COVID_ANCESTRAL = {
                 ages: { from: 1, to: 1 },
                 ifr: cited(0.000054, "covid-forecasting-2022", { interval: between(0.000021, 0.000114, IntervalKind.UI95) }),
             },
-            { id: Group.Adults, covers: "25", ages: { from: 25, to: 25 }, ifr: cited(0.0001, "levin-2020") },
-            { id: Group.MiddleAged, covers: "55", ages: { from: 55, to: 55 }, ifr: cited(0.004, "levin-2020") },
-            { id: Group.Elderly, covers: "75", ages: { from: 75, to: 75 }, ifr: cited(0.046, "levin-2020") },
+            { id: Group.Adults, covers: "25", ages: { from: 25, to: 25 }, ifr: cited(0.0001, "levin-2020", { setting: "Before vaccines (meta-regression)" }) },
+            {
+                id: Group.MiddleAged,
+                covers: "55",
+                ages: { from: 55, to: 55 },
+                ifr: cited(0.004, "levin-2020", { setting: "Before vaccines (meta-regression)" }),
+            },
+            { id: Group.Elderly, covers: "75", ages: { from: 75, to: 75 }, ifr: cited(0.046, "levin-2020", { setting: "Before vaccines (meta-regression)" }) },
         ],
     },
     vaccination: {

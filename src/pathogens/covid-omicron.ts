@@ -23,9 +23,9 @@ export const COVID_OMICRON = {
         fatalInfectiousDays: cited(8, "boucau-2022"),
         generationInterval: cited(2.99, "xu-2023", { interval: between(2.48, 3.49, IntervalKind.CI95) }),
         infectiousnessHalfLife: cited(2.5, "xu-2023", { caveat: Caveat.Fitted }),
-        latentDays: cited(2.7, "jiang-2023", { interval: between(2.53, 2.78, IntervalKind.CI95) }),
+        latentDays: cited(2.7, "jiang-2023", { setting: "Five outbreaks in China, 2022", interval: between(2.53, 2.78, IntervalKind.CI95) }),
         latentVariation: cited(0.69, "backer-2022", { caveat: Caveat.Proxy }),
-        dispersion: cited(0.33, "guo-2022", { interval: between(0.17, 0.62, IntervalKind.CrI95) }),
+        dispersion: cited(0.33, "guo-2022", { setting: "Hong Kong, early chains", interval: between(0.17, 0.62, IntervalKind.CrI95) }),
     },
     contacts: 13,
     // ≈ 81% at 3–6 months (day ≈ 137) and ≈ 28% at 9–12 months (day ≈ 320): halving every 117 days through both
@@ -41,7 +41,12 @@ export const COVID_OMICRON = {
         kind: PopulationKind.Age,
         measure: FatalityMeasure.Infection,
         groups: [
-            { id: Group.All, covers: "all ages", ifr: cited(0.001, "liu-ijid-2022"), vaccineCoverage: cited(0.69, "fast-2022") },
+            {
+                id: Group.All,
+                covers: "all ages",
+                ifr: cited(0.001, "liu-ijid-2022", { setting: "South Africa" }),
+                vaccineCoverage: cited(0.69, "fast-2022", { setting: "US, mid-2022" }),
+            },
 
             { id: Group.Infants, covers: "1", ages: { from: 1, to: 1 }, ifr: cited(0.000011, "liu-ijid-2022", { also: ["covid-forecasting-2022"] }) },
             { id: Group.Adults, covers: "25", ages: { from: 25, to: 25 }, ifr: cited(0.000021, "liu-ijid-2022", { also: ["levin-2020"] }) },

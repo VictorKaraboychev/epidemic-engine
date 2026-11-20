@@ -32,14 +32,34 @@ export const INFLUENZA_B = {
             {
                 id: Group.All,
                 covers: "all ages",
-                ifr: cited(0.0007, "cdc-flu-burden-2024"),
-                vaccineCoverage: cited(0.472, "cdc-fluvaxview-2024"),
+                ifr: cited(0.0007, "cdc-flu-burden-2024", { setting: "US, 2023–24 season (all influenza types)" }),
+                vaccineCoverage: cited(0.472, "cdc-fluvaxview-2024", { setting: "US, 2023–24 season" }),
             },
 
-            { id: Group.Infants, covers: "0–4", ages: { from: 0, to: 4 }, ifr: cited(268 / 2_903_633, "cdc-flu-burden-2024") },
-            { id: Group.Adults, covers: "18–49", ages: { from: 18, to: 49 }, ifr: cited(2_705 / 16_351_383, "cdc-flu-burden-2024") },
-            { id: Group.MiddleAged, covers: "50–64", ages: { from: 50, to: 64 }, ifr: cited(5_701 / 9_042_884, "cdc-flu-burden-2024") },
-            { id: Group.Elderly, covers: "65+", ages: { from: 65, to: Infinity }, ifr: cited(19_038 / 2_610_181, "cdc-flu-burden-2024") },
+            {
+                id: Group.Infants,
+                covers: "0–4",
+                ages: { from: 0, to: 4 },
+                ifr: cited(268 / 2_903_633, "cdc-flu-burden-2024", { setting: "US, 2023–24 season (all influenza types; preliminary)" }),
+            },
+            {
+                id: Group.Adults,
+                covers: "18–49",
+                ages: { from: 18, to: 49 },
+                ifr: cited(2_705 / 16_351_383, "cdc-flu-burden-2024", { setting: "US, 2023–24 season (all influenza types; preliminary)" }),
+            },
+            {
+                id: Group.MiddleAged,
+                covers: "50–64",
+                ages: { from: 50, to: 64 },
+                ifr: cited(5_701 / 9_042_884, "cdc-flu-burden-2024", { setting: "US, 2023–24 season (all influenza types; preliminary)" }),
+            },
+            {
+                id: Group.Elderly,
+                covers: "65+",
+                ages: { from: 65, to: Infinity },
+                ifr: cited(19_038 / 2_610_181, "cdc-flu-burden-2024", { setting: "US, 2023–24 season (all influenza types; preliminary)" }),
+            },
         ],
     },
     vaccination: {

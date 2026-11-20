@@ -3,21 +3,23 @@ export interface Citation {
     authors: string;
     title: string;
     venue: string;
-    /** Year, volume, issue and pages, or "accessed" information for web pages. */
+    /** Year, volume, issue and pages, or "accessed" information for web pages, as the source gives them. */
     details: string;
+    /** The year published (or last updated, for a web page), where it gives one. */
+    year?: number;
+    /** The DOI, for sources that have one (`url` then resolves it). */
+    doi?: string;
     url: string;
 }
 
-/**
- * Every source the simulator cites, shared by all diseases (several cite the same paper). Reference lists number
- * them in the order they are first cited (see `CITATION_ORDER` in `diseases/index.ts`).
- */
+/** Every source the engine cites, shared by all pathogens and populations (several cite the same paper). */
 export const CITATIONS = {
     "census-ages-2024": {
         authors: "US Census Bureau",
         title: "Annual Estimates of the Resident Population by Single Year of Age and Sex for the United States: April 1, 2020 to July 1, 2024 (NC-EST2024-AGESEX-RES)",
         venue: "Vintage 2024 Population Estimates",
         details: "June 2025",
+        year: 2025,
         url: "https://www.census.gov/data/tables/time-series/demo/popest/2020s-national-detail.html",
     },
     "census-households-2024": {
@@ -25,6 +27,7 @@ export const CITATIONS = {
         title: "Historical Households Tables, Table HH-4: Households by Size, 1960 to Present",
         venue: "Current Population Survey, Annual Social and Economic Supplement",
         details: "2024",
+        year: 2024,
         url: "https://www.census.gov/data/tables/time-series/demo/families/households.html",
     },
     "madewell-2020": {
@@ -32,6 +35,8 @@ export const CITATIONS = {
         title: "Household transmission of SARS-CoV-2: a systematic review and meta-analysis",
         venue: "JAMA Network Open",
         details: "2020;3(12):e2031756",
+        year: 2020,
+        doi: "10.1001/jamanetworkopen.2020.31756",
         url: "https://doi.org/10.1001/jamanetworkopen.2020.31756",
     },
     "fu-2012": {
@@ -39,6 +44,8 @@ export const CITATIONS = {
         title: "Representative contact diaries for modeling the spread of infectious diseases in Taiwan",
         venue: "PLoS ONE",
         details: "2012;7(10):e45113",
+        year: 2012,
+        doi: "10.1371/journal.pone.0045113",
         url: "https://doi.org/10.1371/journal.pone.0045113",
     },
     "lloyd-smith-2005": {
@@ -46,6 +53,8 @@ export const CITATIONS = {
         title: "Superspreading and the effect of individual variation on disease emergence",
         venue: "Nature",
         details: "2005;438:355–359",
+        year: 2005,
+        doi: "10.1038/nature04153",
         url: "https://doi.org/10.1038/nature04153",
     },
     "liu-2020": {
@@ -53,6 +62,8 @@ export const CITATIONS = {
         title: "The reproductive number of COVID-19 is higher compared to SARS coronavirus",
         venue: "Journal of Travel Medicine",
         details: "2020;27(2):taaa021",
+        year: 2020,
+        doi: "10.1093/jtm/taaa021",
         url: "https://doi.org/10.1093/jtm/taaa021",
     },
     "he-2020": {
@@ -60,6 +71,8 @@ export const CITATIONS = {
         title: "Temporal dynamics in viral shedding and transmissibility of COVID-19",
         venue: "Nature Medicine",
         details: "2020;26(5):672–675",
+        year: 2020,
+        doi: "10.1038/s41591-020-0869-5",
         url: "https://doi.org/10.1038/s41591-020-0869-5",
     },
     "liu-rocklov-2022": {
@@ -67,6 +80,8 @@ export const CITATIONS = {
         title: "The effective reproductive number of the Omicron variant of SARS-CoV-2 is several times relative to Delta",
         venue: "Journal of Travel Medicine",
         details: "2022;29(3):taac037",
+        year: 2022,
+        doi: "10.1093/jtm/taac037",
         url: "https://doi.org/10.1093/jtm/taac037",
     },
     "boucau-2022": {
@@ -74,6 +89,7 @@ export const CITATIONS = {
         title: "Duration of shedding of culturable virus in SARS-CoV-2 Omicron (BA.1) infection",
         venue: "New England Journal of Medicine",
         details: "2022;387:275–277",
+        year: 2022,
         url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC9258747/",
     },
     "covid-forecasting-2022": {
@@ -81,6 +97,8 @@ export const CITATIONS = {
         title: "Variation in the COVID-19 infection–fatality ratio by age, time, and geography during the pre-vaccine era: a systematic analysis",
         venue: "The Lancet",
         details: "2022;399(10334):1469–1488",
+        year: 2022,
+        doi: "10.1016/S0140-6736(21)02867-1",
         url: "https://doi.org/10.1016/S0140-6736(21)02867-1",
     },
     "levin-2020": {
@@ -88,6 +106,7 @@ export const CITATIONS = {
         title: "Assessing the age specificity of infection fatality rates for COVID-19: systematic review, meta-analysis, and public policy implications",
         venue: "European Journal of Epidemiology",
         details: "2020;35(12):1123–1138",
+        year: 2020,
         url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC7721859/",
     },
     "liu-ijid-2022": {
@@ -95,6 +114,7 @@ export const CITATIONS = {
         title: "Reduction in the infection fatality rate of Omicron variant compared with previous variants in South Africa",
         venue: "International Journal of Infectious Diseases",
         details: "2022;120:146–149",
+        year: 2022,
         url: "https://research.polyu.edu.hk/en/publications/reduction-in-the-infection-fatality-rate-of-omicron-variant-compa/",
     },
     "biggerstaff-2014": {
@@ -102,6 +122,8 @@ export const CITATIONS = {
         title: "Estimates of the reproduction number for seasonal, pandemic, and zoonotic influenza: a systematic review of the literature",
         venue: "BMC Infectious Diseases",
         details: "2014;14:480",
+        year: 2014,
+        doi: "10.1186/1471-2334-14-480",
         url: "https://doi.org/10.1186/1471-2334-14-480",
     },
     "thompson-2022": {
@@ -109,6 +131,7 @@ export const CITATIONS = {
         title: "Global variation in early epidemic growth rates and reproduction number of seasonal influenza",
         venue: "International Journal of Infectious Diseases",
         details: "2022;122:382–388",
+        year: 2022,
         url: "https://pubmed.ncbi.nlm.nih.gov/35718299/",
     },
     "cdc-flu": {
@@ -123,6 +146,7 @@ export const CITATIONS = {
         title: "Preliminary estimated flu disease burden, 2023–2024 flu season",
         venue: "cdc.gov",
         details: "Updated 20 November 2024",
+        year: 2024,
         url: "https://archive.cdc.gov/www_cdc_gov/flu-burden/php/data-vis/2023-2024.html",
     },
     "guerra-2017": {
@@ -130,6 +154,7 @@ export const CITATIONS = {
         title: "The basic reproduction number (R0) of measles: a systematic review",
         venue: "The Lancet Infectious Diseases",
         details: "2017;17(12):e420–e428",
+        year: 2017,
         url: "https://pubmed.ncbi.nlm.nih.gov/28757186/",
     },
     "cdc-measles": {
@@ -144,6 +169,7 @@ export const CITATIONS = {
         title: "Measles: global health topics",
         venue: "cdc.gov (archived)",
         details: "Last reviewed 12 December 2019",
+        year: 2019,
         url: "https://archive.cdc.gov/www_cdc_gov/globalhealth/newsroom/topics/measles/index.html",
     },
     "zhang-2024": {
@@ -151,6 +177,7 @@ export const CITATIONS = {
         title: "Transmission dynamics and effect of control measures on the 2022 outbreak of mpox among gay, bisexual, and other men who have sex with men in England: a mathematical modelling study",
         venue: "The Lancet Infectious Diseases",
         details: "2024;24(1):65–74",
+        year: 2024,
         url: "https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(23)00451-6/fulltext",
     },
     "cdc-mpox": {
@@ -165,6 +192,7 @@ export const CITATIONS = {
         title: "Multi-country outbreak of mpox, external situation report #12",
         venue: "who.int",
         details: "14 December 2022",
+        year: 2022,
         url: "https://www.who.int/docs/default-source/coronaviruse/situation-reports/20221214_mpox_external-sitrep-12-.pdf",
     },
     "who-ebola-nejm-2014": {
@@ -172,6 +200,7 @@ export const CITATIONS = {
         title: "Ebola virus disease in West Africa — the first 9 months of the epidemic and forward projections",
         venue: "New England Journal of Medicine",
         details: "2014;371(16):1481–1495",
+        year: 2014,
         url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC4235004/",
     },
     "who-ebola-factsheet": {
@@ -186,6 +215,8 @@ export const CITATIONS = {
         title: "Estimating the latent period of coronavirus disease 2019 (COVID-19)",
         venue: "Clinical Infectious Diseases",
         details: "2022;74(9):1678–1681",
+        year: 2022,
+        doi: "10.1093/cid/ciab746",
         url: "https://doi.org/10.1093/cid/ciab746",
     },
     "jiang-2023": {
@@ -193,6 +224,8 @@ export const CITATIONS = {
         title: "Latent period and incubation period with associated factors of COVID-19 caused by Omicron variant",
         venue: "Chinese Journal of Preventive Medicine",
         details: "2023;57(5):659–666 (in Chinese)",
+        year: 2023,
+        doi: "10.3760/cma.j.cn112150-20220926-00925",
         url: "https://doi.org/10.3760/cma.j.cn112150-20220926-00925",
     },
     "cori-2012": {
@@ -200,6 +233,8 @@ export const CITATIONS = {
         title: "Estimating influenza latency and infectious period durations using viral excretion data",
         venue: "Epidemics",
         details: "2012;4(3):132–138",
+        year: 2012,
+        doi: "10.1016/j.epidem.2012.06.001",
         url: "https://doi.org/10.1016/j.epidem.2012.06.001",
     },
     "lessler-2009": {
@@ -207,6 +242,8 @@ export const CITATIONS = {
         title: "Incubation periods of acute respiratory viral infections: a systematic review",
         venue: "The Lancet Infectious Diseases",
         details: "2009;9(5):291–300",
+        year: 2009,
+        doi: "10.1016/S1473-3099(09)70069-6",
         url: "https://doi.org/10.1016/S1473-3099(09)70069-6",
     },
     "cdc-pinkbook-measles": {
@@ -214,6 +251,7 @@ export const CITATIONS = {
         title: "Chapter 13: Measles",
         venue: "CDC, Epidemiology and Prevention of Vaccine-Preventable Diseases (Pink Book)",
         details: "14th ed., 2021",
+        year: 2021,
         url: "https://www.cdc.gov/pinkbook/hcp/table-of-contents/chapter-13-measles.html",
     },
     "ward-2022": {
@@ -221,6 +259,8 @@ export const CITATIONS = {
         title: "Transmission dynamics of monkeypox in the United Kingdom: contact tracing study",
         venue: "BMJ",
         details: "2022;379:e073153",
+        year: 2022,
+        doi: "10.1136/bmj-2022-073153",
         url: "https://doi.org/10.1136/bmj-2022-073153",
     },
     "stein-2023": {
@@ -228,6 +268,8 @@ export const CITATIONS = {
         title: "Past SARS-CoV-2 infection protection against re-infection: a systematic review and meta-analysis",
         venue: "The Lancet",
         details: "2023;401(10379):833–842",
+        year: 2023,
+        doi: "10.1016/S0140-6736(22)02465-5",
         url: "https://doi.org/10.1016/S0140-6736(22)02465-5",
     },
     "chemaitelly-2025": {
@@ -235,6 +277,8 @@ export const CITATIONS = {
         title: "Differential protection against SARS-CoV-2 reinfection pre- and post-Omicron",
         venue: "Nature",
         details: "2025;639(8056):1024–1031",
+        year: 2025,
+        doi: "10.1038/s41586-024-08511-9",
         url: "https://doi.org/10.1038/s41586-024-08511-9",
     },
     "ranjeva-2019": {
@@ -242,6 +286,8 @@ export const CITATIONS = {
         title: "Age-specific differences in the dynamics of protective immunity to influenza",
         venue: "Nature Communications",
         details: "2019;10:1660",
+        year: 2019,
+        doi: "10.1038/s41467-019-09652-6",
         url: "https://doi.org/10.1038/s41467-019-09652-6",
     },
     "frank-1987": {
@@ -249,6 +295,8 @@ export const CITATIONS = {
         title: "Influenza B virus reinfection",
         venue: "American Journal of Epidemiology",
         details: "1987;125(4):576–586",
+        year: 1987,
+        doi: "10.1093/oxfordjournals.aje.a114571",
         url: "https://doi.org/10.1093/oxfordjournals.aje.a114571",
     },
     "cdc-measles-clinical": {
@@ -256,6 +304,7 @@ export const CITATIONS = {
         title: "Clinical questions about measles",
         venue: "cdc.gov",
         details: "Reviewed 10 September 2025",
+        year: 2025,
         url: "https://www.cdc.gov/measles/hcp/clinical-overview/questions.html",
     },
     "reis-2016": {
@@ -263,6 +312,8 @@ export const CITATIONS = {
         title: "Retrospective parameter estimation and forecast of respiratory syncytial virus in the United States",
         venue: "PLoS Computational Biology",
         details: "2016;12(10):e1005133",
+        year: 2016,
+        doi: "10.1371/journal.pcbi.1005133",
         url: "https://doi.org/10.1371/journal.pcbi.1005133",
     },
     "cdc-rsv-spread": {
@@ -270,6 +321,7 @@ export const CITATIONS = {
         title: "How RSV spreads",
         venue: "cdc.gov",
         details: "Updated 20 February 2026; accessed 12 November 2026",
+        year: 2026,
         url: "https://www.cdc.gov/rsv/causes/index.html",
     },
     "li-2022": {
@@ -277,6 +329,8 @@ export const CITATIONS = {
         title: "Global, regional, and national disease burden estimates of acute lower respiratory infections due to respiratory syncytial virus in children younger than 5 years in 2019: a systematic analysis",
         venue: "The Lancet",
         details: "2022;399(10340):2047–2064",
+        year: 2022,
+        doi: "10.1016/S0140-6736(22)00478-0",
         url: "https://doi.org/10.1016/S0140-6736(22)00478-0",
     },
     "ohuma-2012": {
@@ -284,6 +338,8 @@ export const CITATIONS = {
         title: "The natural history of respiratory syncytial virus in a birth cohort: the influence of age and previous infection on reinfection and disease",
         venue: "American Journal of Epidemiology",
         details: "2012;176(9):794–802",
+        year: 2012,
+        doi: "10.1093/aje/kws257",
         url: "https://doi.org/10.1093/aje/kws257",
     },
     "kretzschmar-2010": {
@@ -291,6 +347,8 @@ export const CITATIONS = {
         title: "Incidence and reproduction numbers of pertussis: estimates from serological and social contact data in five European countries",
         venue: "PLoS Medicine",
         details: "2010;7(6):e1000291",
+        year: 2010,
+        doi: "10.1371/journal.pmed.1000291",
         url: "https://doi.org/10.1371/journal.pmed.1000291",
     },
     "wearing-rohani-2009": {
@@ -298,6 +356,8 @@ export const CITATIONS = {
         title: "Estimating the duration of pertussis immunity using epidemiological signatures",
         venue: "PLoS Pathogens",
         details: "2009;5(10):e1000647",
+        year: 2009,
+        doi: "10.1371/journal.ppat.1000647",
         url: "https://doi.org/10.1371/journal.ppat.1000647",
     },
     "cdc-pinkbook-pertussis": {
@@ -305,6 +365,7 @@ export const CITATIONS = {
         title: "Chapter 16: Pertussis",
         venue: "CDC, Epidemiology and Prevention of Vaccine-Preventable Diseases (Pink Book)",
         details: "14th ed., 2021; updated 12 April 2024",
+        year: 2021,
         url: "https://www.cdc.gov/pinkbook/hcp/table-of-contents/chapter-16-pertussis.html",
     },
     "skoff-2019": {
@@ -312,6 +373,8 @@ export const CITATIONS = {
         title: "The epidemiology of nationally reported pertussis in the United States, 2000–2016",
         venue: "Clinical Infectious Diseases",
         details: "2019;68(10):1634–1640",
+        year: 2019,
+        doi: "10.1093/cid/ciy757",
         url: "https://doi.org/10.1093/cid/ciy757",
     },
     "riley-2003": {
@@ -319,6 +382,8 @@ export const CITATIONS = {
         title: "Transmission dynamics of the etiological agent of SARS in Hong Kong: impact of public health interventions",
         venue: "Science",
         details: "2003;300(5627):1961–1966",
+        year: 2003,
+        doi: "10.1126/science.1086478",
         url: "https://doi.org/10.1126/science.1086478",
     },
     "leung-2004": {
@@ -326,6 +391,8 @@ export const CITATIONS = {
         title: "The epidemiology of severe acute respiratory syndrome in the 2003 Hong Kong epidemic: an analysis of all 1755 patients",
         venue: "Annals of Internal Medicine",
         details: "2004;141(9):662–673",
+        year: 2004,
+        doi: "10.7326/0003-4819-141-9-200411020-00006",
         url: "https://doi.org/10.7326/0003-4819-141-9-200411020-00006",
     },
     "who-sars-summary": {
@@ -333,6 +400,7 @@ export const CITATIONS = {
         title: "Summary of probable SARS cases with onset of illness from 1 November 2002 to 31 July 2003",
         venue: "who.int",
         details: "Data as of 31 December 2003",
+        year: 2003,
         url: "https://www.who.int/publications/m/item/summary-of-probable-sars-cases-with-onset-of-illness-from-1-november-2002-to-31-july-2003",
     },
     "who-sars-consensus": {
@@ -340,6 +408,7 @@ export const CITATIONS = {
         title: "Consensus document on the epidemiology of severe acute respiratory syndrome (SARS)",
         venue: "WHO/CDS/CSR/GAR/2003.11",
         details: "2003",
+        year: 2003,
         url: "https://www.who.int/publications/i/item/consensus-document-on-the-epidemiology-of-severe-acute-respiratory-syndrome-(-sars)",
     },
     "kucharski-althaus-2015": {
@@ -347,6 +416,8 @@ export const CITATIONS = {
         title: "The role of superspreading in Middle East respiratory syndrome coronavirus (MERS-CoV) transmission",
         venue: "Eurosurveillance",
         details: "2015;20(25):21167",
+        year: 2015,
+        doi: "10.2807/1560-7917.ES2015.20.25.21167",
         url: "https://doi.org/10.2807/1560-7917.ES2015.20.25.21167",
     },
     "sha-2017": {
@@ -354,6 +425,8 @@ export const CITATIONS = {
         title: "Fatality risks for nosocomial outbreaks of Middle East respiratory syndrome coronavirus in the Middle East and South Korea",
         venue: "Archives of Virology",
         details: "2017;162(1):33–44",
+        year: 2017,
+        doi: "10.1007/s00705-016-3062-x",
         url: "https://doi.org/10.1007/s00705-016-3062-x",
     },
     "who-mers-2025": {
@@ -361,6 +434,7 @@ export const CITATIONS = {
         title: "Middle East respiratory syndrome coronavirus – global update",
         venue: "Disease Outbreak News DON591",
         details: "24 December 2025",
+        year: 2025,
         url: "https://www.who.int/emergencies/disease-outbreak-news/item/2025-DON591",
     },
     "virlogeux-2016": {
@@ -368,6 +442,8 @@ export const CITATIONS = {
         title: "Comparison of incubation period distribution of human infections with MERS-CoV in South Korea and Saudi Arabia",
         venue: "Scientific Reports",
         details: "2016;6:35839",
+        year: 2016,
+        doi: "10.1038/srep35839",
         url: "https://doi.org/10.1038/srep35839",
     },
     "cowling-2015": {
@@ -375,6 +451,8 @@ export const CITATIONS = {
         title: "Preliminary epidemiological assessment of MERS-CoV outbreak in South Korea, May to June 2015",
         venue: "Eurosurveillance",
         details: "2015;20(25):21163",
+        year: 2015,
+        doi: "10.2807/1560-7917.ES2015.20.25.21163",
         url: "https://doi.org/10.2807/1560-7917.ES2015.20.25.21163",
     },
     "al-raddadi-2020": {
@@ -382,6 +460,8 @@ export const CITATIONS = {
         title: "Burden of Middle East respiratory syndrome coronavirus infection in Saudi Arabia",
         venue: "Journal of Infection and Public Health",
         details: "2020;13(5):692–696",
+        year: 2020,
+        doi: "10.1016/j.jiph.2019.11.016",
         url: "https://doi.org/10.1016/j.jiph.2019.11.016",
     },
     "endo-2020": {
@@ -389,6 +469,8 @@ export const CITATIONS = {
         title: "Estimating the overdispersion in COVID-19 transmission using outbreak sizes outside China",
         venue: "Wellcome Open Research",
         details: "2020;5:67 (version 3)",
+        year: 2020,
+        doi: "10.12688/wellcomeopenres.15842.3",
         url: "https://doi.org/10.12688/wellcomeopenres.15842.3",
     },
     "guo-2022": {
@@ -396,6 +478,8 @@ export const CITATIONS = {
         title: "Superspreading potential of COVID-19 outbreak seeded by Omicron variants of SARS-CoV-2 in Hong Kong",
         venue: "Journal of Travel Medicine",
         details: "2022;29(6):taac049",
+        year: 2022,
+        doi: "10.1093/jtm/taac049",
         url: "https://doi.org/10.1093/jtm/taac049",
     },
     "althaus-2015": {
@@ -403,6 +487,8 @@ export const CITATIONS = {
         title: "Ebola superspreading",
         venue: "The Lancet Infectious Diseases",
         details: "2015;15(5):507–508",
+        year: 2015,
+        doi: "10.1016/S1473-3099(15)70135-0",
         url: "https://doi.org/10.1016/S1473-3099(15)70135-0",
     },
     "cho-2025": {
@@ -410,6 +496,8 @@ export const CITATIONS = {
         title: "Transmission dynamics and parameters for pertussis during school-based outbreak, South Korea, 2024",
         venue: "Emerging Infectious Diseases",
         details: "2025;31(7):1330–1336",
+        year: 2025,
+        doi: "10.3201/eid3107.241643",
         url: "https://doi.org/10.3201/eid3107.241643",
     },
     "mossong-2008": {
@@ -417,6 +505,8 @@ export const CITATIONS = {
         title: "Social contacts and mixing patterns relevant to the spread of infectious diseases",
         venue: "PLoS Medicine",
         details: "2008;5(3):e74",
+        year: 2008,
+        doi: "10.1371/journal.pmed.0050074",
         url: "https://doi.org/10.1371/journal.pmed.0050074",
     },
     "tartof-2021": {
@@ -424,6 +514,8 @@ export const CITATIONS = {
         title: "Effectiveness of mRNA BNT162b2 COVID-19 vaccine up to 6 months in a large integrated health system in the USA: a retrospective cohort study",
         venue: "The Lancet",
         details: "2021;398(10309):1407–1416",
+        year: 2021,
+        doi: "10.1016/S0140-6736(21)02183-8",
         url: "https://doi.org/10.1016/S0140-6736(21)02183-8",
     },
     "fast-2022": {
@@ -431,6 +523,8 @@ export const CITATIONS = {
         title: "Booster COVID-19 vaccinations among persons aged ≥5 years and second booster COVID-19 vaccinations among persons aged ≥50 years — United States, August 13, 2021–August 5, 2022",
         venue: "MMWR",
         details: "2022;71(35):1121–1125",
+        year: 2022,
+        doi: "10.15585/mmwr.mm7135a4",
         url: "https://doi.org/10.15585/mmwr.mm7135a4",
     },
     "menegale-2023": {
@@ -438,6 +532,8 @@ export const CITATIONS = {
         title: "Evaluation of waning of SARS-CoV-2 vaccine–induced immunity: a systematic review and meta-analysis",
         venue: "JAMA Network Open",
         details: "2023;6(5):e2310650",
+        year: 2023,
+        doi: "10.1001/jamanetworkopen.2023.10650",
         url: "https://doi.org/10.1001/jamanetworkopen.2023.10650",
     },
     "young-2018": {
@@ -445,6 +541,8 @@ export const CITATIONS = {
         title: "Duration of influenza vaccine effectiveness: a systematic review, meta-analysis, and meta-regression of test-negative design case-control studies",
         venue: "The Journal of Infectious Diseases",
         details: "2018;217(5):731–741",
+        year: 2018,
+        doi: "10.1093/infdis/jix632",
         url: "https://doi.org/10.1093/infdis/jix632",
     },
     "cdc-fluvaxview-2024": {
@@ -452,6 +550,7 @@ export const CITATIONS = {
         title: "Flu vaccination coverage, United States, 2023–24 influenza season",
         venue: "FluVaxView, cdc.gov",
         details: "20 September 2024; accessed 12 November 2026",
+        year: 2024,
         url: "https://www.cdc.gov/fluvaxview/coverage-by-season/2023-2024.html",
     },
     "cdc-measles-vaccine": {
@@ -459,6 +558,7 @@ export const CITATIONS = {
         title: "Measles vaccination",
         venue: "cdc.gov",
         details: "Updated 29 April 2026; accessed 12 November 2026",
+        year: 2026,
         url: "https://www.cdc.gov/measles/vaccines/index.html",
     },
     "who-immunization-2026": {
@@ -466,6 +566,7 @@ export const CITATIONS = {
         title: "Immunization coverage (fact sheet)",
         venue: "who.int",
         details: "15 July 2026 (2025 WUENIC data); accessed 12 November 2026",
+        year: 2026,
         url: "https://www.who.int/news-room/fact-sheets/detail/immunization-coverage",
     },
     "deputy-2023": {
@@ -473,6 +574,8 @@ export const CITATIONS = {
         title: "Vaccine effectiveness of JYNNEOS against mpox disease in the United States",
         venue: "New England Journal of Medicine",
         details: "2023;388(26):2434–2443",
+        year: 2023,
+        doi: "10.1056/NEJMoa2215201",
         url: "https://doi.org/10.1056/NEJMoa2215201",
     },
     "owens-2023": {
@@ -480,6 +583,8 @@ export const CITATIONS = {
         title: "JYNNEOS vaccination coverage among persons at risk for mpox — United States, May 22, 2022–January 31, 2023",
         venue: "MMWR",
         details: "2023;72(13):342–347",
+        year: 2023,
+        doi: "10.15585/mmwr.mm7213a4",
         url: "https://doi.org/10.15585/mmwr.mm7213a4",
     },
     "henao-restrepo-2017": {
@@ -487,6 +592,8 @@ export const CITATIONS = {
         title: "Efficacy and effectiveness of an rVSV-vectored vaccine in preventing Ebola virus disease: final results from the Guinea ring vaccination, open-label, cluster-randomised trial (Ebola Ça Suffit!)",
         venue: "The Lancet",
         details: "2017;389(10068):505–518",
+        year: 2017,
+        doi: "10.1016/S0140-6736(16)32621-6",
         url: "https://doi.org/10.1016/S0140-6736(16)32621-6",
     },
     "li-2020-vaccines": {
@@ -494,6 +601,8 @@ export const CITATIONS = {
         title: "Coronavirus vaccine development: from SARS and MERS to COVID-19",
         venue: "Journal of Biomedical Science",
         details: "2020;27(1):104",
+        year: 2020,
+        doi: "10.1186/s12929-020-00695-2",
         url: "https://doi.org/10.1186/s12929-020-00695-2",
     },
     "who-mers-factsheet": {
@@ -501,6 +610,7 @@ export const CITATIONS = {
         title: "Middle East respiratory syndrome coronavirus (MERS-CoV) (fact sheet)",
         venue: "who.int",
         details: "11 December 2025; accessed 12 November 2026",
+        year: 2025,
         url: "https://www.who.int/news-room/fact-sheets/detail/middle-east-respiratory-syndrome-coronavirus-(mers-cov)",
     },
     "papi-2023": {
@@ -508,6 +618,8 @@ export const CITATIONS = {
         title: "Respiratory syncytial virus prefusion F protein vaccine in older adults",
         venue: "New England Journal of Medicine",
         details: "2023;388(7):595–608",
+        year: 2023,
+        doi: "10.1056/NEJMoa2209604",
         url: "https://doi.org/10.1056/NEJMoa2209604",
     },
     "ison-2024": {
@@ -515,6 +627,8 @@ export const CITATIONS = {
         title: "Efficacy and safety of respiratory syncytial virus (RSV) prefusion F protein vaccine (RSVPreF3 OA) in older adults over 2 RSV seasons",
         venue: "Clinical Infectious Diseases",
         details: "2024;78(6):1732–1744",
+        year: 2024,
+        doi: "10.1093/cid/ciae010",
         url: "https://doi.org/10.1093/cid/ciae010",
     },
     "kriss-2024": {
@@ -522,6 +636,8 @@ export const CITATIONS = {
         title: "Influenza, COVID-19, and respiratory syncytial virus vaccination coverage among adults — United States, fall 2024",
         venue: "MMWR",
         details: "2024;73(46):1044–1051",
+        year: 2024,
+        doi: "10.15585/mmwr.mm7346a1",
         url: "https://doi.org/10.15585/mmwr.mm7346a1",
     },
     "misegades-2012": {
@@ -529,6 +645,8 @@ export const CITATIONS = {
         title: "Association of childhood pertussis with receipt of 5 doses of pertussis vaccine by time since last vaccine dose, California, 2010",
         venue: "JAMA",
         details: "2012;308(20):2126–2132",
+        year: 2012,
+        doi: "10.1001/jama.2012.14939",
         url: "https://doi.org/10.1001/jama.2012.14939",
     },
     "hill-2026": {
@@ -536,6 +654,8 @@ export const CITATIONS = {
         title: "Vaccination coverage by age 24 months among children born in 2021 and 2022 — National Immunization Survey-Child, United States, 2022–2024",
         venue: "MMWR",
         details: "2026;75(11):146–155",
+        year: 2026,
+        doi: "10.15585/mmwr.mm7511a2",
         url: "https://doi.org/10.15585/mmwr.mm7511a2",
     },
     "who-sars-update-49": {
@@ -543,6 +663,7 @@ export const CITATIONS = {
         title: "Update 49 — SARS case fatality ratio, incubation period",
         venue: "Disease Outbreak News",
         details: "7 May 2003",
+        year: 2003,
         url: "https://www.who.int/emergencies/disease-outbreak-news/item/2003_05_07a-en",
     },
     "eyre-2022": {
@@ -550,6 +671,8 @@ export const CITATIONS = {
         title: "Effect of Covid-19 vaccination on transmission of Alpha and Delta variants",
         venue: "New England Journal of Medicine",
         details: "2022;386:744–756",
+        year: 2022,
+        doi: "10.1056/NEJMoa2116597",
         url: "https://doi.org/10.1056/NEJMoa2116597",
     },
     "tseng-2022": {
@@ -557,6 +680,8 @@ export const CITATIONS = {
         title: "Effectiveness of mRNA-1273 against SARS-CoV-2 Omicron and Delta variants",
         venue: "Nature Medicine",
         details: "2022;28:1063–1071",
+        year: 2022,
+        doi: "10.1038/s41591-022-01753-y",
         url: "https://doi.org/10.1038/s41591-022-01753-y",
     },
     "tan-2023": {
@@ -564,6 +689,8 @@ export const CITATIONS = {
         title: "Infectiousness of SARS-CoV-2 breakthrough infections and reinfections during the Omicron wave",
         venue: "Nature Medicine",
         details: "2023;29:358–365",
+        year: 2023,
+        doi: "10.1038/s41591-022-02138-x",
         url: "https://doi.org/10.1038/s41591-022-02138-x",
     },
     "nyberg-2022": {
@@ -571,6 +698,8 @@ export const CITATIONS = {
         title: "Comparative analysis of the risks of hospitalisation and death associated with SARS-CoV-2 omicron (B.1.1.529) and delta (B.1.617.2) variants in England: a cohort study",
         venue: "The Lancet",
         details: "2022;399:1303–1312",
+        year: 2022,
+        doi: "10.1016/S0140-6736(22)00462-7",
         url: "https://doi.org/10.1016/S0140-6736(22)00462-7",
     },
     "arriola-2017": {
@@ -578,6 +707,8 @@ export const CITATIONS = {
         title: "Influenza vaccination modifies disease severity among community-dwelling adults hospitalized with influenza",
         venue: "Clinical Infectious Diseases",
         details: "2017;65(8):1289–1297",
+        year: 2017,
+        doi: "10.1093/cid/cix468",
         url: "https://doi.org/10.1093/cid/cix468",
     },
     "cherry-zahn-2018": {
@@ -585,6 +716,8 @@ export const CITATIONS = {
         title: "Clinical characteristics of measles in previously vaccinated and unvaccinated patients in California",
         venue: "Clinical Infectious Diseases",
         details: "2018;67(9):1315–1319",
+        year: 2018,
+        doi: "10.1093/cid/ciy286",
         url: "https://doi.org/10.1093/cid/ciy286",
     },
     "mcnamara-2017": {
@@ -592,6 +725,8 @@ export const CITATIONS = {
         title: "Reduced severity of pertussis in persons with age-appropriate pertussis vaccination—United States, 2010–2012",
         venue: "Clinical Infectious Diseases",
         details: "2017;65(5):811–818",
+        year: 2017,
+        doi: "10.1093/cid/cix421",
         url: "https://doi.org/10.1093/cid/cix421",
     },
     "coulborn-2024": {
@@ -599,6 +734,8 @@ export const CITATIONS = {
         title: "Case fatality risk among individuals vaccinated with rVSVΔG-ZEBOV-GP: a retrospective cohort analysis of patients with confirmed Ebola virus disease in the Democratic Republic of the Congo",
         venue: "The Lancet Infectious Diseases",
         details: "2024;24(6):602–610",
+        year: 2024,
+        doi: "10.1016/S1473-3099(23)00819-8",
         url: "https://doi.org/10.1016/S1473-3099(23)00819-8",
     },
     "schildhauer-2023": {
@@ -606,6 +743,8 @@ export const CITATIONS = {
         title: "Reduced odds of mpox-associated hospitalization among persons who received JYNNEOS vaccine — California, May 2022–May 2023",
         venue: "Morbidity and Mortality Weekly Report",
         details: "2023;72(36):992–996",
+        year: 2023,
+        doi: "10.15585/mmwr.mm7236a4",
         url: "https://doi.org/10.15585/mmwr.mm7236a4",
     },
     "lauer-2020": {
@@ -613,6 +752,8 @@ export const CITATIONS = {
         title: "The incubation period of coronavirus disease 2019 (COVID-19) from publicly reported confirmed cases: estimation and application",
         venue: "Annals of Internal Medicine",
         details: "2020;172(9):577–582",
+        year: 2020,
+        doi: "10.7326/M20-0504",
         url: "https://doi.org/10.7326/M20-0504",
     },
     "backer-2022": {
@@ -620,6 +761,8 @@ export const CITATIONS = {
         title: "Shorter serial intervals in SARS-CoV-2 cases with Omicron BA.1 variant compared with Delta variant, the Netherlands, 13 to 26 December 2021",
         venue: "Eurosurveillance",
         details: "2022;27(6):2200042",
+        year: 2022,
+        doi: "10.2807/1560-7917.ES.2022.27.6.2200042",
         url: "https://doi.org/10.2807/1560-7917.ES.2022.27.6.2200042",
     },
     "ganyani-2020": {
@@ -627,6 +770,8 @@ export const CITATIONS = {
         title: "Estimating the generation interval for coronavirus disease (COVID-19) based on symptom onset data, March 2020",
         venue: "Eurosurveillance",
         details: "2020;25(17):2000257",
+        year: 2020,
+        doi: "10.2807/1560-7917.ES.2020.25.17.2000257",
         url: "https://doi.org/10.2807/1560-7917.ES.2020.25.17.2000257",
     },
     "xu-2023": {
@@ -634,6 +779,8 @@ export const CITATIONS = {
         title: "Assessing changes in incubation period, serial interval, and generation time of SARS-CoV-2 variants of concern: a systematic review and meta-analysis",
         venue: "BMC Medicine",
         details: "2023;21:374",
+        year: 2023,
+        doi: "10.1186/s12916-023-03070-8",
         url: "https://doi.org/10.1186/s12916-023-03070-8",
     },
     "cowling-2009": {
@@ -641,6 +788,8 @@ export const CITATIONS = {
         title: "Estimation of the serial interval of influenza",
         venue: "Epidemiology",
         details: "2009;20(3):344–347",
+        year: 2009,
+        doi: "10.1097/EDE.0b013e31819d1092",
         url: "https://doi.org/10.1097/EDE.0b013e31819d1092",
     },
     "vink-2014": {
@@ -648,6 +797,8 @@ export const CITATIONS = {
         title: "Serial intervals of respiratory infectious diseases: a systematic review and analysis",
         venue: "American Journal of Epidemiology",
         details: "2014;180(9):865–875",
+        year: 2014,
+        doi: "10.1093/aje/kwu209",
         url: "https://doi.org/10.1093/aje/kwu209",
     },
     "te-beest-2014": {
@@ -655,6 +806,8 @@ export const CITATIONS = {
         title: "Estimation of the serial interval of pertussis in Dutch households",
         venue: "Epidemics",
         details: "2014;7:1–6",
+        year: 2014,
+        doi: "10.1016/j.epidem.2014.02.001",
         url: "https://doi.org/10.1016/j.epidem.2014.02.001",
     },
     "madewell-2023": {
@@ -662,6 +815,8 @@ export const CITATIONS = {
         title: "Serial interval and incubation period estimates of monkeypox virus infection in 12 jurisdictions, United States, May–August 2022",
         venue: "Emerging Infectious Diseases",
         details: "2023;29(4):818–821",
+        year: 2023,
+        doi: "10.3201/eid2904.221622",
         url: "https://doi.org/10.3201/eid2904.221622",
     },
     "lipsitch-2003": {
@@ -669,6 +824,8 @@ export const CITATIONS = {
         title: "Transmission dynamics and control of severe acute respiratory syndrome",
         venue: "Science",
         details: "2003;300(5627):1966–1970",
+        year: 2003,
+        doi: "10.1126/science.1086616",
         url: "https://doi.org/10.1126/science.1086616",
     },
 } satisfies Record<string, Citation>;
