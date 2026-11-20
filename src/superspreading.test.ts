@@ -4,13 +4,13 @@ import { buildNetwork } from "./network.js";
 import { estimateR0 } from "./r0.js";
 import { gammaMeanOne, mulberry32 } from "./random.js";
 import { treeCurve } from "./reproduction.js";
-import { type SimulationModelParams, simulationModel } from "./seird.js";
+import { type SeirdModelParams, seirdModel } from "./seird.js";
 import { createEpidemic, infectedCount, stepEpidemic } from "./stochastic.js";
 import { offspringCounts, topCasesShare } from "./superspreading.js";
 import { DESKTOP } from "./test-support.js";
 
-const MODEL = simulationModel({ exposed: false, waning: false });
-const PARAMS: SimulationModelParams = {
+const MODEL = seirdModel({ exposed: false, waning: false });
+const PARAMS: SeirdModelParams = {
     beta: 0.3,
     recoveryDays: 5,
     deathDays: 5,

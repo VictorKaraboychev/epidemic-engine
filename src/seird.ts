@@ -6,7 +6,7 @@
 import { type CompartmentModel, SeirdCompartment, type SeirdParams, vaccineSusceptibility, waningSusceptibility } from "./model.js";
 
 /** Every parameter any of the simulator's models reads (each model ignores the ones it doesn't use). */
-export interface SimulationModelParams extends SeirdParams {
+export interface SeirdModelParams extends SeirdParams {
     /** Coefficient of variation of the latent period (its shape is 1 / CV²). */
     latentVariation: number;
     /** Days for infectiousness to halve over the infectious period (`Infinity`, or omitted: flat). */
@@ -25,7 +25,7 @@ export interface SimulationModelParams extends SeirdParams {
     immunitySpreadProtection?: number;
 }
 
-export type SimulationModel = CompartmentModel<SimulationModelParams>;
+export type SeirdModel = CompartmentModel<SeirdModelParams>;
 
 /** Optional parts of the model, each switched on separately. */
 export interface ModelFeatures {
@@ -44,23 +44,23 @@ export interface ModelFeatures {
 
 export const MODEL_FEATURES = ["exposed", "waning", "superspreading", "vaccination"] as const satisfies (keyof ModelFeatures)[];
 
-const models = new Map<string, SimulationModel>();
+const models = new Map<string, SeirdModel>();
 
 /**
  * The simulator's model for a set of features: SIRD (infectious → recovered or died, each outcome with its own
  * infectious period), plus an exposed compartment, gradually waning immunity and/or vaccination. One model per
  * combination, cached.
  */
-export const simulationModel = ({
+export const seirdModel = ({
     exposed,
     waning,
     vaccination = false,
-}: Pick<ModelFeatures, "exposed" | "waning"> & Partial<Pick<ModelFeatures, "vaccination">>): SimulationModel => {
+}: Pick<ModelFeatures, "exposed" | "waning"> & Partial<Pick<ModelFeatures, "vaccination">>): SeirdModel => {
     const id = `s${exposed ? "e" : ""}ird${waning ? "-waning" : ""}${vaccination ? "-vaccination" : ""}`;
     const additions = [waning && "waning immunity", vaccination && "vaccination"].filter(Boolean).join(" and ");
     const cached = models.get(id);
     if (cached) return cached;
-    const model: SimulationModel = {
+    const model: SeirdModel = {
         id,
         name: `${exposed ? "SEIRD" : "SIRD"}${additions ? ` with ${additions}` : ""}`,
         compartments: [
@@ -71,9 +71,9 @@ export const simulationModel = ({
                       {
                           key: SeirdCompartment.Vaccinated,
                           name: "vaccinated",
-                          susceptibilityAfter: (p: SimulationModelParams) => vaccineSusceptibility(p.vaccineEfficacy ?? 0, p.vaccineHalfLife ?? Infinity),
+                          susceptibilityAfter: (p: SeirdModelParams) => vaccineSusceptibility(p.vaccineEfficacy ?? 0, p.vaccineHalfLife ?? Infinity),
                           // Breakthrough infections: less likely to be fatal, and less infectious.
-                          protects: (p: SimulationModelParams) => ({ death: p.vaccineDeathProtection ?? 0, spread: p.vaccineSpreadProtection ?? 0 }),
+                          protects: (p: SeirdModelParams) => ({ death: p.vaccineDeathProtection ?? 0, spread: p.vaccineSpreadProtection ?? 0 }),
                       },
                   ]
                 : []),
@@ -87,8 +87,8 @@ export const simulationModel = ({
                           exits: [
                               {
                                   to: SeirdCompartment.Infected,
-                                  days: (p: SimulationModelParams) => p.latentDays,
-                                  shape: (p: SimulationModelParams) => 1 / p.latentVariation ** 2,
+                                  days: (p: SeirdModelParams) => p.latentDays,
+                                  shape: (p: SeirdModelParams) => 1 / p.latentVariation ** 2,
                               },
                           ],
                       },
@@ -132,7 +132,7 @@ export const simulationModel = ({
  * The parameters with the disease's stages (latent and infectious periods, and how fast infectiousness fades) scaled by
  * `scale`: the reference curve's timing, matched to the network (see `growth.ts`). A flat profile stays flat.
  */
-export const withStagesScaled = <P extends SimulationModelParams>(params: P, scale: number): P =>
+export const withStagesScaled = <P extends SeirdModelParams>(params: P, scale: number): P =>
     scale === 1
         ? params
         : {
@@ -149,7 +149,7 @@ export const withStagesScaled = <P extends SimulationModelParams>(params: P, sca
  * with flat infectiousness, 1% fatality and no protection after infection or vaccination. The default `beta` is a
  * placeholder: solve it for an R₀ with `solveTransmission`.
  */
-export const seirdParams = (overrides: Partial<SimulationModelParams> = {}): SimulationModelParams => ({
+export const seirdParams = (overrides: Partial<SeirdModelParams> = {}): SeirdModelParams => ({
     beta: 0.3,
     dispersion: null,
     recoveryDays: 4,

@@ -7,11 +7,11 @@ import { HOUSEHOLD_SIZES, HOUSEHOLD_WEIGHT } from "./population.js";
 import { pathogenParams } from "./presets.js";
 import { infectionTimeline, infectiousnessAfterInfection } from "./profile.js";
 import { mulberry32 } from "./random.js";
-import { type SimulationModelParams, simulationModel } from "./seird.js";
+import { type SeirdModelParams, seirdModel } from "./seird.js";
 import { seirdParams } from "./test-support.js";
 
-const SEIRD = simulationModel({ exposed: true, waning: false });
-const params = (overrides: Partial<SimulationModelParams>) => seirdParams({ beta: 0.2, latentDays: 5, recoveryDays: 8, deathDays: 8, ...overrides });
+const SEIRD = seirdModel({ exposed: true, waning: false });
+const params = (overrides: Partial<SeirdModelParams>) => seirdParams({ beta: 0.2, latentDays: 5, recoveryDays: 8, deathDays: 8, ...overrides });
 
 describe("infectiousness profile", () => {
     it("is zero while latent, sums to one, and its mean is the intrinsic generation interval", () => {

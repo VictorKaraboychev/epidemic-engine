@@ -53,31 +53,43 @@ const LUCK_SALT = 0x85ebca6b;
 /** Mixed into the seed for the order people are vaccinated in. */
 const VACCINATION_SALT = 0xc2b2ae35;
 
-export interface NetworkConfig {
-    seed: number;
-    /** World size: people are placed in a `width` × `height` area (a view scales it to the screen). */
-    layout: { width: number; height: number };
-    population: number;
+/** The area people are placed in when no `world` is given (16:9; it only affects positions and who neighbours whom). */
+export const DEFAULT_WORLD = { width: 1600, height: 900 } as const;
+
+export interface PopulationNetworkOptions {
+    /** People in the network. */
+    people: number;
+    /** Average everyday contacts per person (households included). */
     contacts: number;
-    /** People's contact numbers vary (superspreading), instead of everyone linking to the same number of neighbours. */
-    contactVariation: boolean;
+    /** Same seed, same network. */
+    seed: number;
+    /** The area people are placed in, in world units (a view scales it to the screen). Default `DEFAULT_WORLD`. */
+    world?: { width: number; height: number };
+    /**
+     * Superspreading's gatherings: contact numbers vary much more, so a few people have very many contacts (default
+     * false: they vary as in contact diaries).
+     */
+    superspreading?: boolean;
 }
 
 /** Equal keys build equal networks. */
-export const networkKey = ({ seed, layout, population, contacts, contactVariation }: NetworkConfig) =>
-    `${seed}:${layout.width}x${layout.height}:${population}:${contacts}:${contactVariation ? 1 : 0}`;
+export const networkKey = ({ seed, world = DEFAULT_WORLD, people, contacts, superspreading = false }: PopulationNetworkOptions) =>
+    `${seed}:${world.width}x${world.height}:${people}:${contacts}:${superspreading ? 1 : 0}`;
 
 /** Node spacing that fits the whole population into the canvas. */
 const nodeSpacing = (width: number, height: number, population: number) =>
     Math.min(MAX_NODE_SPACING, Math.sqrt((PACKING * 4 * width * height) / (Math.PI * population)));
 
-/** The seeded network for a configuration: the same configuration always draws the same people and contacts. */
-export const buildSimulationNetwork = ({ seed, layout, population, contacts, contactVariation }: NetworkConfig): Network => {
-    const spacing = nodeSpacing(layout.width, layout.height, population);
+/**
+ * A seeded population: households of census sizes, everyday contacts with neighbours and a share of distant people,
+ * and with superspreading, gatherings. The same options always draw the same people and contacts.
+ */
+export const buildPopulationNetwork = ({ seed, world = DEFAULT_WORLD, people, contacts, superspreading = false }: PopulationNetworkOptions): Network => {
+    const spacing = nodeSpacing(world.width, world.height, people);
     return buildNetwork(mulberry32(seed), {
-        width: layout.width,
-        height: layout.height,
-        count: population,
+        width: world.width,
+        height: world.height,
+        count: people,
         minDistance: spacing,
         neighbours: contacts,
         // Denser networks need a longer reach so every node can find its nearest contacts.
@@ -86,7 +98,7 @@ export const buildSimulationNetwork = ({ seed, layout, population, contacts, con
         radiusScale: Math.min(Math.max(MIN_RADIUS_SCALE, spacing / MAX_NODE_SPACING), (MAX_DOT_SHARE * spacing) / (2 * NODE_RADIUS.max)),
         // Everyone's contact numbers vary as in contact diaries; superspreading adds people with very many contacts
         // (gatherings), so the most infectious can infect many more than an everyday contact list.
-        contactVariation: contactVariation ? CONTACT_VARIATION : EVERYDAY_CONTACT_VARIATION,
+        contactVariation: superspreading ? CONTACT_VARIATION : EVERYDAY_CONTACT_VARIATION,
         distantShare: DISTANT_SHARE,
         households: { sizes: HOUSEHOLD_SIZES, weight: HOUSEHOLD_WEIGHT },
     });

@@ -6,10 +6,10 @@ import { buildNetwork } from "./network.js";
 import { seededVaccinated, vaccinatedCount, vaccinationOrder } from "./population.js";
 import { availableFeatures } from "./presets.js";
 import { mulberry32 } from "./random.js";
-import { simulationModel } from "./seird.js";
+import { seirdModel } from "./seird.js";
 import { createEpidemic } from "./stochastic.js";
 
-const VACCINATED = simulationModel({ exposed: false, waning: false, vaccination: true });
+const VACCINATED = seirdModel({ exposed: false, waning: false, vaccination: true });
 const V = compileModel(VACCINATED).indexOf.v;
 const I = compileModel(VACCINATED).indexOf.i;
 
@@ -17,7 +17,7 @@ describe("vaccination", () => {
     it("adds a vaccinated compartment after susceptible, named in the model", () => {
         expect(VACCINATED.compartments.map((c) => c.key)).toEqual(["s", "v", "i", "r", "d"]);
         expect(VACCINATED.name).toBe("SIRD with vaccination");
-        expect(simulationModel({ exposed: true, waning: true, vaccination: true }).name).toBe("SEIRD with waning immunity and vaccination");
+        expect(seirdModel({ exposed: true, waning: true, vaccination: true }).name).toBe("SEIRD with waning immunity and vaccination");
     });
 
     it("protects a share equal to the efficacy at first, fewer as the vaccine wanes", () => {

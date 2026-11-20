@@ -7,14 +7,14 @@ import { type Cited, type PathogenProfile, Population, fatalityRate, parameterVa
 import type { CompartmentModel } from "./model.js";
 import { betaForR0, transmissibility } from "./r0.js";
 import { type ReproductionCurve, contactDispersionAt, individualDispersion } from "./reproduction.js";
-import type { ModelFeatures, SimulationModelParams } from "./seird.js";
+import type { ModelFeatures, SeirdModelParams } from "./seird.js";
 
 /**
  * Everything a disease can set: the model's parameters except the transmission rate (solved for R₀ on the network:
  * see `solveTransmission`), plus contacts per person, vaccine coverage, and `dispersion`, the published k of offspring
  * counts (a target: the network's own unevenness supplies part of it).
  */
-export type PathogenParams = Omit<SimulationModelParams, "beta" | "dispersion"> & { contacts: number; vaccineCoverage: number; dispersion: number };
+export type PathogenParams = Omit<SeirdModelParams, "beta" | "dispersion"> & { contacts: number; vaccineCoverage: number; dispersion: number };
 
 /** Model parameters a disease's cited values set directly, where it has them. */
 const CITED_PARAMS = [
@@ -88,7 +88,7 @@ export const BETA_RANGE = { min: 0.01, max: 0.95 } as const;
 /** Rounds of solving the transmission rate and individual dispersion together (they settle within a few). */
 const SPLIT_ROUNDS = 3;
 
-export interface TransmissionTarget<P extends SimulationModelParams> {
+export interface TransmissionTarget<P extends SeirdModelParams> {
     model: CompartmentModel<P>;
     /** The run's parameters; `beta` is kept when there's no `r0` to solve for, and `dispersion` is ignored. */
     params: P;
@@ -107,7 +107,7 @@ export interface TransmissionTarget<P extends SimulationModelParams> {
  * network alone is as uneven). The two depend on each other (the network's share depends on transmissibility), so
  * they are found together in a few rounds.
  */
-export const solveTransmission = <P extends SimulationModelParams>({
+export const solveTransmission = <P extends SeirdModelParams>({
     model,
     params,
     reproduction,

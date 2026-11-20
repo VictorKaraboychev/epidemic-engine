@@ -9,13 +9,13 @@ import { pathogenParams } from "./presets.js";
 import { estimateR0 } from "./r0.js";
 import { mulberry32 } from "./random.js";
 import { treeCurve } from "./reproduction.js";
-import { type SimulationModelParams, simulationModel } from "./seird.js";
+import { type SeirdModelParams, seirdModel } from "./seird.js";
 import { createEpidemic, infectedCount, stepEpidemic } from "./stochastic.js";
 import { DESKTOP } from "./test-support.js";
 
-const PARAMS: SimulationModelParams = { beta: 0.35, recoveryDays: 5, deathDays: 5, ifr: 0, latentDays: 2, latentVariation: 0.5, immunityHalfLife: 60 };
-const WANING = simulationModel({ exposed: false, waning: true });
-const PLAIN = simulationModel({ exposed: false, waning: false });
+const PARAMS: SeirdModelParams = { beta: 0.35, recoveryDays: 5, deathDays: 5, ifr: 0, latentDays: 2, latentVariation: 0.5, immunityHalfLife: 60 };
+const WANING = seirdModel({ exposed: false, waning: true });
+const PLAIN = seirdModel({ exposed: false, waning: false });
 const [, , R] = [0, 1, 2];
 
 describe("waning immunity", () => {
@@ -27,8 +27,8 @@ describe("waning immunity", () => {
     });
 
     it("builds one model per feature combination, named for its compartments", () => {
-        expect(simulationModel({ exposed: true, waning: true })).toBe(simulationModel({ exposed: true, waning: true }));
-        expect(simulationModel({ exposed: true, waning: true }).compartments.map((c) => c.key)).toEqual(["s", "e", "i", "r", "d"]);
+        expect(seirdModel({ exposed: true, waning: true })).toBe(seirdModel({ exposed: true, waning: true }));
+        expect(seirdModel({ exposed: true, waning: true }).compartments.map((c) => c.key)).toEqual(["s", "e", "i", "r", "d"]);
         expect(WANING.name).toBe("SIRD with waning immunity");
         expect(compileModel(WANING).waning[R]).toBe(1);
     });
