@@ -1,4 +1,4 @@
-import { between, cited, defineDisease } from "./types.js";
+import { Bound, Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
 
 /**
  * Mpox, 2022 clade IIb outbreak, which spread almost entirely among gay, bisexual and other men who have sex with men
@@ -14,32 +14,32 @@ import { between, cited, defineDisease } from "./types.js";
  *   ≈ 23% of Americans at risk (GBMSM and transgender people eligible for vaccination) were fully vaccinated by early
  *   2023 [Owens 2023].
  */
-export const MPOX = defineDisease({
-    id: "mpox",
+export const MPOX = definePathogen({
+    id: Pathogen.Mpox,
     values: {
-        r0: cited(1.94, "zhang-2024", { interval: between(1.81, 2.19, "cri95") }),
-        recoveryDays: cited(21, "cdc-mpox", { interval: between(14, 28, "range") }),
-        deathDays: cited(21, "cdc-mpox", { interval: between(14, 28, "range") }),
-        generationInterval: cited(8.5, "madewell-2023", { interval: between(7.3, 9.9, "cri95"), caveat: "proxy" }),
+        r0: cited(1.94, "zhang-2024", { interval: between(1.81, 2.19, IntervalKind.CrI95) }),
+        recoveryDays: cited(21, "cdc-mpox", { interval: between(14, 28, IntervalKind.Range) }),
+        deathDays: cited(21, "cdc-mpox", { interval: between(14, 28, IntervalKind.Range) }),
+        generationInterval: cited(8.5, "madewell-2023", { interval: between(7.3, 9.9, IntervalKind.CrI95), caveat: Caveat.Proxy }),
         // Most spread is around symptom onset, though lesions take weeks to heal.
-        infectiousnessHalfLife: cited(0.9, "madewell-2023", { caveat: "fitted" }),
-        latentDays: cited(7.6, "ward-2022", { bound: "below" }),
-        latentVariation: cited(0.71, "ward-2022", { caveat: "proxy" }),
-        dispersion: cited(0.58, "lloyd-smith-2005", { interval: between(0.32, 3.57, "ci90"), caveat: "otherSetting" }),
+        infectiousnessHalfLife: cited(0.9, "madewell-2023", { caveat: Caveat.Fitted }),
+        latentDays: cited(7.6, "ward-2022", { bound: Bound.Below }),
+        latentVariation: cited(0.71, "ward-2022", { caveat: Caveat.Proxy }),
+        dispersion: cited(0.58, "lloyd-smith-2005", { interval: between(0.32, 3.57, IntervalKind.CI90), caveat: Caveat.OtherSetting }),
     },
     contacts: 3,
     vaccination: {
-        efficacy: cited(0.66, "deputy-2023", { interval: between(0.474, 0.781, "ci95"), caveat: "proxy" }),
+        efficacy: cited(0.66, "deputy-2023", { interval: between(0.474, 0.781, IntervalKind.CI95), caveat: Caveat.Proxy }),
         // Hospitalisation, 2 doses vs none: OR 0.20 (California 2022–23) [Schildhauer 2023].
-        deathProtection: cited(0.8, "schildhauer-2023", { interval: between(0.1, 0.99, "ci95"), caveat: "proxy" }),
+        deathProtection: cited(0.8, "schildhauer-2023", { interval: between(0.1, 0.99, IntervalKind.CI95), caveat: Caveat.Proxy }),
     },
     // The base group is the outbreak's population, GBMSM, not everyone (no published fatality by age or other group).
     populations: {
-        kind: "group",
-        measure: "case",
+        kind: PopulationKind.Group,
+        measure: FatalityMeasure.Case,
         groups: [
             {
-                id: "gbmsm",
+                id: Population.Gbmsm,
                 covers: "confirmed cases, almost all among gay, bisexual and other men who have sex with men (GBMSM)",
                 ifr: cited(0.0008, "who-mpox-2022"),
                 vaccineCoverage: cited(0.227, "owens-2023"),

@@ -83,6 +83,16 @@ export interface CompartmentModel<P extends ModelParams = ModelParams> {
 
 /* ─── SIRD ─── */
 
+/** The compartments of the SIRD and SEIRD models, by key (`CompartmentModel` keys are strings: these are theirs). */
+export enum SeirdCompartment {
+    Susceptible = "s",
+    Vaccinated = "v",
+    Exposed = "e",
+    Infected = "i",
+    Recovered = "r",
+    Died = "d",
+}
+
 export interface SirdParams extends ModelParams {
     /** Mean infectious days for infections that end in recovery. */
     recoveryDays: number;
@@ -96,22 +106,22 @@ export interface SirdParams extends ModelParams {
 export const SIRD_MODEL: CompartmentModel<SirdParams> = {
     id: "sird",
     compartments: [
-        { key: "s", name: "susceptible", susceptibility: () => 1 },
+        { key: SeirdCompartment.Susceptible, name: "susceptible", susceptibility: () => 1 },
         {
-            key: "i",
+            key: SeirdCompartment.Infected,
             name: "infected",
             infected: true,
             infectious: true,
             exits: [
-                { to: "r", share: (p) => 1 - p.ifr, days: (p) => p.recoveryDays },
-                { to: "d", share: (p) => p.ifr, days: (p) => p.deathDays },
+                { to: SeirdCompartment.Recovered, share: (p) => 1 - p.ifr, days: (p) => p.recoveryDays },
+                { to: SeirdCompartment.Died, share: (p) => p.ifr, days: (p) => p.deathDays },
             ],
         },
-        { key: "r", name: "recovered" },
-        { key: "d", name: "died", dead: true },
+        { key: SeirdCompartment.Recovered, name: "recovered" },
+        { key: SeirdCompartment.Died, name: "died", dead: true },
     ],
-    infectionEntry: "i",
-    indexEntry: "i",
+    infectionEntry: SeirdCompartment.Infected,
+    indexEntry: SeirdCompartment.Infected,
 };
 
 /* ─── SEIRD ─── */
@@ -128,14 +138,14 @@ const INFECTIOUS_EXITS = SIRD_MODEL.compartments[1].exits!;
 export const SEIRD_MODEL: CompartmentModel<SeirdParams> = {
     id: "seird",
     compartments: [
-        { key: "s", name: "susceptible", susceptibility: () => 1 },
-        { key: "e", name: "exposed", infected: true, exits: [{ to: "i", days: (p) => p.latentDays }] },
-        { key: "i", name: "infected", infected: true, infectious: true, exits: INFECTIOUS_EXITS },
-        { key: "r", name: "recovered" },
-        { key: "d", name: "died", dead: true },
+        { key: SeirdCompartment.Susceptible, name: "susceptible", susceptibility: () => 1 },
+        { key: SeirdCompartment.Exposed, name: "exposed", infected: true, exits: [{ to: SeirdCompartment.Infected, days: (p) => p.latentDays }] },
+        { key: SeirdCompartment.Infected, name: "infected", infected: true, infectious: true, exits: INFECTIOUS_EXITS },
+        { key: SeirdCompartment.Recovered, name: "recovered" },
+        { key: SeirdCompartment.Died, name: "died", dead: true },
     ],
-    infectionEntry: "e",
-    indexEntry: "i",
+    infectionEntry: SeirdCompartment.Exposed,
+    indexEntry: SeirdCompartment.Infected,
 };
 
 /* ─── Waning immunity ─── */

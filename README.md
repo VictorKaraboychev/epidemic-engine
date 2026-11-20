@@ -12,8 +12,10 @@ import {
     buildSimulationNetwork,
     compileModel,
     createEpidemic,
-    diseaseParams,
-    getDisease,
+    pathogenParams,
+    getPathogen,
+    Pathogen,
+    Population,
     infectedCount,
     mulberry32,
     ratesFor,
@@ -23,13 +25,25 @@ import {
     solveTransmission,
 } from "epidemic-engine";
 
-const measles = getDisease("measles");
-const { contacts, vaccineCoverage, dispersion, ...preset } = diseaseParams(measles, "all");
-const network = buildSimulationNetwork({ seed: 1, layout: { width: 1600, height: 900 }, population: 20_000, contacts: contacts!, contactVariation: false });
+const measles = getPathogen(Pathogen.Measles);
+const { contacts, vaccineCoverage, dispersion, ...preset } = pathogenParams(measles, Population.All);
+const network = buildSimulationNetwork({
+    seed: 1,
+    layout: { width: 1600, height: 900 },
+    population: 20_000,
+    contacts: contacts!,
+    contactVariation: false,
+});
 const model = simulationModel({ exposed: true, waning: false });
 const params = seirdParams(preset);
 // The transmission rate that gives measles' published R₀ on this network.
-const { beta } = solveTransmission({ model, params, reproduction: reproductionCurve(network, mulberry32(1)), r0: measles.values.r0.value, dispersion: null });
+const { beta } = solveTransmission({
+    model,
+    params,
+    reproduction: reproductionCurve(network, mulberry32(1)),
+    r0: measles.values.r0.value,
+    dispersion: null,
+});
 
 const random = mulberry32(2);
 const epidemic = createEpidemic(model, network, [0]);
@@ -39,7 +53,7 @@ while (infectedCount(compileModel(model), epidemic.counts) > 0) advanceEpidemic(
 
 | Area        | Main exports                                                                                                                                            |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Pathogens   | `DISEASES`, `getDisease`, `diseaseParams`, `availableFeatures`, `CITATIONS`, `citationsOf`; ids in `DISEASE_IDS`, `POPULATION_IDS`, `CAVEAT_IDS`        |
+| Pathogens   | `Pathogen`, `Population`, `getPathogen`, `pathogenParams`, `availableFeatures`, `PATHOGENS`, `CITATIONS`, `citationsOf`, `Caveat`                       |
 | Populations | `buildSimulationNetwork` (households, everyday and distant contacts, optional gatherings), `buildNetwork`, seeded `indexCaseOrder` / `vaccinationOrder` |
 | Models      | `simulationModel` (SEIRD with optional waning immunity and vaccination), or any `CompartmentModel`                                                      |
 | Runs        | `solveTransmission`, `createEpidemic` + `advanceEpidemic` (event-driven) or `stepEpidemic`, `deterministicCurve`, `calibrateTheory`                     |
@@ -58,9 +72,9 @@ npm run build       # dist/: ES modules with type declarations and source maps
 npm run validate    # every preset on 20,000 people, against the literature (a few minutes)
 ```
 
-Pathogens live in `src/diseases/`, one file each (`defineDisease`), listed in `diseases/index.ts` with its id in
-`DISEASE_IDS`. Every published value is `cited(value, citationId, details?)`, citing an entry in
-`src/diseases/citations.ts`; `diseases.test.ts` checks every value is cited and inside its published interval.
+Pathogens live in `src/pathogens/`, one file each (`definePathogen`), listed in `pathogens/index.ts` with its id in
+the `Pathogen` enum. Every published value is `cited(value, citationId, details?)`, citing an entry in
+`src/pathogens/citations.ts`; `pathogens.test.ts` checks every value is cited and inside its published interval.
 
 ## The model and its validation
 
@@ -80,7 +94,7 @@ The simulator follows standard practice for stochastic network models, and check
 ## Data and citations
 
 The pathogen values (R₀, periods, fatality, vaccine efficacy and coverage, household sizes, contact patterns) are
-published estimates, each cited to its source in `src/diseases/citations.ts`. They are facts reported by those
+published estimates, each cited to its source in `src/pathogens/citations.ts`. They are facts reported by those
 sources, reproduced as numbers with references, not copies of the publications. If you use them in your own work,
 cite the original sources, not this package. They describe particular populations and periods (see each disease's
 file and caveats), so they are illustrative, not guidance for public health decisions.

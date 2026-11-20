@@ -14,8 +14,15 @@
 import { type Random, gammaMeanOne } from "./random.js";
 import { SpatialGrid } from "./spatial-grid.js";
 
-/** What kind of contact an edge is. */
-export const EDGE_KIND = { local: 0, distant: 1, household: 2 } as const;
+/** What kind of contact an edge is (stored as a number in `Network.edgeKind`). */
+export enum EdgeKind {
+    /** A nearby neighbour. */
+    Local = 0,
+    /** Someone anywhere in the network. */
+    Distant = 1,
+    /** A member of the same household. */
+    Household = 2,
+}
 
 export interface Network {
     width: number;
@@ -27,7 +34,7 @@ export interface Network {
     y: Float64Array;
     r: Float64Array;
     /**
-     * Contacts in the order they were made: edge e links `edgeA[e]` < `edgeB[e]`, of kind `edgeKind[e]` (`EDGE_KIND`).
+     * Contacts in the order they were made: edge e links `edgeA[e]` < `edgeB[e]`, of kind `edgeKind[e]` (`EdgeKind`).
      * Distant contacts aren't drawn as links (too many would cover the canvas).
      */
     edgeA: Int32Array;
@@ -142,7 +149,7 @@ export const buildNetwork = (random: Random, options: NetworkOptions = {}): Netw
             const household = householdOf[person];
             if (household < 0 || members[start[household]] !== person) continue;
             for (let p = start[household]; p < start[household + 1]; p++)
-                for (let q = p + 1; q < start[household + 1]; q++) candidates.push(members[p], members[q], EDGE_KIND.household);
+                for (let q = p + 1; q < start[household + 1]; q++) candidates.push(members[p], members[q], EdgeKind.Household);
         }
     }
 
@@ -245,8 +252,8 @@ export const buildNetwork = (random: Random, options: NetworkOptions = {}): Netw
 
     // Finally the contacts, in index order: each person's distant ones, then their nearest.
     for (let i = 0; i < count; i++) {
-        for (let k = distantStart[i]; k < distantStart[i + 1]; k++) candidates.push(i, distantTargets[k], EDGE_KIND.distant);
-        for (let k = 0; k < nearestCount[i]; k++) candidates.push(i, nearest[nearestStart[i] + k], EDGE_KIND.local);
+        for (let k = distantStart[i]; k < distantStart[i + 1]; k++) candidates.push(i, distantTargets[k], EdgeKind.Distant);
+        for (let k = 0; k < nearestCount[i]; k++) candidates.push(i, nearest[nearestStart[i] + k], EdgeKind.Local);
     }
 
     return {

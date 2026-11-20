@@ -1,9 +1,9 @@
 import { it } from "vitest";
-import type { DiseaseId } from "../diseases/index.js";
+import type { Pathogen } from "../pathogens/index.js";
 import { measurePreset } from "./measure.js";
 
 const env = (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env ?? {};
-// Slow: `CALIBRATE='{"covid-ancestral":5.0}' npx vitest run packages/epidemic-engine/src/validation/calibrate`.
+// Slow: `CALIBRATE='{"covid-ancestral":5.0}' npx vitest run src/validation/calibrate`.
 const run = env.CALIBRATE ? it : it.skip;
 
 /**
@@ -13,8 +13,8 @@ const run = env.CALIBRATE ? it : it.skip;
 run(
     "calibrate infectiousness profiles to generation intervals",
     () => {
-        const targets = JSON.parse(env.CALIBRATE!) as Record<DiseaseId, number>;
-        for (const [id, target] of Object.entries(targets) as [DiseaseId, number][]) {
+        const targets = JSON.parse(env.CALIBRATE!) as Record<Pathogen, number>;
+        for (const [id, target] of Object.entries(targets) as [Pathogen, number][]) {
             const flat = measurePreset(id, { people: 10_000, runs: 5, infectiousnessHalfLife: Infinity }).generationInterval;
             if (flat <= target) {
                 console.log(`${id}: flat already gives GI ${flat.toFixed(2)} ≤ target ${target}: keep flat`);

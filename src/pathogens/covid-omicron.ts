@@ -1,4 +1,4 @@
-import { between, cited, defineDisease } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
 
 /**
  * COVID-19, Omicron variant.
@@ -15,17 +15,17 @@ import { between, cited, defineDisease } from "./types.js";
  * - Vaccine (primary series) against Omicron infection: 44% at 1 month, fitted half-life 143 days [Menegale 2023];
  *   ≈ 69% had completed it by mid-2022 [Fast 2022].
  */
-export const COVID_OMICRON = defineDisease({
-    id: "covid-omicron",
+export const COVID_OMICRON = definePathogen({
+    id: Pathogen.CovidOmicron,
     values: {
-        r0: cited(9.5, "liu-rocklov-2022", { interval: between(5.5, 24, "range") }),
+        r0: cited(9.5, "liu-rocklov-2022", { interval: between(5.5, 24, IntervalKind.Range) }),
         recoveryDays: cited(8, "boucau-2022"),
         deathDays: cited(8, "boucau-2022"),
-        generationInterval: cited(2.99, "xu-2023", { interval: between(2.48, 3.49, "ci95") }),
-        infectiousnessHalfLife: cited(2.5, "xu-2023", { caveat: "fitted" }),
-        latentDays: cited(2.7, "jiang-2023", { interval: between(2.53, 2.78, "ci95") }),
-        latentVariation: cited(0.69, "backer-2022", { caveat: "proxy" }),
-        dispersion: cited(0.33, "guo-2022", { interval: between(0.17, 0.62, "cri95") }),
+        generationInterval: cited(2.99, "xu-2023", { interval: between(2.48, 3.49, IntervalKind.CI95) }),
+        infectiousnessHalfLife: cited(2.5, "xu-2023", { caveat: Caveat.Fitted }),
+        latentDays: cited(2.7, "jiang-2023", { interval: between(2.53, 2.78, IntervalKind.CI95) }),
+        latentVariation: cited(0.69, "backer-2022", { caveat: Caveat.Proxy }),
+        dispersion: cited(0.33, "guo-2022", { interval: between(0.17, 0.62, IntervalKind.CrI95) }),
     },
     contacts: 13,
     // ≈ 81% at 3–6 months (day ≈ 137) and ≈ 28% at 9–12 months (day ≈ 320): halving every 117 days through both
@@ -33,20 +33,20 @@ export const COVID_OMICRON = defineDisease({
     // Reinfections: death HR 0.18 vs first infections [Nyberg 2022]; 23% less infectious [Tan 2023].
     immunity: {
         delay: cited(100, "chemaitelly-2025"),
-        halfLife: cited(117, "chemaitelly-2025", { caveat: "confounded" }),
-        deathProtection: cited(0.82, "nyberg-2022", { interval: between(0.43, 0.94, "ci95") }),
-        spreadProtection: cited(0.23, "tan-2023", { interval: between(0.03, 0.39, "ci95") }),
+        halfLife: cited(117, "chemaitelly-2025", { caveat: Caveat.Confounded }),
+        deathProtection: cited(0.82, "nyberg-2022", { interval: between(0.43, 0.94, IntervalKind.CI95) }),
+        spreadProtection: cited(0.23, "tan-2023", { interval: between(0.03, 0.39, IntervalKind.CI95) }),
     },
     populations: {
-        kind: "age",
-        measure: "infection",
+        kind: PopulationKind.Age,
+        measure: FatalityMeasure.Infection,
         groups: [
-            { id: "all", covers: "all ages", ifr: cited(0.001, "liu-ijid-2022"), vaccineCoverage: cited(0.69, "fast-2022") },
+            { id: Population.All, covers: "all ages", ifr: cited(0.001, "liu-ijid-2022"), vaccineCoverage: cited(0.69, "fast-2022") },
 
-            { id: "infants", covers: "1", ifr: cited(0.000011, "liu-ijid-2022", { also: ["covid-forecasting-2022"] }) },
-            { id: "adults", covers: "25", ifr: cited(0.000021, "liu-ijid-2022", { also: ["levin-2020"] }) },
-            { id: "middle-aged", covers: "55", ifr: cited(0.00084, "liu-ijid-2022", { also: ["levin-2020"] }) },
-            { id: "elderly", covers: "75", ifr: cited(0.0097, "liu-ijid-2022", { also: ["levin-2020"] }) },
+            { id: Population.Infants, covers: "1", ifr: cited(0.000011, "liu-ijid-2022", { also: ["covid-forecasting-2022"] }) },
+            { id: Population.Adults, covers: "25", ifr: cited(0.000021, "liu-ijid-2022", { also: ["levin-2020"] }) },
+            { id: Population.MiddleAged, covers: "55", ifr: cited(0.00084, "liu-ijid-2022", { also: ["levin-2020"] }) },
+            { id: Population.Elderly, covers: "75", ifr: cited(0.0097, "liu-ijid-2022", { also: ["levin-2020"] }) },
         ],
     },
     vaccination: {
@@ -54,7 +54,7 @@ export const COVID_OMICRON = defineDisease({
         halfLife: cited(143, "menegale-2023"),
         // Among the infected: 13.9% fewer Omicron infections but 84.5% fewer admissions, so ≈ 82% fewer admissions per
         // infection [Tseng 2022]; vaccinated cases 22% less infectious [Tan 2023].
-        deathProtection: cited(0.82, "tseng-2022", { caveat: "proxy" }),
-        spreadProtection: cited(0.22, "tan-2023", { interval: between(0.06, 0.36, "ci95") }),
+        deathProtection: cited(0.82, "tseng-2022", { caveat: Caveat.Proxy }),
+        spreadProtection: cited(0.22, "tan-2023", { interval: between(0.06, 0.36, IntervalKind.CI95) }),
     },
 });
