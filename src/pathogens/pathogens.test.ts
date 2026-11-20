@@ -10,6 +10,7 @@ import {
     VISIBLE_PATHOGENS,
     baseGroupOf,
     citationNumber,
+    citationsFor,
     citationsOf,
     citedValuesOf,
     fatalityRate,
@@ -41,7 +42,8 @@ describe("pathogens", () => {
         for (const pathogen of PATHOGENS) {
             for (const value of citedValuesOf(pathogen)) {
                 expect(Number.isFinite(value.value)).toBe(true);
-                for (const citation of [value.citation, ...(value.also ?? [])]) expect(CITATIONS[citation]).toBeDefined();
+                expect(value.citation, `${pathogen.id}: ${value.value} has a source`).toBeDefined();
+                for (const citation of citationsFor(value)) expect(CITATIONS[citation]).toBeDefined();
             }
         }
     });
@@ -123,10 +125,11 @@ describe("vaccination data", () => {
             const coverages = [...pathogen.populations.groups.map((group) => group.vaccineCoverage)].filter((value): value is Cited => Boolean(value));
             expect(coverages.length, `${pathogen.id} has coverage somewhere`).toBeGreaterThan(0);
             for (const value of [vaccination.efficacy, ...coverages, ...(vaccination.halfLife ? [vaccination.halfLife] : [])]) {
-                for (const citation of [value.citation, ...(value.also ?? [])]) expect(CITATIONS[citation]).toBeDefined();
+                expect(value.citation, `${pathogen.id}: ${value.value} has a source`).toBeDefined();
+                for (const citation of citationsFor(value)) expect(CITATIONS[citation]).toBeDefined();
             }
             for (const fraction of [vaccination.efficacy.value, ...coverages.map((value) => value.value)]) expect(fraction >= 0 && fraction <= 1).toBe(true);
-            if (vaccination.lifelong) expect(CITATIONS[vaccination.lifelong]).toBeDefined();
+            if (vaccination.lifelong) expect(typeof vaccination.lifelong === "string" && CITATIONS[vaccination.lifelong]).toBeTruthy();
         }
     });
 

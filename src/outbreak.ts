@@ -23,8 +23,11 @@ import { type ModelFeatures, type SeirdModel, type SeirdModelParams, seirdModel,
 import { type EpidemicState, createEpidemic, infectedCount, advanceEpidemic } from "./stochastic.js";
 
 export interface OutbreakOptions {
-    /** A pathogen with cited data. Omit it to set everything yourself with `params` and `r0` (or `params.beta`). */
-    pathogen?: Pathogen;
+    /**
+     * A built-in pathogen (`Pathogen.Measles`), or your own (`createPathogen({ … })`, or a changed copy of a built-in
+     * one). Omit it to set everything with `params` and `r0` (or `params.beta`).
+     */
+    pathogen?: Pathogen | PathogenProfile;
     /** Whose fatality rate and vaccine coverage to use. Default `Population.All` (the pathogen's base group). */
     population?: Population;
     /** People in the network. Default 10,000. */
@@ -78,7 +81,7 @@ const DEFAULT_DISPERSION = 0.3;
 
 /** A stochastic outbreak on a contact network: set up from options, advanced a day at a time. */
 export class Outbreak {
-    /** The pathogen's cited data, or null when the parameters were set by hand. */
+    /** The pathogen's data, or null when the parameters were set by hand. */
     readonly pathogen: PathogenProfile | null;
     readonly seed: number;
     readonly features: ModelFeatures;
@@ -98,7 +101,7 @@ export class Outbreak {
     private record: History;
 
     constructor(options: OutbreakOptions = {}) {
-        const pathogen = options.pathogen ? getPathogen(options.pathogen) : null;
+        const pathogen = typeof options.pathogen === "string" ? getPathogen(options.pathogen) : (options.pathogen ?? null);
         const population = options.population ?? Population.All;
         const people = options.people ?? 10_000;
         const seed = options.seed ?? randomSeed();
@@ -106,7 +109,7 @@ export class Outbreak {
         const preset = pathogen ? pathogenParams(pathogen, population) : {};
         const { contacts: pathogenContacts, vaccineCoverage: pathogenCoverage, dispersion: pathogenDispersion, ...pathogenModelParams } = preset;
         const feature = (name: "waning" | "vaccination" | "superspreading", requested = false, given = false) => {
-            if (requested && !available[name] && !given) throw new Error(`${pathogen!.id} has no published data for ${name}`);
+            if (requested && !available[name] && !given) throw new Error(`${pathogen!.id} has no data for ${name}`);
             return requested;
         };
         const features: ModelFeatures = {

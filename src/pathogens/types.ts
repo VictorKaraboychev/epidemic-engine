@@ -85,10 +85,13 @@ export enum Bound {
     Above = "above",
 }
 
-/** A published number, the source it comes from, and what else the source says about it. */
+/**
+ * A number with the source it comes from and what else the source says about it. Values you set yourself
+ * (`createPathogen`) have no source.
+ */
 export interface Cited {
     value: number;
-    citation: CitationId;
+    citation?: CitationId;
     /** Further sources, for values derived from more than one (e.g. incubation minus pre-symptom spread). */
     also?: CitationId[];
     /** The source's uncertainty around the value (the value lies within it). */
@@ -109,7 +112,7 @@ export type CitedDetails = Omit<Cited, "value" | "citation">;
 export const cited = (value: number, citation: CitationId, details: CitedDetails = {}): Cited => ({ value, citation, ...details });
 
 /** Every source behind a value. */
-export const citationsFor = (value: Cited): CitationId[] => [value.citation, ...(value.also ?? [])];
+export const citationsFor = (value: Cited): CitationId[] => [...(value.citation ? [value.citation] : []), ...(value.also ?? [])];
 
 /**
  * Protection, after infection or vaccination: how strong it is at first (if measured) and how long it lasts, either
@@ -135,7 +138,7 @@ export type Protection = {
           delay?: Cited;
           lifelong?: never;
       }
-    | { lifelong: CitationId; halfLife?: never; delay?: never }
+    | { lifelong: CitationId | true; halfLife?: never; delay?: never }
     | { halfLife?: never; delay?: never; lifelong?: never }
 );
 
@@ -146,7 +149,7 @@ export const protectionCitations = (protection: Protection): CitationId[] => [
     ...(protection.spreadProtection ? citationsFor(protection.spreadProtection) : []),
     ...(protection.halfLife ? citationsFor(protection.halfLife) : []),
     ...(protection.delay ? citationsFor(protection.delay) : []),
-    ...(protection.lifelong ? [protection.lifelong] : []),
+    ...(typeof protection.lifelong === "string" ? [protection.lifelong] : []),
 ];
 
 /**
@@ -251,8 +254,13 @@ export type Vaccination =
           none: CitationId;
       };
 
-export interface PathogenProfile {
-    id: Pathogen;
+/**
+ * Everything known about a pathogen. The built-in ones (`getPathogen(Pathogen.Measles)`) are cited throughout; make
+ * your own with `createPathogen`, or by changing a built-in one (`{ ...getPathogen(Pathogen.Measles), contacts: 12 }`).
+ */
+export interface PathogenProfile<Id extends string = string> {
+    /** A `Pathogen` for the built-in ones; any name for your own. */
+    id: Id;
     values: PathogenValues;
     /**
      * Nearest contacts per person: a modelling choice, not a published value. Each person can infect at most their
@@ -273,5 +281,5 @@ export interface PathogenProfile {
     hidden?: boolean;
 }
 
-/** Typed identity: lets each disease file be checked against `PathogenProfile` where it is written. */
-export const definePathogen = (pathogen: PathogenProfile) => pathogen;
+/** Typed identity: lets each built-in pathogen's file be checked against `PathogenProfile` where it is written. */
+export const definePathogen = (pathogen: PathogenProfile<Pathogen>) => pathogen;

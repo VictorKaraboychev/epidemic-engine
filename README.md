@@ -57,12 +57,30 @@ new Outbreak({
 });
 ```
 
-**Your own disease.** Without a pathogen, set the parameters yourself; the transmission rate is solved for `r0` on
-the network.
+**Your own pathogen.** `createPathogen` takes plain numbers; the result works anywhere a built-in one does. Each
+optional part switches on its feature: `latentDays` the latent period, `immunity` waning, `vaccine` vaccination,
+`dispersion` superspreading.
 
 ```ts
-new Outbreak({ r0: 2.5, params: { latentDays: 3, recoveryDays: 7, deathDays: 7, ifr: 0.01 } });
+import { Outbreak, Pathogen, createPathogen, getPathogen } from "epidemic-engine";
+
+const myFlu = createPathogen({
+    id: "my-flu",
+    r0: 1.8,
+    latentDays: 2,
+    recoveryDays: 5,
+    ifr: 0.001,
+    immunity: { halfLife: 365 }, // or { lifelong: true }
+    vaccine: { efficacy: 0.6, coverage: 0.4, halfLife: 180 },
+});
+new Outbreak({ pathogen: myFlu, vaccination: true, waning: true }).run();
+
+// Or change a built-in one:
+new Outbreak({ pathogen: { ...getPathogen(Pathogen.Measles), contacts: 12 } });
 ```
+
+The transmission rate is always solved for `r0` on the network. For a one-off, skip the pathogen and pass `r0` and
+`params` to `Outbreak` directly.
 
 **Day by day.** `step()` advances a day (or several) and keeps every day's counts.
 
@@ -101,7 +119,8 @@ number of people infected (`offspring`); `outbreak.network` has their positions 
 | `Mers`                | 0.47 | 5 d    | 14 d (fatal: 11.5 d)   | 37% per case             |        |         | ✓              |
 | `Ebola`               | 1.83 | 11.4 d | 16.4 d (fatal: 7.5 d)  | 50% per case             |        | ✓       | ✓              |
 
-Every value is cited (`getPathogen(id)` has them with their sources, intervals and caveats). Fatality rates are
+Every value is cited (`getPathogen(id)` has them with their sources, intervals and caveats). Your own pathogens
+(`createPathogen`) don't need sources. Fatality rates are
 also given for population groups (`Population.Elderly`, `Population.Infants`, …) where published. A pathogen without
 the data for a feature throws if you ask for it.
 
@@ -112,7 +131,7 @@ the data for a feature throws if you ask for it.
 | Area        | Main exports                                                                                                                                            |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Start here  | `Outbreak`, `OutbreakOptions`, `OutbreakSummary`                                                                                                        |
-| Pathogens   | `Pathogen`, `Population`, `getPathogen`, `pathogenParams`, `availableFeatures`, `PATHOGENS`, `CITATIONS`, `citationsOf`, `Caveat`                       |
+| Pathogens   | `Pathogen`, `Population`, `getPathogen`, `createPathogen`, `pathogenParams`, `availableFeatures`, `PATHOGENS`, `CITATIONS`, `citationsOf`, `Caveat`     |
 | Populations | `buildPopulationNetwork` (households, everyday and distant contacts, optional gatherings), `buildNetwork`, seeded `indexCaseOrder` / `vaccinationOrder` |
 | Models      | `seirdModel` (SEIRD with optional waning immunity and vaccination), `seirdParams`, `SeirdCompartment`, or any `CompartmentModel`                        |
 | Runs        | `solveTransmission`, `createEpidemic` + `advanceEpidemic` (event-driven) or `stepEpidemic`, `deterministicCurve`, `calibrateTheory`                     |

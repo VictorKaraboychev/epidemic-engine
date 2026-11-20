@@ -27,6 +27,7 @@ import {
 
 export { CITATIONS, type Citation, type CitationId } from "./citations.js";
 export * from "./types.js";
+export * from "./custom.js";
 
 /** At most this many population groups per disease besides its base group (a limit a compact UI can rely on). */
 export const MAX_POPULATION_GROUPS = 4;
@@ -35,9 +36,25 @@ export const MAX_POPULATION_GROUPS = 4;
 export const DEFAULT_POPULATION: Population = Population.Elderly;
 
 /** Every disease, in display order. */
-export const PATHOGENS: PathogenProfile[] = [COVID_ANCESTRAL, COVID_OMICRON, INFLUENZA_A, INFLUENZA_B, RSV, MEASLES, PERTUSSIS, MPOX, SARS, MERS, EBOLA];
+export const PATHOGENS: PathogenProfile<Pathogen>[] = [
+    COVID_ANCESTRAL,
+    COVID_OMICRON,
+    INFLUENZA_A,
+    INFLUENZA_B,
+    RSV,
+    MEASLES,
+    PERTUSSIS,
+    MPOX,
+    SARS,
+    MERS,
+    EBOLA,
+];
 
-export const getPathogen = (id: Pathogen) => PATHOGENS.find((pathogen) => pathogen.id === id)!;
+export const getPathogen = (id: Pathogen): PathogenProfile<Pathogen> => {
+    const pathogen = PATHOGENS.find((candidate) => candidate.id === id);
+    if (!pathogen) throw new Error(`Unknown pathogen "${id}"`);
+    return pathogen;
+};
 
 /** The diseases to offer (not `hidden`). */
 export const VISIBLE_PATHOGENS = PATHOGENS.filter((pathogen) => !pathogen.hidden);
