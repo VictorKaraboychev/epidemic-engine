@@ -7,60 +7,49 @@ browsers (put it in a Web Worker for large networks).
 ## Use
 
 ```ts
-import {
-    advanceEpidemic,
-    buildSimulationNetwork,
-    compileModel,
-    createEpidemic,
-    pathogenParams,
-    getPathogen,
-    Pathogen,
-    Population,
-    infectedCount,
-    mulberry32,
-    ratesFor,
-    reproductionCurve,
-    seirdParams,
-    simulationModel,
-    solveTransmission,
-} from "epidemic-engine";
+import { Outbreak, Pathogen, Population, SeirdCompartment } from "epidemic-engine";
 
-const measles = getPathogen(Pathogen.Measles);
-const { contacts, vaccineCoverage, dispersion, ...preset } = pathogenParams(measles, Population.All);
-const network = buildSimulationNetwork({
-    seed: 1,
-    layout: { width: 1600, height: 900 },
-    population: 20_000,
-    contacts: contacts!,
-    contactVariation: false,
-});
-const model = simulationModel({ exposed: true, waning: false });
-const params = seirdParams(preset);
-// The transmission rate that gives measles' published R₀ on this network.
-const { beta } = solveTransmission({
-    model,
-    params,
-    reproduction: reproductionCurve(network, mulberry32(1)),
-    r0: measles.values.r0.value,
-    dispersion: null,
-});
+const outbreak = new Outbreak({ pathogen: Pathogen.Measles, people: 20_000, seed: 1 });
+const summary = outbreak.run(); // { days, over, everInfected, attackRate, deaths, peak: { day, infected } }
 
-const random = mulberry32(2);
-const epidemic = createEpidemic(model, network, [0]);
-const rates = ratesFor(model, { ...params, beta });
-while (infectedCount(compileModel(model), epidemic.counts) > 0) advanceEpidemic(model, network, epidemic, rates, random);
+outbreak.count(SeirdCompartment.Recovered); // people recovered today
+outbreak.series(SeirdCompartment.Infected); // infected people, day by day
+outbreak.theory(); // the deterministic reference curve
 ```
+
+`Outbreak` takes its parameters from the pathogen's published estimates; every option can override them:
+
+```ts
+new Outbreak({
+    pathogen: Pathogen.CovidAncestral,
+    population: Population.Elderly, // whose fatality rate and vaccine coverage
+    people: 100_000,
+    initialCases: 5,
+    vaccination: true, // also `waning`, `superspreading`, where the pathogen has the data
+    params: { ifr: 0 }, // any model parameter
+});
+
+// No pathogen: your own disease, with the transmission rate solved for R₀ on the network.
+new Outbreak({ r0: 2.5, params: { latentDays: 3, recoveryDays: 7, deathDays: 7, ifr: 0.01 } });
+```
+
+Step a day at a time with `outbreak.step()`, or read the full state (`outbreak.state`: each person's compartment, who
+infected whom) for anything the summary doesn't give.
+
+### The pieces
+
+`Outbreak` is a thin layer over functions you can use directly, e.g. to define your own compartmental model:
 
 | Area        | Main exports                                                                                                                                            |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Pathogens   | `Pathogen`, `Population`, `getPathogen`, `pathogenParams`, `availableFeatures`, `PATHOGENS`, `CITATIONS`, `citationsOf`, `Caveat`                       |
-| Populations | `buildSimulationNetwork` (households, everyday and distant contacts, optional gatherings), `buildNetwork`, seeded `indexCaseOrder` / `vaccinationOrder` |
-| Models      | `simulationModel` (SEIRD with optional waning immunity and vaccination), or any `CompartmentModel`                                                      |
+| Populations | `buildPopulationNetwork` (households, everyday and distant contacts, optional gatherings), `buildNetwork`, seeded `indexCaseOrder` / `vaccinationOrder` |
+| Models      | `seirdModel` (SEIRD with optional waning immunity and vaccination) and `seirdParams`, or any `CompartmentModel`                                         |
 | Runs        | `solveTransmission`, `createEpidemic` + `advanceEpidemic` (event-driven) or `stepEpidemic`, `deterministicCurve`, `calibrateTheory`                     |
 | Measures    | `estimateR0`, `reproductionCurve`, `infectionTimeline`, `outbreakSummary`, the daily `History`                                                          |
 
 Conventions: times are in days; shares are 0–1; lifelong protection and flat infectiousness are `Infinity`. The
-engine names things by id; a UI supplies the words (and its copy should have an entry for each id).
+engine names things by enum (`Pathogen.Measles`, `Population.Elderly`, `Caveat.Proxy`); a UI supplies the words.
 
 ## Develop
 
