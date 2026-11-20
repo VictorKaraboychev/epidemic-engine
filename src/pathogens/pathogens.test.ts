@@ -16,7 +16,7 @@ import {
     populationGroup,
     vaccineCoverage,
 } from "./index.js";
-import { Caveat, PathogenId, Population } from "./types.js";
+import { Caveat, PathogenId, Group } from "./types.js";
 
 const valuesOf = (pathogen: (typeof Pathogen.all)[number]) => Object.entries(parameterValues(pathogen)) as [string, Cited][];
 
@@ -27,7 +27,7 @@ describe("pathogens", () => {
 
     it("only use caveats and population groups that are declared", () => {
         for (const pathogen of Pathogen.all) {
-            for (const group of pathogen.populations.groups) expect(Object.values(Population), pathogen.id).toContain(group.id);
+            for (const group of pathogen.populations.groups) expect(Object.values(Group), pathogen.id).toContain(group.id);
             for (const [, value] of valuesOf(pathogen)) if (value.caveat) expect(Object.values(Caveat), pathogen.id).toContain(value.caveat);
         }
     });
@@ -69,10 +69,10 @@ describe("pathogens", () => {
 
     it("give fatal cases their own infectious period only where a source estimates it", () => {
         const ebola = Pathogen.Ebola.values;
-        expect([ebola.deathDays.value, ebola.recoveryDays.value]).toEqual([7.5, 16.4]);
+        expect([ebola.fatalInfectiousDays.value, ebola.infectiousDays.value]).toEqual([7.5, 16.4]);
         expect(Pathogen.all.filter(hasOutcomeSpecificPeriods).map((pathogen) => pathogen.id)).toEqual([PathogenId.Sars, PathogenId.Mers, PathogenId.Ebola]);
         for (const pathogen of Pathogen.all.filter((item) => !hasOutcomeSpecificPeriods(item))) {
-            expect(pathogen.values.deathDays.citation).toBe(pathogen.values.recoveryDays.citation);
+            expect(pathogen.values.fatalInfectiousDays.citation).toBe(pathogen.values.infectiousDays.citation);
         }
     });
 
@@ -108,7 +108,7 @@ describe("vaccination data", () => {
             expect(vaccination, pathogen.id).toBeDefined();
             if (!vaccination || "none" in vaccination) {
                 if (vaccination) expect(CITATIONS[vaccination.none]).toBeDefined();
-                expect(vaccineCoverage(pathogen, Population.All)).toBeNull();
+                expect(vaccineCoverage(pathogen, Group.All)).toBeNull();
                 continue;
             }
             const coverages = [...pathogen.populations.groups.map((group) => group.vaccineCoverage)].filter((value): value is Cited => Boolean(value));
@@ -123,19 +123,19 @@ describe("vaccination data", () => {
     });
 
     it("keeps coverage on the population: a group's own figure, else everyone's", () => {
-        expect(vaccineCoverage(Pathogen.Rsv, Population.Elderly)?.value).toBe(0.397);
-        expect(vaccineCoverage(Pathogen.Rsv, Population.All)).toBeNull();
-        expect(vaccineCoverage(Pathogen.InfluenzaA, Population.Elderly)?.value).toBe(0.472);
-        expect(vaccineCoverage(Pathogen.InfluenzaA, Population.All)?.value).toBe(0.472);
-        expect(vaccineCoverage(Pathogen.Ebola, Population.All)).toBeNull();
-        expect(vaccineCoverage(Pathogen.Ebola, Population.Contacts)?.value).toBe(0.52);
-        expect(vaccineCoverage(Pathogen.Mpox, Population.All)?.value).toBe(0.227);
+        expect(vaccineCoverage(Pathogen.Rsv, Group.Elderly)?.value).toBe(0.397);
+        expect(vaccineCoverage(Pathogen.Rsv, Group.All)).toBeNull();
+        expect(vaccineCoverage(Pathogen.InfluenzaA, Group.Elderly)?.value).toBe(0.472);
+        expect(vaccineCoverage(Pathogen.InfluenzaA, Group.All)?.value).toBe(0.472);
+        expect(vaccineCoverage(Pathogen.Ebola, Group.All)).toBeNull();
+        expect(vaccineCoverage(Pathogen.Ebola, Group.Contacts)?.value).toBe(0.52);
+        expect(vaccineCoverage(Pathogen.Mpox, Group.All)?.value).toBe(0.227);
     });
 });
 
 describe("population groups", () => {
     it("can be incomplete, bounded, or not ages at all", () => {
-        expect(fatalityGroups(Pathogen.Pertussis).map((group) => group.id)).toEqual([Population.Infants, Population.Elderly]);
+        expect(fatalityGroups(Pathogen.Pertussis).map((group) => group.id)).toEqual([Group.Infants, Group.Elderly]);
         expect(Pathogen.Sars.populations.groups.map((group) => group.ifr?.bound)).toEqual([undefined, "below", undefined, undefined, "above"]);
         expect(Pathogen.Mpox.populations.kind).toBe("group");
     });
@@ -145,19 +145,19 @@ describe("population groups", () => {
             const ids = pathogen.populations.groups.map((group) => group.id);
             expect(new Set(ids).size).toBe(ids.length);
             // "everyone" can only be the base group.
-            expect(ids.slice(1)).not.toContain(Population.All);
-            expect(populationGroup(pathogen, Population.All)).toBe(baseGroupOf(pathogen));
+            expect(ids.slice(1)).not.toContain(Group.All);
+            expect(populationGroup(pathogen, Group.All)).toBe(baseGroupOf(pathogen));
             expect(fatalityGroups(pathogen)).not.toContain(baseGroupOf(pathogen));
         }
         const covid = Pathogen.CovidAncestral;
         const [, ...groups] = covid.populations.groups;
         const unknown = {
             ...covid,
-            populations: { ...covid.populations, groups: [{ id: Population.All, covers: "all ages" }, ...groups] as typeof covid.populations.groups },
+            populations: { ...covid.populations, groups: [{ id: Group.All, covers: "all ages" }, ...groups] as typeof covid.populations.groups },
         };
-        expect(fatalityRate(unknown, Population.All)).toBe(NO_FATALITY);
-        expect(fatalityRate(unknown, Population.Children)).toBe(NO_FATALITY);
-        expect(fatalityRate(unknown, Population.Elderly)).toBe(0.046);
+        expect(fatalityRate(unknown, Group.All)).toBe(NO_FATALITY);
+        expect(fatalityRate(unknown, Group.Children)).toBe(NO_FATALITY);
+        expect(fatalityRate(unknown, Group.Elderly)).toBe(0.046);
     });
 
     it("name the base group for who its rate was measured in: Everyone only when that's everyone", () => {
@@ -165,18 +165,18 @@ describe("population groups", () => {
         const everyone = /^(all ages|(reported|confirmed|probable) cases)$/;
         for (const pathogen of Pathogen.all) {
             const base = baseGroupOf(pathogen);
-            expect(base.id === Population.All, `${pathogen.id}: ${base.covers}`).toBe(everyone.test(base.covers));
+            expect(base.id === Group.All, `${pathogen.id}: ${base.covers}`).toBe(everyone.test(base.covers));
         }
-        expect(baseGroupOf(Pathogen.Rsv).id).toBe(Population.Under5);
-        expect(baseGroupOf(Pathogen.Measles).id).toBe(Population.Children);
+        expect(baseGroupOf(Pathogen.Rsv).id).toBe(Group.Under5);
+        expect(baseGroupOf(Pathogen.Measles).id).toBe(Group.Children);
         // Mpox's 2022 outbreak, and every value of it, was among GBMSM.
-        expect(baseGroupOf(Pathogen.Mpox).id).toBe(Population.Gbmsm);
+        expect(baseGroupOf(Pathogen.Mpox).id).toBe(Group.Gbmsm);
     });
 
     it("fall back to the base group (and its rate) for a group a pathogen has no data for", () => {
-        expect(fatalityRate(Pathogen.Pertussis, Population.Adults)).toBe(baseGroupOf(Pathogen.Pertussis).ifr!.value);
-        expect(fatalityRate(Pathogen.Measles, Population.All)).toBe(baseGroupOf(Pathogen.Measles).ifr!.value);
-        expect(fatalityRate(Pathogen.Sars, Population.Elderly)).toBe(0.5);
+        expect(fatalityRate(Pathogen.Pertussis, Group.Adults)).toBe(baseGroupOf(Pathogen.Pertussis).ifr!.value);
+        expect(fatalityRate(Pathogen.Measles, Group.All)).toBe(baseGroupOf(Pathogen.Measles).ifr!.value);
+        expect(fatalityRate(Pathogen.Sars, Group.Elderly)).toBe(0.5);
     });
 });
 
@@ -196,8 +196,8 @@ describe("citations", () => {
 
 describe("population (age) fatality", () => {
     it("uses the pathogen's own rate for all ages and for pathogens without age data", () => {
-        expect(fatalityRate(Pathogen.CovidAncestral, Population.All)).toBe(baseGroupOf(Pathogen.CovidAncestral).ifr!.value);
-        expect(fatalityRate(Pathogen.Measles, Population.Elderly)).toBe(baseGroupOf(Pathogen.Measles).ifr!.value);
+        expect(fatalityRate(Pathogen.CovidAncestral, Group.All)).toBe(baseGroupOf(Pathogen.CovidAncestral).ifr!.value);
+        expect(fatalityRate(Pathogen.Measles, Group.Elderly)).toBe(baseGroupOf(Pathogen.Measles).ifr!.value);
     });
 
     it("rises with age for COVID-19 and influenza", () => {
@@ -208,9 +208,9 @@ describe("population (age) fatality", () => {
     });
 
     it("matches the published values", () => {
-        expect(fatalityRate(Pathogen.CovidAncestral, Population.Elderly)).toBe(0.046);
-        expect(fatalityRate(Pathogen.CovidAncestral, Population.Infants)).toBe(0.000054);
-        expect(fatalityRate(Pathogen.CovidOmicron, Population.Elderly)).toBe(0.0097);
-        expect(fatalityRate(Pathogen.InfluenzaA, Population.Elderly)).toBeCloseTo(19_038 / 2_610_181, 12);
+        expect(fatalityRate(Pathogen.CovidAncestral, Group.Elderly)).toBe(0.046);
+        expect(fatalityRate(Pathogen.CovidAncestral, Group.Infants)).toBe(0.000054);
+        expect(fatalityRate(Pathogen.CovidOmicron, Group.Elderly)).toBe(0.0097);
+        expect(fatalityRate(Pathogen.InfluenzaA, Group.Elderly)).toBeCloseTo(19_038 / 2_610_181, 12);
     });
 });

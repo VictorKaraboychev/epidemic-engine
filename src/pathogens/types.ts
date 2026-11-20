@@ -16,11 +16,11 @@ export enum PathogenId {
 }
 
 /**
- * Population groups a pathogen can have data for (`All` is everyone); add one here to use it (it needn't be an age
+ * Group groups a pathogen can have data for (`All` is everyone); add one here to use it (it needn't be an age
  * group), and a UI names it. `All` also selects a pathogen's base group, whatever it covers (see
  * `Populations.groups`).
  */
-export enum Population {
+export enum Group {
     All = "all",
     Infants = "infants",
     Under5 = "under-5",
@@ -33,7 +33,7 @@ export enum Population {
     Gbmsm = "gbmsm",
 }
 /** A group narrower than everyone. */
-export type PopulationGroupId = Exclude<Population, Population.All>;
+export type PopulationGroupId = Exclude<Group, Group.All>;
 
 /** How a source states a value's uncertainty. */
 export enum IntervalKind {
@@ -100,6 +100,8 @@ export interface Cited {
     bound?: Bound;
     /** Why the value should be read with care, if it should. */
     caveat?: Caveat;
+    /** Where and when it was measured, as the source reports it (e.g. "US, 2023–24 season"), so you can judge whether it applies. */
+    setting?: string;
 }
 
 /** Everything about a value beyond the number and its main source. */
@@ -162,12 +164,12 @@ export interface PathogenValues {
     /** R₀ the simulator targets (it solves for the daily transmission rate that gives it on the network). */
     r0: Cited;
     /** Mean infectious period (days) of infections that end in recovery. */
-    recoveryDays: Cited;
+    infectiousDays: Cited;
     /**
-     * Mean infectious period (days) of infections that end in death. Equal to `recoveryDays` unless a source gives an
+     * Mean infectious period (days) of infections that end in death. Equal to `infectiousDays` unless a source gives an
      * outcome-specific estimate (Ebola: infectious until death, which comes sooner than recovery).
      */
-    deathDays: Cited;
+    fatalInfectiousDays: Cited;
     /** Mean days infected but not yet infectious. */
     latentDays?: Cited;
     /**
@@ -192,10 +194,21 @@ export interface PathogenValues {
 }
 
 /** One population group's data, as its sources report it: fatality, vaccine coverage, both, or neither. */
-export interface PopulationGroup<Id extends Population = PopulationGroupId> {
+/** Ages from `from` to `to` years, inclusive. */
+export interface AgeRange {
+    from: number;
+    to: number;
+}
+
+export interface PopulationGroup<Id extends Group = PopulationGroupId> {
     id: Id;
     /** Who exactly the numbers cover, as the source reports it: ages ("75", "0–4") or a short description. */
     covers: string;
+    /**
+     * The ages the numbers cover, in whole years (`to: Infinity`: and older). A single age (`from` = `to`) is an
+     * estimate at that age, as age-specific fatality is usually published (e.g. Levin et al. 2020).
+     */
+    ages?: AgeRange;
     /** Fatality in this group, with its citation (without it, everyone's rate applies, or none if everyone has none either). */
     ifr?: Cited;
     /** Share of this group vaccinated, with its citation (without it, everyone's coverage applies). */
@@ -236,7 +249,7 @@ export interface Populations {
      * (children under 5 for RSV, GBMSM for mpox), so a UI can name who the numbers are about. Then the narrower groups
      * with data.
      */
-    groups: [PopulationGroup<Population>, ...PopulationGroup[]];
+    groups: [PopulationGroup<Group>, ...PopulationGroup[]];
 }
 
 /**

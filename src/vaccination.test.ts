@@ -2,7 +2,7 @@ import { Pathogen } from "./pathogens/pathogen.js";
 import { describe, expect, it } from "vitest";
 import { compileModel, vaccineSusceptibility } from "./model.js";
 import { buildNetwork } from "./network.js";
-import { seededVaccinated, vaccinatedCount, vaccinationOrder } from "./population.js";
+import { seededVaccinated, vaccinatedCount, vaccinationOrder } from "./seeding.js";
 import { availableFeatures } from "./presets.js";
 import { seededRandom } from "./random.js";
 import { seirdModel } from "./seird.js";

@@ -95,9 +95,9 @@ export enum SeirdCompartment {
 
 export interface SirdParams extends ModelParams {
     /** Mean infectious days for infections that end in recovery. */
-    recoveryDays: number;
+    infectiousDays: number;
     /** Mean infectious days for infections that end in death. */
-    deathDays: number;
+    fatalInfectiousDays: number;
     /** Share of infections that are fatal. */
     ifr: number;
 }
@@ -113,8 +113,8 @@ export const SIRD_MODEL: CompartmentModel<SirdParams> = {
             infected: true,
             infectious: true,
             exits: [
-                { to: SeirdCompartment.Recovered, share: (p) => 1 - p.ifr, days: (p) => p.recoveryDays },
-                { to: SeirdCompartment.Died, share: (p) => p.ifr, days: (p) => p.deathDays },
+                { to: SeirdCompartment.Recovered, share: (p) => 1 - p.ifr, days: (p) => p.infectiousDays },
+                { to: SeirdCompartment.Died, share: (p) => p.ifr, days: (p) => p.fatalInfectiousDays },
             ],
         },
         { key: SeirdCompartment.Recovered, name: "recovered" },
@@ -239,6 +239,12 @@ export interface Rates {
      * a factor on infectiousness and the cumulative exit shares with deaths reduced; null where there is none.
      */
     protection: ({ infectiousness: number; cumulativeShares: Float64Array[] } | null)[];
+    /**
+     * Each person's risk of dying from an infection relative to the model's (`ifr`): exits to a death compartment take
+     * that multiple of their share, the others the rest. Null: everyone's is the model's. Set it after `ratesFor`,
+     * e.g. from people's ages (`Outbreak` does).
+     */
+    fatalityScale?: Float32Array | null;
 }
 
 /** Cumulative exit shares, in exit order (the last is 1). */

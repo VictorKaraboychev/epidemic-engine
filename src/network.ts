@@ -483,3 +483,31 @@ export const excessDegree = (network: Pick<Network, "offsets" | "count">) => {
     }
     return sum > 0 ? squares / sum - 1 : 0;
 };
+
+/**
+ * A network from your own contacts: pairs of people (`[a, b]`, either order; repeats and self-pairs ignored), with
+ * each person's household if you have them (-1 or omitted: none; members should also be listed as contacts, and
+ * contacts within a household are the household kind). People have no positions (all at 0, 0).
+ */
+export const networkFromContacts = (
+    count: number,
+    pairs: Iterable<readonly [number, number]>,
+    { householdOf, householdWeight = 1 }: { householdOf?: ArrayLike<number>; householdWeight?: number } = {},
+): Network => {
+    const households = householdOf ? Int32Array.from(householdOf) : undefined;
+    const candidates = new EdgeList();
+    for (const [a, b] of pairs) {
+        if (!(a >= 0 && a < count && b >= 0 && b < count)) throw new RangeError(`contact [${a}, ${b}] is outside 0–${count - 1}`);
+        const home = households && households[a] >= 0 && households[a] === households[b];
+        candidates.push(a, b, home ? EdgeKind.Household : EdgeKind.Local);
+    }
+    return {
+        width: 0,
+        height: 0,
+        count,
+        x: new Float64Array(count),
+        y: new Float64Array(count),
+        ...compress(candidates, count),
+        ...(households ? { householdOf: households, householdWeight } : {}),
+    };
+};

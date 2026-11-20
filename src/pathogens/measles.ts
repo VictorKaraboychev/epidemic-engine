@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Group, PopulationKind, between, cited } from "./types.js";
 
 /**
  * Measles.
@@ -18,14 +18,18 @@ export const MEASLES = {
     id: PathogenId.Measles,
     values: {
         r0: cited(15, "guerra-2017", { interval: between(12, 18, IntervalKind.Range) }),
-        recoveryDays: cited(8, "cdc-measles"),
-        deathDays: cited(8, "cdc-measles"),
+        infectiousDays: cited(8, "cdc-measles"),
+        fatalInfectiousDays: cited(8, "cdc-measles"),
         // Serial interval 11.7 days [Vink 2014]. Flat infectiousness: simulated outbreaks already run a little shorter
         // (≈ 9–12 days), as with R₀ 15 the first of a person's contacts to become infectious usually infects them.
         generationInterval: cited(11.7, "vink-2014", { caveat: Caveat.Proxy }),
         latentDays: cited(10, "cdc-pinkbook-measles"),
         latentVariation: cited(0.21, "lessler-2009", { interval: between(0.17, 0.25, IntervalKind.CI95), caveat: Caveat.Proxy }),
-        dispersion: cited(0.23, "lloyd-smith-2005", { interval: between(0.16, 0.39, IntervalKind.CI90), caveat: Caveat.OtherSetting }),
+        dispersion: cited(0.23, "lloyd-smith-2005", {
+            setting: "US, 1997–99 (near elimination)",
+            interval: between(0.16, 0.39, IntervalKind.CI90),
+            caveat: Caveat.OtherSetting,
+        }),
     },
     contacts: 20,
     immunity: { lifelong: "cdc-measles-clinical" },
@@ -41,10 +45,10 @@ export const MEASLES = {
         measure: FatalityMeasure.Case,
         groups: [
             {
-                id: Population.Children,
+                id: Group.Children,
                 covers: "children",
                 ifr: cited(0.0015, "cdc-measles-global", { interval: between(0.001, 0.002, IntervalKind.Range) }),
-                vaccineCoverage: cited(0.77, "who-immunization-2026"),
+                vaccineCoverage: cited(0.77, "who-immunization-2026", { setting: "Children worldwide, 2025 (second dose)" }),
             },
         ],
     },

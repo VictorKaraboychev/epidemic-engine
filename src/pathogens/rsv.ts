@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Group, PopulationKind, between, cited } from "./types.js";
 
 /**
  * Respiratory syncytial virus. Reinfection is common throughout life, so it's the disease where waning immunity matters
@@ -19,9 +19,9 @@ import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile
 export const RSV = {
     id: PathogenId.Rsv,
     values: {
-        r0: cited(3.0, "reis-2016", { interval: between(1.5, 4, IntervalKind.Range) }),
-        recoveryDays: cited(6.4, "reis-2016"),
-        deathDays: cited(6.4, "reis-2016"),
+        r0: cited(3.0, "reis-2016", { setting: "US regions and seasons", interval: between(1.5, 4, IntervalKind.Range) }),
+        infectiousDays: cited(6.4, "reis-2016"),
+        fatalInfectiousDays: cited(6.4, "reis-2016"),
         // Flat infectiousness: simulated outbreaks run a little shorter (≈ 6 days).
         generationInterval: cited(7.5, "vink-2014", { caveat: Caveat.Proxy }),
         latentDays: cited(3, "lessler-2009", { also: ["cdc-rsv-spread"] }),
@@ -30,7 +30,10 @@ export const RSV = {
     contacts: 5,
     // ≈ 70% over months 0–6 (day ≈ 91) and ≈ 19% at 6–11 months: halving every 97 days through both points needs
     // protection to stay full for 91 − 97 × log₂(1 / 0.70) ≈ 41 days first.
-    immunity: { delay: cited(41, "ohuma-2012", { caveat: Caveat.OtherSetting }), halfLife: cited(97, "ohuma-2012", { caveat: Caveat.OtherSetting }) },
+    immunity: {
+        delay: cited(41, "ohuma-2012", { setting: "Kenyan birth cohort (children)", caveat: Caveat.OtherSetting }),
+        halfLife: cited(97, "ohuma-2012", { setting: "Kenyan birth cohort (children)", caveat: Caveat.OtherSetting }),
+    },
     vaccination: {
         efficacy: cited(0.717, "papi-2023", { interval: between(0.562, 0.823, IntervalKind.CI95), caveat: Caveat.Proxy }),
         halfLife: cited(445, "papi-2023", { also: ["ison-2024"] }),
@@ -40,8 +43,18 @@ export const RSV = {
         kind: PopulationKind.Age,
         measure: FatalityMeasure.Illness,
         groups: [
-            { id: Population.Under5, covers: "under 5", ifr: cited(0.0031, "li-2022", { caveat: Caveat.OtherSetting }) },
-            { id: Population.Elderly, covers: "75+", vaccineCoverage: cited(0.397, "kriss-2024") },
+            {
+                id: Group.Under5,
+                covers: "under 5",
+                ages: { from: 0, to: 4 },
+                ifr: cited(0.0031, "li-2022", { setting: "Children under 5, worldwide, 2019", caveat: Caveat.OtherSetting }),
+            },
+            {
+                id: Group.Elderly,
+                covers: "75+",
+                ages: { from: 75, to: Infinity },
+                vaccineCoverage: cited(0.397, "kriss-2024", { setting: "US, age 75 and over, late 2024" }),
+            },
         ],
     },
 } satisfies PathogenProfile<PathogenId>;

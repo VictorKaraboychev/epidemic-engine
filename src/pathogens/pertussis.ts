@@ -1,4 +1,4 @@
-import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
+import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Group, PopulationKind, between, cited } from "./types.js";
 
 /**
  * Pertussis (whooping cough). Highly contagious, infectious for weeks, and immunity after infection fades over decades.
@@ -19,14 +19,18 @@ import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, type Pathogen
 export const PERTUSSIS = {
     id: PathogenId.Pertussis,
     values: {
-        r0: cited(5.5, "kretzschmar-2010", { interval: between(5, 6, IntervalKind.Range) }),
-        recoveryDays: cited(15, "wearing-rohani-2009", { also: ["cdc-pinkbook-pertussis"] }),
-        deathDays: cited(15, "wearing-rohani-2009", { also: ["cdc-pinkbook-pertussis"] }),
+        r0: cited(5.5, "kretzschmar-2010", { setting: "Five European countries", interval: between(5, 6, IntervalKind.Range) }),
+        infectiousDays: cited(15, "wearing-rohani-2009", { also: ["cdc-pinkbook-pertussis"] }),
+        fatalInfectiousDays: cited(15, "wearing-rohani-2009", { also: ["cdc-pinkbook-pertussis"] }),
         // Household serial interval, mother to infant [te Beest 2014]. Flat infectiousness: simulated outbreaks still
         // run about half as long (≈ 11 days), as contacts are infected early in the long infectious period.
         generationInterval: cited(20, "te-beest-2014", { interval: between(16, 23, IntervalKind.CI95), caveat: Caveat.Proxy }),
         latentDays: cited(8, "cdc-pinkbook-pertussis", { interval: between(7, 10, IntervalKind.Range) }),
-        dispersion: cited(0.23, "cho-2025", { interval: between(0.11, 0.53, IntervalKind.CI95), caveat: Caveat.OtherSetting }),
+        dispersion: cited(0.23, "cho-2025", {
+            setting: "One school outbreak, vaccinated pupils",
+            interval: between(0.11, 0.53, IntervalKind.CI95),
+            caveat: Caveat.OtherSetting,
+        }),
     },
     contacts: 7,
     immunity: { halfLife: cited(7595, "wearing-rohani-2009", { bound: Bound.Above }) },
@@ -34,11 +38,11 @@ export const PERTUSSIS = {
         kind: PopulationKind.Age,
         measure: FatalityMeasure.Case,
         groups: [
-            { id: Population.All, covers: "all ages", ifr: cited(0.0012, "skoff-2019") },
+            { id: Group.All, covers: "all ages", ifr: cited(0.0012, "skoff-2019", { setting: "US, 2000–16" }) },
 
-            { id: Population.Infants, covers: "under 1", ifr: cited(261 / 50_950, "skoff-2019") },
-            { id: Population.Children, covers: "4 DTaP doses by age 2", vaccineCoverage: cited(0.807, "hill-2026") },
-            { id: Population.Elderly, covers: "65+", ifr: cited(14 / 8_177, "skoff-2019") },
+            { id: Group.Infants, covers: "under 1", ages: { from: 0, to: 0 }, ifr: cited(261 / 50_950, "skoff-2019", { setting: "US, 2000–16" }) },
+            { id: Group.Children, covers: "4 DTaP doses by age 2", vaccineCoverage: cited(0.807, "hill-2026", { setting: "US toddlers (4 doses by age 2)" }) },
+            { id: Group.Elderly, covers: "65+", ages: { from: 65, to: Infinity }, ifr: cited(14 / 8_177, "skoff-2019", { setting: "US, 2000–16" }) },
         ],
     },
     vaccination: {

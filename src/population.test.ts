@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { degreeOf } from "./network.js";
-import { buildPopulationNetwork, indexCaseOrder, luckSeed, seededIndexCases } from "./population.js";
+import { buildPopulationNetwork } from "./population.js";
+import { indexCaseOrder, luckSeed, seededIndexCases } from "./seeding.js";
 import { seirdModel } from "./seird.js";
 import { createEpidemic } from "./stochastic.js";
 import { FIGURE_POPULATION, WIDE_LAYOUT } from "./test-support.js";

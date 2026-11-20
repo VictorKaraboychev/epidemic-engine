@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Group, PopulationKind, between, cited } from "./types.js";
 
 /**
  * Seasonal influenza A.
@@ -17,31 +17,56 @@ export const INFLUENZA_A = {
     id: PathogenId.InfluenzaA,
     values: {
         r0: cited(1.28, "biggerstaff-2014", { interval: between(1.19, 1.37, IntervalKind.IQR) }),
-        recoveryDays: cited(5, "cdc-flu"),
-        deathDays: cited(5, "cdc-flu"),
+        infectiousDays: cited(5, "cdc-flu"),
+        fatalInfectiousDays: cited(5, "cdc-flu"),
         generationInterval: cited(3.6, "cowling-2009", { interval: between(2.9, 4.3, IntervalKind.CI95), caveat: Caveat.Proxy }),
         infectiousnessHalfLife: cited(1.6, "cowling-2009", { caveat: Caveat.Fitted }),
-        latentDays: cited(1.6, "cori-2012"),
+        latentDays: cited(1.6, "cori-2012", { setting: "Experimental infections" }),
         latentVariation: cited(0.43, "lessler-2009", { interval: between(0.37, 0.5, IntervalKind.CI95), caveat: Caveat.Proxy }),
     },
     contacts: 4,
     // 3.5–7 years by subtype and age.
-    immunity: { halfLife: cited(1500, "ranjeva-2019", { interval: between(3.5 * 365.25, 7 * 365.25, IntervalKind.Range) }) },
+    immunity: {
+        halfLife: cited(1500, "ranjeva-2019", {
+            setting: "Hong Kong households (H3N2, adults)",
+            interval: between(3.5 * 365.25, 7 * 365.25, IntervalKind.Range),
+        }),
+    },
     populations: {
         kind: PopulationKind.Age,
         measure: FatalityMeasure.Illness,
         groups: [
             {
-                id: Population.All,
+                id: Group.All,
                 covers: "all ages",
-                ifr: cited(0.0007, "cdc-flu-burden-2024"),
-                vaccineCoverage: cited(0.472, "cdc-fluvaxview-2024"),
+                ifr: cited(0.0007, "cdc-flu-burden-2024", { setting: "US, 2023–24 season" }),
+                vaccineCoverage: cited(0.472, "cdc-fluvaxview-2024", { setting: "US, 2023–24 season" }),
             },
 
-            { id: Population.Infants, covers: "0–4", ifr: cited(268 / 2_903_633, "cdc-flu-burden-2024") },
-            { id: Population.Adults, covers: "18–49", ifr: cited(2_705 / 16_351_383, "cdc-flu-burden-2024") },
-            { id: Population.MiddleAged, covers: "50–64", ifr: cited(5_701 / 9_042_884, "cdc-flu-burden-2024") },
-            { id: Population.Elderly, covers: "65+", ifr: cited(19_038 / 2_610_181, "cdc-flu-burden-2024") },
+            {
+                id: Group.Infants,
+                covers: "0–4",
+                ages: { from: 0, to: 4 },
+                ifr: cited(268 / 2_903_633, "cdc-flu-burden-2024", { setting: "US, 2023–24 season (preliminary)" }),
+            },
+            {
+                id: Group.Adults,
+                covers: "18–49",
+                ages: { from: 18, to: 49 },
+                ifr: cited(2_705 / 16_351_383, "cdc-flu-burden-2024", { setting: "US, 2023–24 season (preliminary)" }),
+            },
+            {
+                id: Group.MiddleAged,
+                covers: "50–64",
+                ages: { from: 50, to: 64 },
+                ifr: cited(5_701 / 9_042_884, "cdc-flu-burden-2024", { setting: "US, 2023–24 season (preliminary)" }),
+            },
+            {
+                id: Group.Elderly,
+                covers: "65+",
+                ages: { from: 65, to: Infinity },
+                ifr: cited(19_038 / 2_610_181, "cdc-flu-burden-2024", { setting: "US, 2023–24 season (preliminary)" }),
+            },
         ],
     },
     vaccination: {

@@ -1,4 +1,4 @@
-import { Population } from "./pathogens/types.js";
+import { Group } from "./pathogens/types.js";
 import { Pathogen } from "./pathogens/pathogen.js";
 import { describe, expect, it } from "vitest";
 import { buildPopulationNetwork } from "./population.js";
@@ -15,10 +15,10 @@ const SEIRD = seirdModel({ exposed: true, waning: false });
 
 describe("pathogen parameters", () => {
     it("are the pathogen's cited values, with infinite half-lives for lifelong protection and flat infectiousness", () => {
-        const measles = pathogenParams(Pathogen.Measles, Population.All);
-        expect(measles).toMatchObject({ immunityDelay: Infinity, immunityHalfLife: Infinity, infectiousnessHalfLife: Infinity, vaccineHalfLife: Infinity });
-        expect(pathogenParams(Pathogen.CovidOmicron, Population.All)).toMatchObject({ immunityDelay: 100 });
-        expect(pathogenParams(Pathogen.Sars, Population.All).vaccineEfficacy).toBeUndefined();
+        const measles = pathogenParams(Pathogen.Measles, Group.All);
+        expect(measles).toMatchObject({ immunity: { delay: Infinity, halfLife: Infinity }, infectiousnessHalfLife: Infinity, vaccine: { halfLife: Infinity } });
+        expect(pathogenParams(Pathogen.CovidOmicron, Group.All)).toMatchObject({ immunity: { delay: 100 } });
+        expect(pathogenParams(Pathogen.Sars, Group.All).vaccine).toBeUndefined();
     });
 
     it("switch on only the features a pathogen has data for", () => {
@@ -29,14 +29,14 @@ describe("pathogen parameters", () => {
 
 describe("transmission", () => {
     it("solves the rate for a published R₀ on the network, or keeps the given one", () => {
-        const params = seirdParams({ latentDays: 3, recoveryDays: 6, deathDays: 6 });
+        const params = seirdParams({ latentDays: 3, infectiousDays: 6, fatalInfectiousDays: 6 });
         const { beta } = solveTransmission({ model: SEIRD, params, reproduction, r0: 2.5, dispersion: null });
         expect(estimateR0(SEIRD, { ...params, beta }, reproduction)).toBeCloseTo(2.5, 1);
         expect(solveTransmission({ model: SEIRD, params: { ...params, beta: 0.12 }, reproduction, r0: null, dispersion: null }).beta).toBe(0.12);
     });
 
     it("finds the individual dispersion only with superspreading, less uneven than the target as the network adds its own", () => {
-        const params = seirdParams({ recoveryDays: 6, deathDays: 6 });
+        const params = seirdParams({ infectiousDays: 6, fatalInfectiousDays: 6 });
         expect(solveTransmission({ model: SEIRD, params, reproduction, r0: 2.5, dispersion: null }).dispersion).toBeNull();
         const { dispersion } = solveTransmission({ model: SEIRD, params, reproduction, r0: 2.5, dispersion: 0.3 });
         expect(dispersion).toBeGreaterThanOrEqual(0.3);

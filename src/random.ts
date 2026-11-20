@@ -27,7 +27,7 @@ export const seededOrder = (n: number, random: Random) => {
 };
 
 /** A standard normal draw (Box–Muller). */
-const normal = (random: Random) => {
+export const standardNormal = (random: Random) => {
     const u = 1 - random();
     return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * random());
 };
@@ -44,7 +44,7 @@ export const gammaMeanOne = (random: Random, shape: number): number => {
         let x: number;
         let v: number;
         do {
-            x = normal(random);
+            x = standardNormal(random);
             v = 1 + c * x;
         } while (v <= 0);
         v = v * v * v;

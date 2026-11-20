@@ -6,19 +6,21 @@ import { type PathogenParams, availableFeatures, pathogenParams } from "../prese
 import type { ModelFeatures } from "../seird.js";
 import type { CitationId } from "./citations.js";
 import { type PathogenSpec, profileFromSpec } from "./custom.js";
+import { sampleProfile } from "./sample.js";
+import type { Random } from "../random.js";
 import { COVID_ANCESTRAL } from "./covid-ancestral.js";
 import { COVID_OMICRON } from "./covid-omicron.js";
 import { EBOLA } from "./ebola.js";
 import { INFLUENZA_A } from "./influenza-a.js";
 import { INFLUENZA_B } from "./influenza-b.js";
-import { citationsOf, fatalityRate, simulatedCoverage } from "./index.js";
+import { citationsOf, coverageAtAge, fatalityAtAge, fatalityRate, simulatedCoverage } from "./index.js";
 import { MEASLES } from "./measles.js";
 import { MERS } from "./mers.js";
 import { MPOX } from "./mpox.js";
 import { PERTUSSIS } from "./pertussis.js";
 import { RSV } from "./rsv.js";
 import { SARS } from "./sars.js";
-import { type PathogenId, type PathogenProfile, type PathogenValues, Population, type Populations, type Protection, type Vaccination } from "./types.js";
+import { type PathogenId, type PathogenProfile, type PathogenValues, Group, type Populations, type Protection, type Vaccination } from "./types.js";
 
 export class Pathogen implements PathogenProfile {
     static readonly CovidAncestral = new Pathogen(COVID_ANCESTRAL);
@@ -64,7 +66,7 @@ export class Pathogen implements PathogenProfile {
     readonly vaccination?: Vaccination;
 
     /**
-     * Your own pathogen from plain numbers (`{ id, r0, recoveryDays, latentDays?, ifr?, immunity?, vaccine?, … }`; see
+     * Your own pathogen from plain numbers (`{ id, r0, infectiousDays, latentDays?, ifr?, immunity?, vaccine?, … }`; see
      * `PathogenSpec`), or from full data (`PathogenProfile`, with sources).
      */
     constructor(data: PathogenSpec | PathogenProfile) {
@@ -94,6 +96,14 @@ export class Pathogen implements PathogenProfile {
         };
     }
 
+    /**
+     * A copy with every value that has a published interval drawn from it (see `sample.ts`), e.g. for runs that reflect
+     * what isn't known: `Pathogen.Measles.sample(seededRandom(1))`.
+     */
+    sample(random: Random = Math.random): Pathogen {
+        return new Pathogen(sampleProfile(this.profile(), random));
+    }
+
     /** The basic reproduction number. */
     get r0(): number {
         return this.values.r0.value;
@@ -110,17 +120,27 @@ export class Pathogen implements PathogenProfile {
     }
 
     /** The model parameters it sets for a population group (lifelong protection and flat infectiousness: `Infinity`). */
-    params(population: Population = Population.All): Partial<PathogenParams> {
+    params(population: Group = Group.All): Partial<PathogenParams> {
         return pathogenParams(this, population);
     }
 
     /** The share of infections (or illnesses, or cases: see `populations.measure`) that are fatal, for a group. */
-    fatalityRate(population: Population = Population.All): number {
+    fatalityRate(population: Group = Group.All): number {
         return fatalityRate(this, population);
     }
 
+    /** Fatality at one age (see `fatalityAtAge`: age bands, or log-linear between published ages). */
+    fatalityAt(age: number): number {
+        return fatalityAtAge(this, age);
+    }
+
+    /** The share vaccinated at one age (see `coverageAtAge`); null without a vaccine. */
+    vaccineCoverageAt(age: number): number | null {
+        return coverageAtAge(this, age);
+    }
+
     /** The share vaccinated before an outbreak, for a group; null without a vaccine. */
-    vaccineCoverage(population: Population = Population.All): number | null {
+    vaccineCoverage(population: Group = Group.All): number | null {
         return simulatedCoverage(this, population)?.value ?? null;
     }
 }

@@ -1,5 +1,5 @@
 import { Pathogen } from "../pathogens/pathogen.js";
-import { Population } from "../pathogens/types.js";
+import { Group } from "../pathogens/types.js";
 /**
  * Measures what a preset's simulated outbreaks actually do, for validation against the literature: the mean
  * generation interval (days from an infector's infection to their infectee's), the reproduction number in the early
@@ -8,7 +8,8 @@ import { Population } from "../pathogens/types.js";
  */
 import { type PathogenId } from "../pathogens/index.js";
 import { compileModel, ratesFor } from "../model.js";
-import { buildPopulationNetwork, indexCaseOrder, luckSeed, seededIndexCases } from "../population.js";
+import { buildPopulationNetwork } from "../population.js";
+import { indexCaseOrder, luckSeed, seededIndexCases } from "../seeding.js";
 import { availableFeatures, pathogenParams, solveTransmission } from "../presets.js";
 import { seededRandom } from "../random.js";
 import { reproductionCurve } from "../reproduction.js";
@@ -50,15 +51,15 @@ export const measurePreset = (
     for (let run = 0; run < (options.runs ?? 6); run++) {
         const seed = (options.seed ?? 1000) + run;
         const pathogen = Pathogen.get(presetId);
-        const { contacts, vaccineCoverage: _coverage, dispersion: k, ...preset } = pathogenParams(pathogen, Population.All);
+        const { contacts, vaccineCoverage: _coverage, dispersion: k, ...preset } = pathogenParams(pathogen, Group.All);
         const superspreading = (options.superspreading ?? false) && availableFeatures(pathogen).superspreading;
         // Calibration: scale both infectious periods (the preset's R₀ is still solved for).
         const scale = options.infectiousScale ?? 1;
         const base = seirdParams({
             ...preset,
             ifr: 0,
-            recoveryDays: preset.recoveryDays! * scale,
-            deathDays: preset.deathDays! * scale,
+            infectiousDays: preset.infectiousDays! * scale,
+            fatalInfectiousDays: preset.fatalInfectiousDays! * scale,
             ...(options.infectiousnessHalfLife !== undefined ? { infectiousnessHalfLife: options.infectiousnessHalfLife } : {}),
         });
         const network = buildPopulationNetwork({ seed, people, contacts: contacts!, superspreading: superspreading });

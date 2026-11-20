@@ -1,8 +1,8 @@
 /**
- * Your own pathogens, from plain numbers: `new Pathogen({ id: "my-flu", r0: 1.8, latentDays: 2, recoveryDays: 5 })`
+ * Your own pathogens, from plain numbers: `new Pathogen({ id: "my-flu", r0: 1.8, latentDays: 2, infectiousDays: 5 })`
  * reads a `PathogenSpec` into the same data the built-in ones have (`profileFromSpec`).
  */
-import { FatalityMeasure, type PathogenProfile, Population, PopulationKind, type Protection } from "./types.js";
+import { FatalityMeasure, type PathogenProfile, Group, PopulationKind, type Protection } from "./types.js";
 
 /** Protection after recovery or vaccination: lifelong, or full for `delay` days and then halving every `halfLife`. */
 export interface ProtectionSpec {
@@ -23,9 +23,9 @@ export interface PathogenSpec {
     /** Basic reproduction number: the transmission rate is solved for it on each network. */
     r0: number;
     /** Mean days infectious, for infections that end in recovery. */
-    recoveryDays: number;
-    /** Mean days infectious, for infections that end in death (default `recoveryDays`). */
-    deathDays?: number;
+    infectiousDays: number;
+    /** Mean days infectious, for infections that end in death (default `infectiousDays`). */
+    fatalInfectiousDays?: number;
     /** Mean days infected but not yet infectious (default: none, an SIRD model). */
     latentDays?: number;
     /** How variable latent periods are: coefficient of variation (default 0.5). */
@@ -76,7 +76,16 @@ const protectionOf = (name: string, spec: ProtectionSpec): Protection => {
 
 /** A pathogen's data from your own numbers (checked: periods positive, shares between 0 and 1). Its values have no sources. */
 export const profileFromSpec = (spec: PathogenSpec): PathogenProfile => {
-    for (const key of ["r0", "recoveryDays", "deathDays", "latentDays", "latentVariation", "infectiousnessHalfLife", "contacts", "dispersion"] as const)
+    for (const key of [
+        "r0",
+        "infectiousDays",
+        "fatalInfectiousDays",
+        "latentDays",
+        "latentVariation",
+        "infectiousnessHalfLife",
+        "contacts",
+        "dispersion",
+    ] as const)
         positive(key, spec[key]);
     share("ifr", spec.ifr);
     if (spec.vaccine) {
@@ -87,8 +96,8 @@ export const profileFromSpec = (spec: PathogenSpec): PathogenProfile => {
         id: spec.id,
         values: {
             r0: { value: spec.r0 },
-            recoveryDays: { value: spec.recoveryDays },
-            deathDays: { value: spec.deathDays ?? spec.recoveryDays },
+            infectiousDays: { value: spec.infectiousDays },
+            fatalInfectiousDays: { value: spec.fatalInfectiousDays ?? spec.infectiousDays },
             ...(spec.latentDays !== undefined ? { latentDays: { value: spec.latentDays } } : {}),
             ...(spec.latentVariation !== undefined ? { latentVariation: { value: spec.latentVariation } } : {}),
             ...(spec.infectiousnessHalfLife !== undefined ? { infectiousnessHalfLife: { value: spec.infectiousnessHalfLife } } : {}),
@@ -101,7 +110,7 @@ export const profileFromSpec = (spec: PathogenSpec): PathogenProfile => {
             measure: FatalityMeasure.Infection,
             groups: [
                 {
-                    id: Population.All,
+                    id: Group.All,
                     covers: "everyone",
                     ifr: { value: spec.ifr ?? 0 },
                     ...(spec.vaccine ? { vaccineCoverage: { value: spec.vaccine.coverage } } : {}),
