@@ -1,7 +1,7 @@
 import type { CitationId } from "./citations.js";
 
 /** The pathogens with cited data, by id (each has a file in this folder, listed in `index.ts`). A UI names each one. */
-export enum Pathogen {
+export enum PathogenId {
     CovidAncestral = "covid-ancestral",
     CovidOmicron = "covid-omicron",
     InfluenzaA = "influenza-a",
@@ -85,15 +85,18 @@ export enum Bound {
     Above = "above",
 }
 
-/** A published number, the source it comes from, and what else the source says about it. */
+/**
+ * A number with the source it comes from and what else the source says about it. Values you set yourself
+ * (`new Pathogen({ … })`) have no source.
+ */
 export interface Cited {
     value: number;
-    citation: CitationId;
+    citation?: CitationId;
     /** Further sources, for values derived from more than one (e.g. incubation minus pre-symptom spread). */
     also?: CitationId[];
     /** The source's uncertainty around the value (the value lies within it). */
     interval?: Interval;
-    /** The source gives a bound, not a point estimate ("< 1%", "> 21 years"): the bound is used and shown with its sign. */
+    /** The source gives a bound, not a point estimate ("< 1%", "> 21 years"): the bound is used as the value. */
     bound?: Bound;
     /** Why the value should be read with care, if it should. */
     caveat?: Caveat;
@@ -109,7 +112,7 @@ export type CitedDetails = Omit<Cited, "value" | "citation">;
 export const cited = (value: number, citation: CitationId, details: CitedDetails = {}): Cited => ({ value, citation, ...details });
 
 /** Every source behind a value. */
-export const citationsFor = (value: Cited): CitationId[] => [value.citation, ...(value.also ?? [])];
+export const citationsFor = (value: Cited): CitationId[] => [...(value.citation ? [value.citation] : []), ...(value.also ?? [])];
 
 /**
  * Protection, after infection or vaccination: how strong it is at first (if measured) and how long it lasts, either
@@ -135,7 +138,7 @@ export type Protection = {
           delay?: Cited;
           lifelong?: never;
       }
-    | { lifelong: CitationId; halfLife?: never; delay?: never }
+    | { lifelong: CitationId | true; halfLife?: never; delay?: never }
     | { halfLife?: never; delay?: never; lifelong?: never }
 );
 
@@ -146,7 +149,7 @@ export const protectionCitations = (protection: Protection): CitationId[] => [
     ...(protection.spreadProtection ? citationsFor(protection.spreadProtection) : []),
     ...(protection.halfLife ? citationsFor(protection.halfLife) : []),
     ...(protection.delay ? citationsFor(protection.delay) : []),
-    ...(protection.lifelong ? [protection.lifelong] : []),
+    ...(typeof protection.lifelong === "string" ? [protection.lifelong] : []),
 ];
 
 /**
@@ -231,7 +234,7 @@ export interface Populations {
      * The base group first: the disease's overall data (its fatality is the default rate, and without one nobody
      * dies), for whoever the sources measured it in. That's everyone ("all") for most diseases, but any group fits
      * (children under 5 for RSV, GBMSM for mpox), so a UI can name who the numbers are about. Then the narrower groups
-     * with data, in display order. At most `MAX_POPULATION_GROUPS` besides the base with fatality data.
+     * with data.
      */
     groups: [PopulationGroup<Population>, ...PopulationGroup[]];
 }
@@ -251,8 +254,13 @@ export type Vaccination =
           none: CitationId;
       };
 
-export interface PathogenProfile {
-    id: Pathogen;
+/**
+ * A pathogen's data, as plain objects (what the `Pathogen` class holds, and `pathogen.profile()` gives back). The
+ * built-in ones are cited throughout.
+ */
+export interface PathogenProfile<Id extends string = string> {
+    /** A `PathogenId` for the built-in ones; any name for your own. */
+    id: Id;
     values: PathogenValues;
     /**
      * Nearest contacts per person: a modelling choice, not a published value. Each person can infect at most their
@@ -269,9 +277,4 @@ export interface PathogenProfile {
     populations: Populations;
     /** Vaccination data (not used by the simulator yet). */
     vaccination?: Vaccination;
-    /** Kept in the data (and type-checked) but not offered in the UI. */
-    hidden?: boolean;
 }
-
-/** Typed identity: lets each disease file be checked against `PathogenProfile` where it is written. */
-export const definePathogen = (pathogen: PathogenProfile) => pathogen;

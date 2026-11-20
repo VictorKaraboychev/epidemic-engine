@@ -1,7 +1,8 @@
+import { Pathogen } from "./pathogens/pathogen.js";
 import { describe, expect, it } from "vitest";
 import { SeirdCompartment } from "./model.js";
 import { DEFAULT_MAX_DAYS, Outbreak } from "./outbreak.js";
-import { Pathogen, Population } from "./pathogens/types.js";
+import { Population } from "./pathogens/types.js";
 
 describe("Outbreak", () => {
     it("runs a pathogen's outbreak from its published data", () => {

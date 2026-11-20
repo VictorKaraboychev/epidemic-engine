@@ -4,7 +4,7 @@ import { appendDay, countsOn, peakInfections, seriesOf, startHistory } from "./h
 import { SIRD_MODEL, type SirdParams, UNDECIDED, compileModel, ratesFor } from "./model.js";
 import { buildNetwork, excessDegree, neighboursOf } from "./network.js";
 import { betaForR0, estimateR0, meanInfectiousDays, transmissibility } from "./r0.js";
-import { MAX_SEED, MIN_SEED, seededRandom, randomSeed, seededOrder } from "./random.js";
+import { seededRandom, randomSeed, seededOrder } from "./random.js";
 import { treeCurve } from "./reproduction.js";
 import { type EpidemicState, advanceEpidemic, createEpidemic, infectedCount, isOver, stepEpidemic } from "./stochastic.js";
 import { DESKTOP, SEIRS_V_MODEL, type SeirsParams, star } from "./test-support.js";
@@ -31,11 +31,10 @@ describe("random numbers", () => {
         expect(values.every((v) => v >= 0 && v < 1)).toBe(true);
     });
 
-    it("randomSeed returns five digits", () => {
-        for (let k = 0; k < 200; k++) {
-            const seed = randomSeed();
-            expect(Number.isInteger(seed) && seed >= MIN_SEED && seed <= MAX_SEED).toBe(true);
-        }
+    it("randomSeed returns different 32-bit integers", () => {
+        const seeds = Array.from({ length: 200 }, randomSeed);
+        for (const seed of seeds) expect(Number.isInteger(seed) && seed === (seed | 0)).toBe(true);
+        expect(new Set(seeds).size).toBeGreaterThan(195);
     });
 
     it("seededOrder is a deterministic permutation", () => {

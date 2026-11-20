@@ -1,8 +1,8 @@
-import { Bound, Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
 
 /**
- * Seasonal influenza B. Hidden: in this model it behaves almost exactly like influenza A (R 1.23 vs 1.28, same
- * fatality data), so it is kept in the data but not offered.
+ * Seasonal influenza B. In this model it behaves almost exactly like influenza A (R 1.23 vs 1.28, same fatality
+ * data).
  * - Rₑ: median early-epidemic 1.23 (range 1.06–1.58) [Thompson 2022].
  * - Same infectious period as influenza A [CDC]. Fatality overall and by age, and vaccine coverage, are CDC's 2023–24
  *   figures, which cover all influenza types, so they match influenza A's [CDC burden; CDC FluVaxView].
@@ -11,8 +11,8 @@ import { Bound, Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, Pop
  * - No superspreading estimate: no published dispersion k for influenza B.
  * - Vaccine against influenza B: 62% at 15–90 days, 43% at 91–180 days; half-life ≈ 157 days [Young 2018].
  */
-export const INFLUENZA_B = definePathogen({
-    id: Pathogen.InfluenzaB,
+export const INFLUENZA_B = {
+    id: PathogenId.InfluenzaB,
     values: {
         r0: cited(1.23, "thompson-2022", { interval: between(1.06, 1.58, IntervalKind.Range), caveat: Caveat.Proxy }),
         recoveryDays: cited(5, "cdc-flu"),
@@ -42,11 +42,10 @@ export const INFLUENZA_B = definePathogen({
             { id: Population.Elderly, covers: "65+", ifr: cited(19_038 / 2_610_181, "cdc-flu-burden-2024") },
         ],
     },
-    hidden: true,
     vaccination: {
         efficacy: cited(0.62, "young-2018", { interval: between(0.52, 0.7, IntervalKind.CI95), caveat: Caveat.Proxy }),
         halfLife: cited(157, "young-2018"),
         // In-hospital death among adults 65+ hospitalised with influenza: aOR 0.39 vaccinated vs not [Arriola 2017].
         deathProtection: cited(0.61, "arriola-2017", { interval: between(0.34, 0.83, IntervalKind.CI95), caveat: Caveat.OtherSetting }),
     },
-});
+} satisfies PathogenProfile<PathogenId>;

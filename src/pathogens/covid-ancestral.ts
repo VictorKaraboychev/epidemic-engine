@@ -1,4 +1,4 @@
-import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
 
 /**
  * COVID-19, ancestral strain, before vaccines.
@@ -14,8 +14,8 @@ import { Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, Population
  *   ≈ 165 × ln 2 / ln(0.88 / 0.47) ≈ 182 days, partly Delta's arrival [Tartof 2021]. ≈ 69% of Americans 5+ had
  *   completed the primary series by mid-2022 [Fast 2022].
  */
-export const COVID_ANCESTRAL = definePathogen({
-    id: Pathogen.CovidAncestral,
+export const COVID_ANCESTRAL = {
+    id: PathogenId.CovidAncestral,
     values: {
         r0: cited(2.79, "liu-2020"),
         recoveryDays: cited(8, "he-2020"),
@@ -60,4 +60,4 @@ export const COVID_ANCESTRAL = definePathogen({
         deathProtection: cited(0.63, "tartof-2021", { caveat: Caveat.Proxy }),
         spreadProtection: cited(0.68, "eyre-2022", { interval: between(0.52, 0.79, IntervalKind.CI95) }),
     },
-});
+} satisfies PathogenProfile<PathogenId>;

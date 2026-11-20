@@ -1,46 +1,14 @@
 /**
- * The diseases: one file each, every published value cited (`Cited`), citations from the shared library
- * (`citations.ts`). Add a disease by writing its file and listing it here and its id in `Pathogen`.
+ * What can be read from a pathogen's data: fatality and vaccine coverage by population group, its values by
+ * parameter, and its citations (the `Pathogen` class wraps these as methods). The built-in pathogens' data is in
+ * `data.ts`, one file each.
  */
 import type { CitationId } from "./citations.js";
-import { COVID_ANCESTRAL } from "./covid-ancestral.js";
-import { COVID_OMICRON } from "./covid-omicron.js";
-import { EBOLA } from "./ebola.js";
-import { INFLUENZA_A } from "./influenza-a.js";
-import { INFLUENZA_B } from "./influenza-b.js";
-import { MEASLES } from "./measles.js";
-import { MERS } from "./mers.js";
-import { MPOX } from "./mpox.js";
-import { PERTUSSIS } from "./pertussis.js";
-import { RSV } from "./rsv.js";
-import { SARS } from "./sars.js";
-import {
-    type Cited,
-    type PathogenProfile,
-    type Pathogen,
-    type PathogenValues,
-    type PopulationGroup,
-    Population,
-    citationsFor,
-    protectionCitations,
-} from "./types.js";
+import { type Cited, type PathogenProfile, type PathogenValues, type PopulationGroup, Population, citationsFor, protectionCitations } from "./types.js";
 
 export { CITATIONS, type Citation, type CitationId } from "./citations.js";
 export * from "./types.js";
-
-/** At most this many population groups per disease besides its base group (a limit a compact UI can rely on). */
-export const MAX_POPULATION_GROUPS = 4;
-
-/** The figure opens on the elderly, where age-dependent fatality is easiest to see. */
-export const DEFAULT_POPULATION: Population = Population.Elderly;
-
-/** Every disease, in display order. */
-export const PATHOGENS: PathogenProfile[] = [COVID_ANCESTRAL, COVID_OMICRON, INFLUENZA_A, INFLUENZA_B, RSV, MEASLES, PERTUSSIS, MPOX, SARS, MERS, EBOLA];
-
-export const getPathogen = (id: Pathogen) => PATHOGENS.find((pathogen) => pathogen.id === id)!;
-
-/** The diseases to offer (not `hidden`). */
-export const VISIBLE_PATHOGENS = PATHOGENS.filter((pathogen) => !pathogen.hidden);
+export * from "./custom.js";
 
 /** True when the disease gives fatal infections their own infectious period. */
 export const hasOutcomeSpecificPeriods = (pathogen: PathogenProfile) => pathogen.values.deathDays.value !== pathogen.values.recoveryDays.value;
@@ -71,10 +39,7 @@ export const vaccineCoverage = (pathogen: PathogenProfile, population: Populatio
 export const simulatedCoverage = (pathogen: PathogenProfile, population: Population) =>
     vaccineCoverage(pathogen, population) ?? pathogen.populations.groups.find((group) => group.vaccineCoverage)?.vaccineCoverage ?? null;
 
-/**
- * The groups offered in the population picker besides the base group: those with fatality data (coverage-only groups
- * wait for vaccination).
- */
+/** The groups besides the base group with their own fatality rate (others may have only vaccine coverage). */
 export const fatalityGroups = (pathogen: PathogenProfile | null) =>
     pathogen?.populations.groups.slice(1).filter((group): group is PopulationGroup => Boolean(group.ifr)) ?? [];
 
@@ -84,13 +49,6 @@ export const fatalityGroups = (pathogen: PathogenProfile | null) =>
  */
 export const populationGroup = (pathogen: PathogenProfile | null, population: Population) =>
     !pathogen ? null : population === Population.All ? baseGroupOf(pathogen) : (pathogen.populations.groups.find((group) => group.id === population) ?? null);
-
-/**
- * The population in effect: the chosen group if this disease has data for it, else the base group (`Population.All`). (The choice is kept, so
- * switching back to a disease with that group restores it.)
- */
-export const effectivePopulation = (pathogen: PathogenProfile | null, population: Population): Population =>
-    fatalityGroups(pathogen).some((group) => group.id === population) ? population : Population.All;
 
 /**
  * The disease's values keyed by the simulator parameter each sets: its own values, plus immunity's half-life (which
@@ -122,17 +80,20 @@ export const citedValuesOf = (pathogen: PathogenProfile): Cited[] => {
 };
 
 /**
- * Every citation a disease uses, in the order the preset lines show them: R₀ and infectious periods, overall fatality,
- * the other values, immunity, then the population groups.
+ * Every source a pathogen cites, once each, in the order of its values: R₀ and infectious periods, overall fatality,
+ * the other values, immunity, the population groups, then the vaccine.
  */
 export const citationsOf = (pathogen: PathogenProfile): CitationId[] => {
     const { r0, recoveryDays, deathDays, ...rest } = pathogen.values as PathogenValues;
+    // Each source once, where it's first cited.
     return [
-        ...[r0, recoveryDays, deathDays, baseGroupOf(pathogen).ifr].flatMap((value) => (value ? citationsFor(value) : [])),
-        ...Object.values(rest).flatMap(citationsFor),
-        ...(pathogen.immunity ? protectionCitations(pathogen.immunity) : []),
-        ...fatalityGroups(pathogen).flatMap((group) => citationsFor(group.ifr!)),
-        ...vaccinationCitations(pathogen),
+        ...new Set([
+            ...[r0, recoveryDays, deathDays, baseGroupOf(pathogen).ifr].flatMap((value) => (value ? citationsFor(value) : [])),
+            ...Object.values(rest).flatMap(citationsFor),
+            ...(pathogen.immunity ? protectionCitations(pathogen.immunity) : []),
+            ...fatalityGroups(pathogen).flatMap((group) => citationsFor(group.ifr!)),
+            ...vaccinationCitations(pathogen),
+        ]),
     ];
 };
 
@@ -145,14 +106,6 @@ const vaccinationCitations = (pathogen: PathogenProfile): CitationId[] => {
     return [...protectionCitations(vaccination), ...coverages];
 };
 
-/** The sources for superspreading: individual variation in infectiousness, and variation in contacts. */
+/** The sources behind the model's superspreading: individual variation in infectiousness, and in contacts. */
 export const SUPERSPREADING_CITATION: CitationId = "lloyd-smith-2005";
 export const CONTACTS_CITATION: CitationId = "mossong-2008";
-
-/**
- * Citations in order of first use, so reference numbers read 1, 2, 3… down the disease list. Only visible diseases
- * (not `hidden`) contribute, so the list never cites a hidden one.
- */
-export const CITATION_ORDER: CitationId[] = [...new Set([...VISIBLE_PATHOGENS.flatMap(citationsOf), SUPERSPREADING_CITATION, CONTACTS_CITATION])];
-
-export const citationNumber = (id: CitationId) => CITATION_ORDER.indexOf(id) + 1;

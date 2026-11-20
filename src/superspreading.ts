@@ -40,26 +40,30 @@ export const topCasesShare = (states: Uint8Array, infectedBy: Int32Array, fracti
     return caused / infections;
 };
 
-/** People who infected at least this many others are superspreaders (haloed on the network). */
+/** By default, people who infected at least this many others count as superspreaders. */
 export const SUPERSPREADER_MIN_INFECTED = 5;
-/** At most this many superspreaders are listed (the biggest), so a million-person outbreak doesn't list thousands. */
-export const MAX_SUPERSPREADERS = 400;
+
+export interface SuperspreaderOptions {
+    /** Who counts: people who infected at least this many others. Default `SUPERSPREADER_MIN_INFECTED`. */
+    minInfected?: number;
+    /** List at most this many, the most prolific (e.g. to highlight on a drawing). Default: all of them. */
+    limit?: number;
+}
 
 /**
- * The biggest superspreaders, as pairs (person, people infected): everyone who infected at least
- * `SUPERSPREADER_MIN_INFECTED`, or only the most prolific if there are more than `MAX_SUPERSPREADERS` (a count of how
- * many infected how many sets the bar, so no sort).
+ * The superspreaders, as pairs (person, people infected): everyone who infected at least `minInfected`, or only the
+ * most prolific if there are more than `limit` (a count of how many infected how many sets the bar, so no sort).
  */
-export const superspreaders = (offspring: Int32Array) => {
+export const superspreaders = (offspring: Int32Array, { minInfected = SUPERSPREADER_MIN_INFECTED, limit = Infinity }: SuperspreaderOptions = {}) => {
     let most = 0;
     for (let person = 0; person < offspring.length; person++) if (offspring[person] > most) most = offspring[person];
-    if (most < SUPERSPREADER_MIN_INFECTED) return new Int32Array(0);
+    if (most < minInfected) return new Int32Array(0);
     const withCount = new Int32Array(most + 1);
-    for (let person = 0; person < offspring.length; person++) if (offspring[person] >= SUPERSPREADER_MIN_INFECTED) withCount[offspring[person]]++;
-    let least = SUPERSPREADER_MIN_INFECTED;
+    for (let person = 0; person < offspring.length; person++) if (offspring[person] >= minInfected) withCount[offspring[person]]++;
+    let least = minInfected;
     let listed = 0;
-    for (let count = most; count >= SUPERSPREADER_MIN_INFECTED; count--) {
-        if (listed + withCount[count] > MAX_SUPERSPREADERS) {
+    for (let count = most; count >= minInfected; count--) {
+        if (listed + withCount[count] > limit) {
             least = count + 1;
             break;
         }
@@ -80,7 +84,11 @@ export const superspreaders = (offspring: Int32Array) => {
  * then the list): the share of infections caused by the top 20% of cases (`topCasesShare`) and the biggest
  * superspreaders (`superspreaders`). `offspring` as kept by the simulation (or from `offspringCounts`).
  */
-export const outbreakSummary = (states: Uint8Array, offspring: Int32Array, fraction = 0.2) => {
+export const outbreakSummary = (
+    states: Uint8Array,
+    offspring: Int32Array,
+    { fraction = 0.2, minInfected = SUPERSPREADER_MIN_INFECTED, limit = Infinity }: SuperspreaderOptions & { fraction?: number } = {},
+) => {
     let most = 0;
     let casesWith = new Int32Array(64);
     // How many people (cases or not: someone reinfected) infected each number of others, for the superspreader bar.
@@ -94,7 +102,7 @@ export const outbreakSummary = (states: Uint8Array, offspring: Int32Array, fract
     };
     for (let person = 0; person < states.length; person++) {
         const count = offspring[person];
-        if (count >= SUPERSPREADER_MIN_INFECTED) {
+        if (count >= minInfected) {
             if (count >= peopleWith.length) peopleWith = grow(peopleWith, count);
             peopleWith[count]++;
         }
@@ -116,11 +124,11 @@ export const outbreakSummary = (states: Uint8Array, offspring: Int32Array, fract
         }
         share = caused / infections;
     }
-    // The bar for a halo: the fewest infections such that at most `MAX_SUPERSPREADERS` people reach it.
+    // The bar for listing: the fewest infections such that at most `limit` people reach it.
     let least = Infinity;
     let listed = 0;
-    for (let count = peopleWith.length - 1; count >= SUPERSPREADER_MIN_INFECTED; count--) {
-        if (listed + peopleWith[count] > MAX_SUPERSPREADERS) break;
+    for (let count = peopleWith.length - 1; count >= minInfected; count--) {
+        if (listed + peopleWith[count] > limit) break;
         listed += peopleWith[count];
         if (peopleWith[count] > 0) least = count;
     }

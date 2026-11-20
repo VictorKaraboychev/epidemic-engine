@@ -35,9 +35,9 @@ export interface Exit<P extends ModelParams> {
 }
 
 export interface Compartment<P extends ModelParams> {
-    /** Short key used for colours and series, e.g. "s". */
+    /** Short key, e.g. "s" (`SeirdCompartment`). */
     key: string;
-    /** Name for labels, e.g. "susceptible". */
+    /** Its name, e.g. "susceptible". */
     name: string;
     /** Can be infected, at this relative risk (1 = fully susceptible). */
     susceptibility?: (params: P) => number;
@@ -69,7 +69,7 @@ export interface Compartment<P extends ModelParams> {
 
 export interface CompartmentModel<P extends ModelParams = ModelParams> {
     id: string;
-    /** Name for labels, e.g. "SEIRD"; defaults to the id in capitals. */
+    /** Its name, e.g. "SEIRD". */
     name?: string;
     /** Everyone starts in the first compartment. */
     compartments: Compartment<P>[];

@@ -17,8 +17,6 @@ import {
 
 /** Days after infection covered. */
 export const PROFILE_DAYS = 90;
-/** Below this share of infected people infectious on a day, their average infectiousness isn't shown (too few to say). */
-export const STRENGTH_MIN_SHARE = 0.01;
 /**
  * The distribution of whole-day stays (the same one the deterministic reference uses), by number of days, with any
  * longer than `PROFILE_DAYS` counted on the last day.
@@ -33,12 +31,17 @@ const stayDistribution = (mean: number, shape: number) => {
  * An infection's course from exposure, on average: on each day, the share of infected people in each compartment of
  * the model (latent, infectious, then the outcome they end in); how infectious those who are infectious are on average
  * (`strength`, 1 on the day they become infectious: 1 throughout when infectiousness doesn't fade; NaN on days fewer than
- * `STRENGTH_MIN_SHARE` are infectious); and when infections are caused (`curve`, summing to one: the generation
+ * `minInfectiousShare` are infectious); and when infections are caused (`curve`, summing to one: the generation
  * interval's distribution, with mean `mean`, a hump even when infectiousness is flat, since people become and stop
  * being infectious on different days). Over each stay's gamma distribution and each outcome's share, as the simulation
  * draws them.
  */
-export const infectionTimeline = <P extends ModelParams>(model: CompartmentModel<P>, params: P) => {
+export const infectionTimeline = <P extends ModelParams>(
+    model: CompartmentModel<P>,
+    params: P,
+    /** Leave `strength` NaN on days fewer than this share of infections are infectious (too few to say). Default 0. */
+    { minInfectiousShare = 0 }: { minInfectiousShare?: number } = {},
+) => {
     const compiled = compileModel(model);
     const curve = new Float64Array(PROFILE_DAYS);
     const occupancy = model.compartments.map(() => new Float64Array(PROFILE_DAYS));
@@ -80,7 +83,7 @@ export const infectionTimeline = <P extends ModelParams>(model: CompartmentModel
     visit(compiled.entry, start, 1);
     const infectious = new Float64Array(PROFILE_DAYS);
     occupancy.forEach((share, index) => compiled.infectious[index] && share.forEach((value, day) => (infectious[day] += value)));
-    const strength = curve.map((value, day) => (infectious[day] >= STRENGTH_MIN_SHARE ? value / infectious[day] : NaN));
+    const strength = curve.map((value, day) => (infectious[day] > 0 && infectious[day] >= minInfectiousShare ? value / infectious[day] : NaN));
     const total = curve.reduce((sum, value) => sum + value, 0);
     // Infections caused on day d are infected the day after (d + 1): the generation interval.
     const mean = total > 0 ? curve.reduce((sum, value, day) => sum + value * (day + 1), 0) / total : 0;

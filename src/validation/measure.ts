@@ -1,3 +1,4 @@
+import { Pathogen } from "../pathogens/pathogen.js";
 import { Population } from "../pathogens/types.js";
 /**
  * Measures what a preset's simulated outbreaks actually do, for validation against the literature: the mean
@@ -5,7 +6,7 @@ import { Population } from "../pathogens/types.js";
  * epidemic (secondary infections per case among the first cases), the dispersion of those offspring counts
  * (negative binomial k, by moments) and the share caused by the most infectious 20%, and the doubling time.
  */
-import { type Pathogen, getPathogen } from "../pathogens/index.js";
+import { type PathogenId } from "../pathogens/index.js";
 import { compileModel, ratesFor } from "../model.js";
 import { buildPopulationNetwork, indexCaseOrder, luckSeed, seededIndexCases } from "../population.js";
 import { availableFeatures, pathogenParams, solveTransmission } from "../presets.js";
@@ -30,7 +31,7 @@ export interface Measured {
 const mean = (values: number[]) => values.reduce((sum, value) => sum + value, 0) / Math.max(1, values.length);
 
 export const measurePreset = (
-    presetId: Pathogen,
+    presetId: PathogenId,
     options: {
         superspreading?: boolean;
         contactsOnly?: boolean;
@@ -48,7 +49,7 @@ export const measurePreset = (
     let beta = 0;
     for (let run = 0; run < (options.runs ?? 6); run++) {
         const seed = (options.seed ?? 1000) + run;
-        const pathogen = getPathogen(presetId);
+        const pathogen = Pathogen.get(presetId);
         const { contacts, vaccineCoverage: _coverage, dispersion: k, ...preset } = pathogenParams(pathogen, Population.All);
         const superspreading = (options.superspreading ?? false) && availableFeatures(pathogen).superspreading;
         // Calibration: scale both infectious periods (the preset's R₀ is still solved for).

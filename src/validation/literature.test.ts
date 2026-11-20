@@ -4,44 +4,45 @@
  * dispersion of offspring counts against the published k's interval. Slow (large networks, several runs per preset),
  * so opt-in: `VALIDATE=1 npx vitest run src/validation`.
  */
+import { Pathogen } from "../pathogens/pathogen.js";
 import { describe, expect, it } from "vitest";
-import { Pathogen, getPathogen } from "../pathogens/index.js";
+import { PathogenId } from "../pathogens/index.js";
 import { measurePreset } from "./measure.js";
 
 const env = (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env ?? {};
 const validate = env.VALIDATE ? describe : describe.skip;
 
 /** Known gaps, documented in each disease's file. */
-const GENERATION_INTERVAL_EXCEPTIONS: Partial<Record<Pathogen, string>> = {
+const GENERATION_INTERVAL_EXCEPTIONS: Partial<Record<PathogenId, string>> = {
     pertussis: "contacts are infected early in the long infectious period; simulated ≈ 10 days vs ≈ 20 published",
 };
 /** Presets whose early R can't be measured (chains die out) or that the network can't quite reach. */
-const R_EXCEPTIONS: Partial<Record<Pathogen, string>> = { mers: "R₀ below 1: too few early cases to measure" };
+const R_EXCEPTIONS: Partial<Record<PathogenId, string>> = { mers: "R₀ below 1: too few early cases to measure" };
 /**
  * Presets whose early R runs further above R₀ than the usual 25%, with why. Measles (R₀ ≈ 15, 20 contacts plus
  * household): early cases' offspring average ≈ 1.26–1.32 × R₀ over 30 runs, with the daily-roll and the event-driven
  * simulation alike; the reproduction curve is measured on the same network, so it's how measles' first generations
  * fill this network's dense local clusters, not the algorithm.
  */
-const R_HIGH: Partial<Record<Pathogen, number>> = { measles: 1.4 };
+const R_HIGH: Partial<Record<PathogenId, number>> = { measles: 1.4 };
 
-const PRESETS: Pathogen[] = [
-    Pathogen.CovidAncestral,
-    Pathogen.CovidOmicron,
-    Pathogen.InfluenzaA,
-    Pathogen.Rsv,
-    Pathogen.Measles,
-    Pathogen.Pertussis,
-    Pathogen.Mpox,
-    Pathogen.Sars,
-    Pathogen.Mers,
-    Pathogen.Ebola,
+const PRESETS: PathogenId[] = [
+    PathogenId.CovidAncestral,
+    PathogenId.CovidOmicron,
+    PathogenId.InfluenzaA,
+    PathogenId.Rsv,
+    PathogenId.Measles,
+    PathogenId.Pertussis,
+    PathogenId.Mpox,
+    PathogenId.Sars,
+    PathogenId.Mers,
+    PathogenId.Ebola,
 ];
 
 validate("simulated outbreaks against the literature", () => {
     for (const id of PRESETS) {
         it(`${id}: reproduction number and generation interval`, () => {
-            const pathogen = getPathogen(id);
+            const pathogen = Pathogen.get(id);
             // Below R₀ 1, chains are short: many more runs for enough transmissions to measure. Very contagious diseases
             // pass 0.5% of people within a generation or two, so each run has only a few early cases: more runs too.
             const r0 = pathogen.values.r0.value;
@@ -62,9 +63,17 @@ validate("simulated outbreaks against the literature", () => {
         }, 600_000);
     }
 
-    for (const id of [Pathogen.CovidAncestral, Pathogen.CovidOmicron, Pathogen.Measles, Pathogen.Pertussis, Pathogen.Mpox, Pathogen.Sars, Pathogen.Ebola]) {
+    for (const id of [
+        PathogenId.CovidAncestral,
+        PathogenId.CovidOmicron,
+        PathogenId.Measles,
+        PathogenId.Pertussis,
+        PathogenId.Mpox,
+        PathogenId.Sars,
+        PathogenId.Ebola,
+    ]) {
         it(`${id}: superspreading's dispersion within the published interval (±30%)`, () => {
-            const dispersion = getPathogen(id).values.dispersion!;
+            const dispersion = Pathogen.get(id).values.dispersion!;
             const measured = measurePreset(id, { superspreading: true });
             expect(measured.dispersion).toBeGreaterThan((dispersion.interval?.low ?? dispersion.value) * 0.7);
             expect(measured.dispersion).toBeLessThan((dispersion.interval?.high ?? dispersion.value) * 1.3);

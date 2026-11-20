@@ -13,11 +13,8 @@ export const seededRandom = (seed: number): Random => {
     return () => (generator.next() >>> 0) / 4294967296;
 };
 
-export const MIN_SEED = 10000;
-export const MAX_SEED = 99999;
-
-/** A five-digit seed: short enough to read off the screen and type back in. */
-export const randomSeed = () => MIN_SEED + Math.floor(Math.random() * (MAX_SEED - MIN_SEED + 1));
+/** A random 32-bit seed, for a run nobody chose a seed for (keep it to replay the run). */
+export const randomSeed = () => Math.floor(Math.random() * 2 ** 32) | 0;
 
 /** A seeded shuffle of `0…n-1`. */
 export const seededOrder = (n: number, random: Random) => {

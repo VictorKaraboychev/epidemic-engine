@@ -1,4 +1,4 @@
-import { Bound, Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, PopulationKind, between, cited, definePathogen } from "./types.js";
+import { Bound, Caveat, FatalityMeasure, IntervalKind, PathogenId, type PathogenProfile, Population, PopulationKind, between, cited } from "./types.js";
 
 /**
  * Pertussis (whooping cough). Highly contagious, infectious for weeks, and immunity after infection fades over decades.
@@ -16,8 +16,8 @@ import { Bound, Caveat, FatalityMeasure, IntervalKind, Pathogen, Population, Pop
  * - Vaccine (DTaP): 98.1% in the first year after the 5th dose, 71.2% after 5+ years; half-life ≈ 3,949 days (a poor
  *   fit: early efficacy is near 1) [Misegades 2012]. ≈ 81% of US toddlers had 4 doses by age 2 [Hill 2026].
  */
-export const PERTUSSIS = definePathogen({
-    id: Pathogen.Pertussis,
+export const PERTUSSIS = {
+    id: PathogenId.Pertussis,
     values: {
         r0: cited(5.5, "kretzschmar-2010", { interval: between(5, 6, IntervalKind.Range) }),
         recoveryDays: cited(15, "wearing-rohani-2009", { also: ["cdc-pinkbook-pertussis"] }),
@@ -47,4 +47,4 @@ export const PERTUSSIS = definePathogen({
         // Severe pertussis (hospitalisation, pneumonia, seizures or death) in vaccinated children: aOR 0.41 [McNamara 2017].
         deathProtection: cited(0.59, "mcnamara-2017", { interval: between(0.29, 0.77, IntervalKind.CI95), caveat: Caveat.Proxy }),
     },
-});
+} satisfies PathogenProfile<PathogenId>;

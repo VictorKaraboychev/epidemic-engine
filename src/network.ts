@@ -29,14 +29,10 @@ export interface Network {
     height: number;
     /** How many people. */
     count: number;
-    /** Each person's position and dot radius, in world units. */
+    /** Each person's position, in world units. */
     x: Float64Array;
     y: Float64Array;
-    r: Float64Array;
-    /**
-     * Contacts in the order they were made: edge e links `edgeA[e]` < `edgeB[e]`, of kind `edgeKind[e]` (`EdgeKind`).
-     * Distant contacts aren't drawn as links (too many would cover the canvas).
-     */
+    /** Contacts in the order they were made: edge e links `edgeA[e]` < `edgeB[e]`, of kind `edgeKind[e]` (`EdgeKind`). */
     edgeA: Int32Array;
     edgeB: Int32Array;
     edgeKind: Uint8Array;
@@ -63,8 +59,6 @@ export interface NetworkOptions {
      * with many contacts. Omit for everyone linking to the same number of nearest neighbours.
      */
     contactVariation?: number;
-    /** Node radii scale with spacing (1 = sized for 30px spacing), so dense networks stay legible. */
-    radiusScale?: number;
     /** Share of each person's contacts made with someone anywhere in the network instead of a neighbour. */
     distantShare?: number;
     /** Households: the share of households of each size (1, 2, 3…; the last includes larger), and their weight. */
@@ -77,8 +71,9 @@ const PLACEMENT_ATTEMPTS_PER_NODE = 500;
 
 /** People with many contacts reach further for them, but at most this many times the usual link length. */
 const MAX_REACH_FACTOR = 6;
-/** Node radius range at 30px spacing; scaled by `radiusScale`. */
-export const NODE_RADIUS = { min: 2.6, max: 4 };
+/** How far people keep from the edges of the world (world units): about 0.4 of their spacing, within these bounds. */
+const MIN_MARGIN = 9;
+const MAX_MARGIN = 12;
 
 /** Person i's contacts (a view into the network's arrays: don't modify). */
 export const neighboursOf = (network: Pick<Network, "offsets" | "neighbours">, i: number) =>
@@ -121,13 +116,13 @@ export const buildNetwork = (random: Random, options: NetworkOptions = {}): Netw
         neighbours = 3,
         maxEdgeLength = 88,
         contactVariation,
-        radiusScale = 1,
         distantShare = 0,
         households,
     } = options;
-    const margin = 12 * Math.max(0.75, radiusScale);
+    // People keep clear of the edges by about half their spacing.
+    const margin = Math.max(MIN_MARGIN, Math.min(MAX_MARGIN, 0.4 * minDistance));
 
-    const { x, y, r, count } = placePeople(random, { width, height, margin, count: wantedCount, minDistance, radiusScale });
+    const { x, y, count } = placePeople(random, { width, height, margin, count: wantedCount, minDistance });
 
     // Candidate contacts, in the order they're made; a pair made twice keeps its first kind (see `compress`).
     const candidates = new EdgeList();
@@ -262,7 +257,6 @@ export const buildNetwork = (random: Random, options: NetworkOptions = {}): Netw
         count,
         x,
         y,
-        r,
         ...compress(candidates, count),
         ...(householdOf ? { householdOf, householdWeight: households!.weight } : {}),
     };
@@ -286,18 +280,10 @@ const EMPTY = 65535;
  */
 const placePeople = (
     random: Random,
-    {
-        width,
-        height,
-        margin,
-        count,
-        minDistance,
-        radiusScale,
-    }: { width: number; height: number; margin: number; count: number; minDistance: number; radiusScale: number },
+    { width, height, margin, count, minDistance }: { width: number; height: number; margin: number; count: number; minDistance: number },
 ) => {
     const x = new Float64Array(count);
     const y = new Float64Array(count);
-    const r = new Float64Array(count);
     const cell = minDistance > 0 ? minDistance / Math.SQRT2 : 1;
     const columns = Math.floor(width / cell) + 1;
     const rows = Math.floor(height / cell) + 1;
@@ -348,10 +334,9 @@ const placePeople = (
         }
         x[placed] = px;
         y[placed] = py;
-        r[placed] = (NODE_RADIUS.min + random() * (NODE_RADIUS.max - NODE_RADIUS.min)) * radiusScale;
         placed++;
     }
-    return { x: x.slice(0, placed), y: y.slice(0, placed), r: r.slice(0, placed), count: placed };
+    return { x: x.slice(0, placed), y: y.slice(0, placed), count: placed };
 };
 
 /**
