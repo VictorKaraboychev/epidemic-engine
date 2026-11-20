@@ -1,0 +1,14 @@
+version: 2
+updates:
+    - package-ecosystem: npm
+      directory: /
+      schedule:
+          interval: weekly
+      groups:
+          # Tooling updates in one PR a week; runtime dependencies (pure-rand) on their own.
+          dev-dependencies:
+              dependency-type: development
+    - package-ecosystem: github-actions
+      directory: /
+      schedule:
+          interval: weekly
